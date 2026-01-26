@@ -1,0 +1,5 @@
+*build/
+third-party/raylib/
+Todo.md
+.vscode/
+

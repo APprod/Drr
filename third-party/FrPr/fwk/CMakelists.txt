@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(fwk)
+
+FILE(GLOB_RECURSE MyCPPSources ${PROJECT_SOURCE_DIR}/src/*.cpp)
+
+add_library(fwk ${MyCPPSources} src/debug.cpp)
+
+target_include_directories(fwk PUBLIC include/)
+

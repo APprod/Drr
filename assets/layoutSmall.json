@@ -1,0 +1,47 @@
+
+{
+    "buttons":
+    {
+        "start":
+        {
+            "message" : "Start",
+            "textureName" : "button_default",
+            "pos": [75,350],
+            "size": [200,75],
+            "fontName": "TNR",
+            "textTint": [255, 255, 225, 200],
+            "textSize": 24
+        },
+        "options":
+        {
+            "message" : "Options",
+            "textureName" : "button_default",
+            "pos": [300,350],
+            "size": [200,75],
+            "fontName": "TNR",
+            "textTint": [255, 255, 225, 200],
+            "textSize": 24
+        },
+        "return":
+        {
+            "message" : "Return",
+            "textureName" : "button_default",
+            "pos": [500, 150],
+            "size": [200,75],
+            "fontName": "TNR",
+            "textTint": [255, 255, 225, 200],
+            "textSize": 24
+        },
+        "test":
+        {
+            "message" : "Test",
+            "textureName" : "button_default",
+            "pos": [500, 350],
+            "size": [200,75],
+            "fontName": "TNR",
+            "textTint": [255, 255, 225, 200],
+            "textSize": 24
+        }
+        
+    }
+}

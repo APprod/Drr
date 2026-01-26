@@ -1,0 +1,5 @@
+*_build/
+*GrPr/
+*proj/
+run.bat.example
+.vscode

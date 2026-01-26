@@ -45,9 +45,6 @@ set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # don't build the supplied example g
 FetchContent_MakeAvailable(raylibLib)
 
 target_include_directories(app PUBLIC include/)
-target_include_directories(app PUBLIC third-party/FrPr/fwk/include/)
-add_subdirectory(third-party/FrPr/fwk)
-target_link_libraries(app fwk)
 
 
 #target_include_directories(app PUBLIC third-party/FrPr/fwk/include/)

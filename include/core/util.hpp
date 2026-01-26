@@ -1,7 +1,7 @@
 #pragma once
 
 #include <chrono>
-#include "debug.hpp"
+#include "core/debug.hpp"
 #include <iostream>
 #include "raylib.h"
 #include "core/structs.hpp"

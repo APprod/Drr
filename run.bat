@@ -8,7 +8,7 @@ set res=
 if "%varstatic%"=="on" set res=-DIS_STATIC=ON
 
 
-cmake -H. -B_build  -G "MinGW Makefiles" %res%
+cmake -H. -B_build  -G "MinGW Makefiles" %res% -DCMAKE_BUILD_TYPE=Debug
 if %errorlevel% neq 0 exit /b 
 cmake --build _build --parallel
 if %errorlevel% neq 0 exit /b 

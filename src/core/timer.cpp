@@ -1,6 +1,6 @@
 
 #include "core/timer.hpp"
-#include "debug.hpp"
+#include "core/debug.hpp"
 
 Timer::Timer()
 {
@@ -18,8 +18,8 @@ bool Timer::check()
     auto dur = time - m_start;
 
     auto difference = std::chrono::duration_cast<std::chrono::microseconds>(dur);
-    fwk::D_Pr("dufference:",difference.count(), true);
-    fwk::D_Pr("m_dur:", m_dur.count(), true);
+    dbg::GetLogger().DebugInfo("dufference:",difference.count(), true);
+    dbg::GetLogger().DebugInfo("m_dur:", m_dur.count(), true);
     if (difference > m_dur)
     {
         return true;

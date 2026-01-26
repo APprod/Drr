@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
+
 project(app)
 
 option(IS_STATIC "option static" OFF)
@@ -31,6 +32,8 @@ endif()
 
 #get Raylib
 include(FetchContent)
+
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     raylibLib
     URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz

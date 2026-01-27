@@ -21,7 +21,7 @@ private:
     // LogicController m_controller;
     RecourceManager m_manager;
     MyInput m_input;
-    GData gData;
+    // GData gData;
     // MyUI m_ui;
     // SceneManager m_sceneManager;
 

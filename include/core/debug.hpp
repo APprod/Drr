@@ -24,18 +24,10 @@
             } else{\
                 std::cerr << message              << "\n";\
             }\
-            if (critic == fwk::A_L::high)\
-            {\
-                std::abort();\
-            }\
-            if (critic == fwk::A_L::mid)\
-            {\
-                if (fwk::ex_dialog()) exit(-1);\
-               \
-            }\
+            if (fwk::ex_dialog()) exit(-1);\
         }
 #else
-#define M_ASSERT( expected,  message, critic, quiet ) 
+#define M_ASSERT( expected,  message, quiet ) 
 #endif
 
 namespace dbg {

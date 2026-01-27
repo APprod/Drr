@@ -91,10 +91,10 @@ Rectangle rect(Vector2 vec, Vector2 vec2)
     return {vec.x, vec.y, vec2.x, vec2.y};
 }
 
-Rectangle rect(Button &button)
-{
-    return Rectangle{button.pos.x, button.pos.y, button.size.x, button.size.y};
-}
+// Rectangle rect(Button &button)
+// {
+//     return Rectangle{button.pos.x, button.pos.y, button.size.x, button.size.y};
+// }
 
 Ivec2 ivec(Vector2 vec)
 {

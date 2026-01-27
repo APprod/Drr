@@ -1,4 +1,4 @@
-#include "app/app.hpp"
+#include "core/app.hpp"
 #include "core/debug.hpp"
 #include "raylib.h"
 #include "core/util.hpp"
@@ -48,7 +48,7 @@ void App::run()
     float dt = 0.016f;
     // MenuScene menuScene(m_manager, m_renderer, m_input, m_controller, gData, m_ui, m_sceneManager);
     // m_sceneManager.changeScene(&menuScene, gData);
-    gData.scene = "menu";
+    // gData.scene = "menu";
 
     // WorldScene worldScene(m_manager, m_renderer, m_input, m_controller, gData, m_ui, m_sceneManager);
 
@@ -56,11 +56,11 @@ void App::run()
     
     while(!WindowShouldClose())
     {
-        if (gData.changeScene)
-        {
-            // if (gData.scene == "world") m_sceneManager.changeScene(&worldScene, gData);
-            // if (gData.scene == "menu") m_sceneManager.changeScene(&menuScene, gData);
-        }
+        // if (gData.changeScene)
+        // {
+        //     // if (gData.scene == "world") m_sceneManager.changeScene(&worldScene, gData);
+        //     // if (gData.scene == "menu") m_sceneManager.changeScene(&menuScene, gData);
+        // }
         {
             Tester test("Input", 500.0f, DEB_PR); 
             // m_input.getInput(m_renderer.getScreenRelativeRes());

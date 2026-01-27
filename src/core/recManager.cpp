@@ -83,7 +83,7 @@ void RecourceManager::loadFont(std::string name, std::string filepath)
 
     if (!::IsFontValid(newFont))
     {
-        dbg::GetLogger().DebugInfo("\nWRN Failed to load font: " + name +  " path: " + filepath);
+        dbg::GetLogger().Error("\n Failed to load font: " + name +  " path: " + filepath);
         return;
     }
     m_fonts[name] = newFont;
@@ -93,7 +93,7 @@ Font RecourceManager::getFont(std::string name)
 {
     if (m_fonts.count(name) == 0) 
     {
-        dbg::GetLogger().DebugInfo("\nWRN Font not found:", name, MDBG);
+        dbg::GetLogger().Error("\n Font not found:", name, MDBG);
         return m_fonts["default"];
     }
     return m_fonts[name];
@@ -116,13 +116,13 @@ Texture2D RecourceManager::getTexture(std::string name)
 
 bool RecourceManager::lazyLoad(std::string name)
 {
-    dbg::GetLogger().DebugInfo("\nDBG LazyLoading texture: ", name , MDBG);
+    dbg::GetLogger().DebugInfo("\n LazyLoading texture: ", name , MDBG);
     bool success = loadTexture(name);
     if (!success)
     {
         if (name == "default") 
         {
-            dbg::GetLogger().DebugInfo("\nWRN Default texture is missing");
+            dbg::GetLogger().Fatal("\n Default texture is missing");
             exit(-1);
         } // not found(default)s
 

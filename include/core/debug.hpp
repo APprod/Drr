@@ -8,28 +8,6 @@
 #include <vector>
 #include <sstream>
 
-#ifdef M_Deb
-#define M_ASSERT( expected,  message, critic, quiet ) \
-       if (!(expected))\
-        { \
-            if (!(quiet))\
-            {\
-                std::cerr << "Asertion failed"    << "\n";\
-                std::cerr << "---------------"    << "\n";\
-                std::cerr << message              << "\n";\
-                std::cerr << "---------------"    << "\n";\
-                std::cerr << __FILE__             << "\n";\
-                std::cerr << "Line:" << __LINE__  << "\n";\
-                std::cerr << "---------------"    << "\n";\
-            } else{\
-                std::cerr << message              << "\n";\
-            }\
-            if (fwk::ex_dialog()) exit(-1);\
-        }
-#else
-#define M_ASSERT( expected,  message, quiet ) 
-#endif
-
 namespace dbg {
 
 enum class Severity

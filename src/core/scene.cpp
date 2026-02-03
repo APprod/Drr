@@ -10,26 +10,26 @@ SceneManager::SceneManager() {
 }
 void SceneManager::QuePop(){
     //Ques to pop Scenes Stack aka return to previous Scene
-    if (status.action != SceneAction::Idle) {
+    if (m_status.action != SceneAction::Idle) {
         dbg::GetLogger().Warn("Transition already queued");
         return;
     }
-    status.action = SceneAction::Pop;
-    status.transitingScene.reset();
+    m_status.action = SceneAction::Pop;
+    m_status.transitingScene.reset();
 }
 void SceneManager::ResolveTransitions(){
     //called once per frame
-    switch (status.action)
+    switch (m_status.action)
     {
     case SceneAction::Idle:{
         return;
     }
     case SceneAction::TransitSus:{
-        PerformSuspendAndTransit(std::move(status.transitingScene));
+        PerformSuspendAndTransit(std::move(m_status.transitingScene));
         break;
     }
     case SceneAction::Transit:{
-        PerformTransit(std::move(status.transitingScene));
+        PerformTransit(std::move(m_status.transitingScene));
         break;
     }
     case SceneAction::Pop:{
@@ -37,40 +37,39 @@ void SceneManager::ResolveTransitions(){
         break;
     }
     }
-    status.action = SceneAction::Idle;
+    m_status.action = SceneAction::Idle;
 }
 void SceneManager::PopScene(){
-    if (scenes.size() == 1) {
+    if (m_scenes.size() == 1) {
         dbg::GetLogger()
-            .Error("No scene left when trying to pop scene", typeid(*scenes.back()));
+            .Error("No scene left when trying to pop scene", typeid(*m_scenes.back()));
         return;
     }
-    scenes.back()->OnExit();
-    scenes.pop_back();
-    scenes.back()->OnRestore();
+    m_scenes.back()->OnExit();
+    m_scenes.pop_back();
+    m_scenes.back()->OnRestore();
 }
 void SceneManager::PerformTransit(std::unique_ptr<IScene> scene){
-    if (scenes.size() != 0) {
-        scenes.back()->OnExit();
-        scenes.pop_back();
+    if (m_scenes.size() != 0) {
+        m_scenes.back()->OnExit();
+        m_scenes.pop_back();
     }
     AddScene(std::move(scene));
 }
 void SceneManager::PerformSuspendAndTransit(std::unique_ptr<IScene> scene){
-    if (scenes.size() == 0) {
+    if (m_scenes.size() == 0) {
         dbg::GetLogger()
             .Error("No scene left when trying to transit");
         return;
     }
-    scenes.back()->OnSuspend();
+    m_scenes.back()->OnSuspend();
     AddScene(std::move(scene));
 }
 void SceneManager::AddScene(std::unique_ptr<IScene> scene){
-    scenes.push_back(std::move(scene));
-    scenes.back()->OnEnter();
+    m_scenes.push_back(std::move(scene));
+    m_scenes.back()->OnEnter();
 }
-Status status;
-std::vector<std::unique_ptr<IScene>> scenes;
+
 
 
 

@@ -43,23 +43,23 @@ public:
     template<typename T, typename... Args> 
     void QueTransit(Args&&... args){
         //Queues transition
-        if (status.action != SceneAction::Idle) {
+        if (m_status.action != SceneAction::Idle) {
             dbg::GetLogger().Warn("Transition already queued, ignoring");
             return;
         }
-        status.transitingScene = std::make_unique<T>(std::forward<Args>(args)...);
-        status.action = SceneAction::Transit;
+        m_status.transitingScene = std::make_unique<T>(std::forward<Args>(args)...);
+        m_status.action = SceneAction::Transit;
     }
     template<typename T, typename... Args> 
     void QueTransitSus(Args&&... args){
         //Queues transition current scene will be
         //Suspended and restored on next Pop
-        if (status.action != SceneAction::Idle) {
+        if (m_status.action != SceneAction::Idle) {
             dbg::GetLogger().Warn("Transition already queued, ignoring");
             return;
         }
-        status.transitingScene = std::make_unique<T>(std::forward<Args>(args)...);
-        status.action = SceneAction::TransitSus;
+        m_status.transitingScene = std::make_unique<T>(std::forward<Args>(args)...);
+        m_status.action = SceneAction::TransitSus;
     }
     void QuePop();
     void ResolveTransitions();
@@ -68,8 +68,8 @@ private:
     void PerformTransit(std::unique_ptr<IScene> scene);
     void PerformSuspendAndTransit(std::unique_ptr<IScene> scene);
     void AddScene(std::unique_ptr<IScene> scene);
-    Status status;
-    std::vector<std::unique_ptr<IScene>> scenes;
+    Status m_status;
+    std::vector<std::unique_ptr<IScene>> m_scenes;
 };
 
 

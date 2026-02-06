@@ -42,7 +42,7 @@ void SceneManager::ResolveTransitions(){
 void SceneManager::PopScene(){
     if (m_scenes.size() == 1) {
         dbg::GetLogger()
-            .Error("No scene left when trying to pop scene", typeid(*m_scenes.back()));
+            .Error("No scene left when trying to pop scene", typeid(*m_scenes.back()).name());
         return;
     }
     m_scenes.back()->OnExit();

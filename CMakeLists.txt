@@ -17,8 +17,15 @@ FILE(GLOB_RECURSE MyCPPSources ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_
 add_executable(app ${MyCPPSources})
 
 target_compile_options(app PRIVATE
-  $<$<CONFIG:Debug>:-g>
-  $<$<CONFIG:Release>:-O3 -Os -s>
+  $<$<CONFIG:Debug>:-g
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Werror>
+  $<$<CONFIG:Release>:-O3 -Os -s
+    -Wall
+    -Wextra
+    -Wpedantic>
 )
 
 target_link_options(app PRIVATE
@@ -43,6 +50,7 @@ FetchContent_Declare(
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
 set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # don't build the supplied example games
 FetchContent_MakeAvailable(raylibLib)
+target_compile_options(raylib PRIVATE -w)
 
 target_include_directories(app PUBLIC include/)
 

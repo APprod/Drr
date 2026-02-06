@@ -2,12 +2,14 @@
 #include "core/debug.hpp"
 #include "raylib.h"
 #include "core/util.hpp"
+#include "app/scenes/testScene.hpp"
 // #include "app/scenes/menu.hpp"
 // #include "app/scenes/scene.hpp"
 // #include "app/scenes/mainScene.hpp"
 #include <memory>
 
-static bool DEB_PR = true;
+// static bool DEB_PR = true;
+static bool DEB_PR = false;
 
 App::App(int screenWidth, int screenHeight): m_screenHeight(screenHeight), m_screenWidth(screenWidth)
 { 
@@ -45,14 +47,14 @@ void App::run()
     m_manager.load();
     SetExitKey(0);
     
-    float dt = 0.016f;
+    // float dt = 0.016f;
     // MenuScene menuScene(m_manager, m_renderer, m_input, m_controller, gData, m_ui, m_sceneManager);
     // m_sceneManager.changeScene(&menuScene, gData);
     // gData.scene = "menu";
 
     // WorldScene worldScene(m_manager, m_renderer, m_input, m_controller, gData, m_ui, m_sceneManager);
 
-    
+    m_sceneManager.QueTransit<TestScene>(m_manager);
     
     while(!WindowShouldClose())
     {
@@ -68,37 +70,14 @@ void App::run()
         {
             Tester test("Update", 500.0f, DEB_PR);
             // m_sceneManager.getScene()->update(dt);  
+            m_sceneManager.Update();
         }
         {
             Tester test("Render", 17000.0f, DEB_PR);
-            
-               
-                {
-                    BeginDrawing();
-                    // BeginTextureMode(m_renderer.getTarget());
-                        ClearBackground(BLACK); 
-                        
-                        DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
-                        DrawFPS(20, 20);
-                        // for (auto &layer : layers)
-                        // {       
-                        //     if (!layer->isActive) continue;
-                        //     m_renderer.drawButtons(layer->getButtonNames());
-                        // }
-                    //     m_renderer.drawLayersButtons(layers);
-                    // EndTextureMode();
-                    // auto &target = m_renderer.getTarget().texture;
-                    // DrawTexturePro(target,
-                                // { 0, 0, static_cast<float>(target.width), static_cast<float>(-target.height) },
-                                // { 0, 0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())},
-                                //     {0,0}, 0, RAYWHITE);
-                    EndDrawing();  
-                }
+            m_sceneManager.Draw();
         }            
-        dt = 1000.0f/GetFPS();
+        // dt = 1000.0f/GetFPS();
     }
-    
-    
 }
 void App::close()
 {

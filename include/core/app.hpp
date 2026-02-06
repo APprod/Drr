@@ -7,20 +7,21 @@
 // #include "core/renderer.hpp"
 #include "core/structs.hpp"
 // #include "app/scenes/scene.hpp"
-// #include "app/scenes/sceneManager.hpp"
+#include "core/scene.hpp"
 // #include "ui/ui.hpp"
 
 
 class App
 {
 private:
-    int m_screenWidth = 800;
-    int m_screenHeight = 450;
+    int m_screenHeight;
+    int m_screenWidth;
 
     // Renderer m_renderer;
     // LogicController m_controller;
     RecourceManager m_manager;
     MyInput m_input;
+    SceneManager m_sceneManager;
     // GData gData;
     // MyUI m_ui;
     // SceneManager m_sceneManager;

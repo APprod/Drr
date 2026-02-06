@@ -63,6 +63,15 @@ public:
     }
     void QuePop();
     void ResolveTransitions();
+
+    void Update(){
+        ResolveTransitions();
+        m_scenes.back()->OnUpdate();
+    }
+    void Draw(){
+        m_scenes.back()->OnDraw();
+    }
+
 private:
     void PopScene();
     void PerformTransit(std::unique_ptr<IScene> scene);

@@ -23,7 +23,7 @@ public:
     void loadFont(std::string name, std::string filepath);
     Font getFont(std::string name);
 
-    Loader loader;
+    // Loader loader;
 private:
     bool lazyLoad(std::string name);
     void loadTextures();

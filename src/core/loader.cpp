@@ -1,3 +1,4 @@
+/* 
 #include "core/loader.hpp"
 #include <fstream>
 #include <iostream>
@@ -52,3 +53,4 @@ Loader::Loader()
 Loader::~Loader()
 {
 }
+ */

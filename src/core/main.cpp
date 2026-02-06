@@ -1,6 +1,6 @@
 #define M_Deb true
 
-#include "app/app.hpp"
+#include "core/app.hpp"
 #include "core/debug.hpp"
 
 #include <iostream>

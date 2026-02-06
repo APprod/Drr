@@ -6,15 +6,21 @@ TestScene::TestScene(RecourceManager& manager): m_manager{manager}
 {}
 
 void TestScene::OnEnter(){
-    auto row= std::make_unique<HorizontalLayout>();
-    for(int i = 0; i < 10; i++){
-        auto column = std::make_unique<VerticalLayout>();
-        for(int j = 0; j < 10; j++){
-            column->AddChild(std::make_unique<TestComp>(Vector2{100,50}));
+    auto column= std::make_unique<VerticalLayout>(UIComponentSpec{},LayoutSpec{Alignment::End});
+    for(int i = 0; i < 1; i++){
+        auto row = std::make_unique<HorizontalLayout>(
+                    UIComponentSpec{FillMode::FillMaxWidth},
+                    LayoutSpec{Alignment::Center});
+        for(int j = 0; j < 5; j++){
+            row->AddChild(std::make_unique<Button>(
+                Button("Test",
+                    [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
+                "button_default.png",{300,100})
+            ));
         }
-        row->AddChild(std::move(column));    
+        column->AddChild(std::move(row));    
     }
-    root.AddChild(std::move(row));
+    root.AddChild(std::move(column));
     OnResize();
 }
 

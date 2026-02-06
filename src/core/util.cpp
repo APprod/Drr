@@ -90,7 +90,9 @@ Rectangle rect(Vector2 vec, Vector2 vec2)
 {
     return {vec.x, vec.y, vec2.x, vec2.y};
 }
-
+Rectangle rect(Texture2D texture){
+    return {0, 0, static_cast<float>(texture.width), static_cast<float>(texture.height)};
+}
 // Rectangle rect(Button &button)
 // {
 //     return Rectangle{button.pos.x, button.pos.y, button.size.x, button.size.y};

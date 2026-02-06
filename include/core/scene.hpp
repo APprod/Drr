@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <vector>
-#include <stdexcept>
 
 #include "core/debug.hpp"
 
@@ -13,7 +12,6 @@ public:
 
     virtual void OnEnter() = 0; //Allocate everything
     virtual void OnRestore() = 0; //Called only if it was Suspended
-
 
     virtual void OnUpdate() = 0;
     virtual void OnDraw() = 0; 
@@ -64,13 +62,8 @@ public:
     void QuePop();
     void ResolveTransitions();
 
-    void Update(){
-        ResolveTransitions();
-        m_scenes.back()->OnUpdate();
-    }
-    void Draw(){
-        m_scenes.back()->OnDraw();
-    }
+    void Update();
+    void Draw();
 
 private:
     void PopScene();

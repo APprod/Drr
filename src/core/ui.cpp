@@ -1,6 +1,6 @@
 #include "core/ui.hpp"
 #include "core/util.hpp"
-#include "core/debug.hpp"
+
 
 void Layout::AddChild(std::unique_ptr<UIComponent>&& child)
 {
@@ -59,5 +59,17 @@ void HorizontalLayout::OnArrange(Rectangle actualRect)
     for(auto& child: childs){
         child->OnArrange(rect(pos, child->DesiredSize()));
         pos.x += child->FinalRect().width + spacing;
+    }
+}
+
+void Root::OnMeasure(Vector2 available){
+    desiredSize = available;
+    for (auto&child: childs){
+        child->OnMeasure(available);
+    }
+}
+void Root::OnArrange(Rectangle rect){
+    for (auto&child: childs){
+        child->OnArrange(rect);
     }
 }

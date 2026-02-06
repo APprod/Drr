@@ -1,10 +1,8 @@
 #include "core/recManager.hpp"
-#include "core/recManager.hpp"
 #include "core/util.hpp"
 #include "core/debug.hpp"
 
 static bool MDBG = true;
-//TODO: remove exceptions, add return bools
 
 RecourceManager::RecourceManager()
 {

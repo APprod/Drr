@@ -1,5 +1,4 @@
 #include "app/scenes/customUiComps.hpp"
-#include <raylib.h>
 
 TestComp::TestComp(Vector2 targetSize)
 {

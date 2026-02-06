@@ -1,11 +1,11 @@
-/* loader class controls loading of files/ layout/ or any filse*/
 #pragma once
 
-#include "raylib.h"
-#include "loader.hpp"
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "raylib.h"
+// #include "loader.hpp"
 
 class RecourceManager
 {

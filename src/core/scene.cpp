@@ -1,10 +1,7 @@
 #include <memory>
-#include <vector>
-#include <stdexcept>
 
 #include "core/debug.hpp"
 #include "core/scene.hpp"
-
 
 SceneManager::SceneManager() {
 }
@@ -70,6 +67,10 @@ void SceneManager::AddScene(std::unique_ptr<IScene> scene){
     m_scenes.back()->OnEnter();
 }
 
-
-
-
+void SceneManager::Update(){
+    ResolveTransitions();
+    m_scenes.back()->OnUpdate();
+}
+void SceneManager::Draw(){
+    m_scenes.back()->OnDraw();
+}

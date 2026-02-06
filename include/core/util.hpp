@@ -32,7 +32,6 @@ Vector2 operator/(Vector2 vec, float val);
 float distanceSquared(const Vector2 vec, const Vector2 vec2);
 
 Rectangle rect(Vector2 vec, Vector2 vec2);
-// Rectangle rect(Button &button);
 
 struct Ivec2Hasher
 {

@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "raylib.h"
-#include "core/util.hpp" //temp
+
 
 struct Padding
 {
@@ -67,15 +67,6 @@ class HorizontalLayout: public Layout{
 
 class Root: public Layout{ // Just to be explicit, actually just Stack layout
 public:
-    virtual void OnMeasure(Vector2 available) override{
-        desiredSize = available;
-        for (auto&child: childs){
-            child->OnMeasure(available);
-        }
-    }
-    virtual void OnArrange(Rectangle rect) override{
-        for (auto&child: childs){
-            child->OnArrange(rect);
-        }
-    }
+    virtual void OnMeasure(Vector2 available) override;
+    virtual void OnArrange(Rectangle rect) override;
 };

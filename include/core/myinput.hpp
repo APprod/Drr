@@ -1,4 +1,4 @@
-/* used only for multi-platform potentialy. just abstraction above inputs */
+/* used only for different types of input devices potentialy. just abstraction above inputs */
 #pragma once
 #include "raylib.h"
 

@@ -1,5 +1,6 @@
 #include "app/scenes/testScene.hpp"
 #include "app/scenes/customUIComps.hpp"
+#include "core/util.hpp"
 
 TestScene::TestScene(RecourceManager& manager): m_manager{manager}
 {}
@@ -32,12 +33,10 @@ void TestScene::OnResize(){
         static_cast<float>(::GetScreenWidth()),
         static_cast<float>(::GetScreenHeight())
     };
-    Rectangle rect = {0,0,
-        static_cast<float>(::GetScreenWidth()),
-        static_cast<float>(::GetScreenHeight())
-    };
+    Rectangle rectangle = rect({0,0}, dims);
+
     root.OnMeasure(dims);
-    root.OnArrange(rect);
+    root.OnArrange(rectangle);
 }
 void TestScene::OnDraw(){
     BeginDrawing();

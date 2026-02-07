@@ -17,6 +17,8 @@ void App::run()
 {
     dbg::GetLogger().AddSink(
         std::make_unique<dbg::ConsoleSink>(dbg::ConsoleSink()));
+    dbg::GetLogger().AddSink(
+        std::make_unique<dbg::FileSink>(dbg::FileSink("log.txt")));
 
     dbg::GetLogger().DebugInfo("app:run \n");
     dbg::GetLogger().DebugInfo("Running direcotry: ", GetWorkingDirectory());

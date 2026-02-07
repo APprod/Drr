@@ -19,16 +19,9 @@ enum class Severity
     FATAL
 };
 
-inline const char* ToString(Severity s) {
-    switch (s) {
-        case Severity::DBGINFO: return "DBGINFO";
-        case Severity::INFO:   return "INFO";
-        case Severity::WRN:    return "WRN";
-        case Severity::ERROR:  return "ERROR";
-        case Severity::FATAL:  return "FATAL";
-        default:               return "UNKNOWN";
-    }
-}
+inline const char* SeverityColor(dbg::Severity s);
+
+inline const char* ToString(Severity s);
 
 struct MyMessage
 {
@@ -103,7 +96,6 @@ private:
         (oss << ... << args);
         Log(s, oss.str());
     }
-
     std::vector<MyMessage> m_messagesLog;
     std::vector<std::unique_ptr<ISink>> m_sinks;
     Severity m_minSeverity = Severity::DBGINFO;

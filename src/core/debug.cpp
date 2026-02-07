@@ -4,8 +4,52 @@
 #include <iostream>
 #include <cassert>
 
+#include <chrono>
+#include <iomanip>
+
+
+
 
 namespace dbg {
+
+std::string CurrentDateTime()
+{
+    using clock = std::chrono::system_clock;
+
+    auto now = clock::now();
+    std::time_t tt = clock::to_time_t(now);
+
+    std::tm tm{};
+    localtime_s(&tm, &tt); // Windows
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    return oss.str();
+}
+
+inline const char* SeverityColor(dbg::Severity s)
+{
+    switch (s) {
+        case dbg::Severity::DBGINFO: return "\033[35m"; // violet
+        // case dbg::Severity::DBGINFO: return "\033[90m"; // bright black (gray)
+        case dbg::Severity::INFO:    return "\033[34m";       // blue
+        case dbg::Severity::WRN:     return "\033[33m";       // yellow
+        case dbg::Severity::ERROR:   return "\033[38;5;208m"; // orange
+        case dbg::Severity::FATAL:   return "\033[31m";       // red
+        default: return "\033[0m";
+    }
+}
+
+inline const char* ToString(Severity s) {
+    switch (s) {
+        case Severity::DBGINFO: return "DBGINFO";
+        case Severity::INFO:   return "MYINFO";
+        case Severity::WRN:    return "WRN";
+        case Severity::ERROR:  return "ERROR";
+        case Severity::FATAL:  return "FATAL";
+        default:               return "UNKNOWN";
+    }
+}
 
 FileSink::FileSink(const std::string& path)
     : file(path, std::ios::app)
@@ -19,8 +63,10 @@ void FileSink::Write(const MyMessage& message)
 
 void ConsoleSink::Write(const MyMessage& message)
 {
-    std::cout << ToString(message.severity)
-              << ": " << message.message << '\n';
+    std::cout << SeverityColor(message.severity)
+              << ToString(message.severity)
+              << ": " << message.message
+              << "\033[0m\n"; // reset color
 }
 
 Logger& Logger::GetLogger()
@@ -44,6 +90,8 @@ void Logger::Log(Severity s, std::string message)
 void Logger::AddSink(std::unique_ptr<ISink> sink)
 {
     m_sinks.push_back(std::move(sink));
+    m_sinks.back()->Write({Severity::INFO,
+        "\n========== Log started: " + CurrentDateTime() + " =========="});
 }
 
 void Logger::SetMinSeverity(Severity s)

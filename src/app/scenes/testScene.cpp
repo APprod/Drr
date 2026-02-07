@@ -15,7 +15,7 @@ void TestScene::OnEnter(){
             row->AddChild(std::make_unique<Button>(
                 Button("Test",
                     [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
-                "button_default.png",{300,100})
+                "button_default",{300,100})
             ));
         }
         column->AddChild(std::move(row));    

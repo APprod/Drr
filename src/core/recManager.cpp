@@ -2,7 +2,6 @@
 #include "core/util.hpp"
 #include "core/debug.hpp"
 
-static bool MDBG = true;
 
 RecourceManager::RecourceManager()
 {
@@ -38,16 +37,16 @@ bool RecourceManager::loadTexture(std::string name)
 
 bool RecourceManager::loadTexture(std::string name, std::string filepath)
 {
-    dbg::GetLogger().DebugInfo("\nDBG loading texture: ", name + " path: " + filepath, MDBG);
+    dbg::GetLogger().DebugInfo("loading texture: ", name + " path: " + filepath);
     if (m_textures.count(name) != 0)
     {
-        dbg::GetLogger().DebugInfo("\nWRN Texture is already loaded, texture: ", name);
+        dbg::GetLogger().Warn("Texture is already loaded, texture: ", name);
         return false;
     }
     Texture2D newTexture = ::LoadTexture(filepath.c_str());
     if (!::IsTextureValid(newTexture)) 
     {
-        dbg::GetLogger().DebugInfo("\nWRN Failed to load texture: " + name +  " path: " + filepath);
+        dbg::GetLogger().Error("Failed to load texture: " + name +  " path: " + filepath);
         return false;
     }
     m_textures[name] = newTexture;
@@ -56,10 +55,10 @@ bool RecourceManager::loadTexture(std::string name, std::string filepath)
 
 bool RecourceManager::unloadTexture(std::string name)
 {
-    dbg::GetLogger().DebugInfo("\nDBG Unloading texture: ", name , MDBG);
+    dbg::GetLogger().DebugInfo("Unloading texture: ", name);
     if (m_textures.count(name) == 0) 
     {
-        dbg::GetLogger().DebugInfo("\nWRN Failed no unload cause: no texture: " + name);
+        dbg::GetLogger().Warn("Failed no unload cause: no texture: " + name);
         return false;
     }
     ::UnloadTexture(m_textures[name]);
@@ -69,10 +68,10 @@ bool RecourceManager::unloadTexture(std::string name)
 
 void RecourceManager::loadFont(std::string name, std::string filepath)
 {
-    dbg::GetLogger().DebugInfo("\nDBG loading Font: ", name + " path: " + filepath, MDBG);
+    dbg::GetLogger().DebugInfo("loading Font: ", name + " path: " + filepath);
     if (m_fonts.count(name) != 0)
     {
-        dbg::GetLogger().DebugInfo("\nWRN Font is already loaded, font: ", name);
+        dbg::GetLogger().Warn("Font is already loaded, font: ", name);
         return;
     }
     Font newFont = ::LoadFontEx(filepath.c_str(), 32*4, nullptr, 0);
@@ -81,7 +80,7 @@ void RecourceManager::loadFont(std::string name, std::string filepath)
 
     if (!::IsFontValid(newFont))
     {
-        dbg::GetLogger().Error("\n Failed to load font: " + name +  " path: " + filepath);
+        dbg::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath);
         return;
     }
     m_fonts[name] = newFont;
@@ -91,7 +90,7 @@ Font RecourceManager::getFont(std::string name)
 {
     if (m_fonts.count(name) == 0) 
     {
-        dbg::GetLogger().Error("\n Font not found:", name, MDBG);
+        dbg::GetLogger().Error("Font not found:", name);
         return m_fonts["default"];
     }
     return m_fonts[name];
@@ -114,13 +113,13 @@ Texture2D RecourceManager::getTexture(std::string name)
 
 bool RecourceManager::lazyLoad(std::string name)
 {
-    dbg::GetLogger().DebugInfo("\n LazyLoading texture: ", name , MDBG);
+    dbg::GetLogger().DebugInfo("LazyLoading texture: ", name);
     bool success = loadTexture(name);
     if (!success)
     {
         if (name == "default") 
         {
-            dbg::GetLogger().Fatal("\n Default texture is missing");
+            dbg::GetLogger().Fatal("Default texture is missing");
             exit(-1);
         } // not found(default)s
 

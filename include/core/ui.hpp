@@ -136,8 +136,7 @@ public:
         std::string textureName,
         Vector2 targetSize,
         UIComponentSpec spec = {}
-    ): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName}
-    {this->targetSize = targetSize;}
+    );
     void OnUpdate() override;
     void OnDraw() override;
 protected:

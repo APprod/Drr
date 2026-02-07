@@ -39,7 +39,7 @@ public:
 class FileSink : public ISink
 {
 public:
-    explicit FileSink(const std::string& path);
+    FileSink(const std::string& path);
     void Write(const MyMessage& message) override;
 
 private:

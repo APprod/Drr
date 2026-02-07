@@ -127,6 +127,15 @@ void Root::OnArrange(Rectangle rect){
     }
 }
 
+Button::Button(
+    std::string text,
+    std::function<void()> onClick,
+    std::string textureName,
+    Vector2 targetSize,
+    UIComponentSpec spec
+): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName}
+{this->targetSize = targetSize;}
+
 void Button::OnDraw(){
     auto& manager = GetServices().recManager;
     auto texture = manager.getTexture(m_textureName);

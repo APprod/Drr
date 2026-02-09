@@ -6,6 +6,6 @@ public:
     TestComp(Vector2 targetSize);
     void OnUpdate() override;
     void OnDraw() override;
-    void OnMeasure(Vector2 available) override;
-    void OnArrange(Rectangle actualRect) override;
+    void MeasureContent(Vector2 available) override;
+    void ArrangeContent(Rectangle actualRect) override;
 };

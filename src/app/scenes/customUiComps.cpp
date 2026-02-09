@@ -11,14 +11,14 @@ void TestComp::OnDraw()
     ::DrawRectangleRec(actual, RAYWHITE);
 }
 
-void TestComp::OnMeasure(Vector2 available)
+void TestComp::MeasureContent(Vector2 available)
 {
-    UIComponent::OnMeasure(available);
+    UIComponent::MeasureContent(available);
 }
 
-void TestComp::OnArrange(Rectangle actualRect)
+void TestComp::ArrangeContent(Rectangle actualRect)
 {
-    UIComponent::OnArrange(actualRect);
+    UIComponent::ArrangeContent(actualRect);
 }
 
 

@@ -29,7 +29,6 @@ void Layout::OnUpdate()
 
 void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis) {
     contentSize = {0, 0};
-
     for (auto& child : childs) {
         child->OnMeasure(available);
 
@@ -42,86 +41,62 @@ void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis
     if (!childs.empty()){
         contentSize.*mainAxis -= layoutSpec.spacing;
     }
-    desiredSize = contentSize;
-    switch (compSpec.fillMode) {
-        case FillMode::FillMaxWidth: desiredSize.x = available.x; break;
-        case FillMode::FillMaxHeight: desiredSize.y = available.y; break;
-        case FillMode::FillMaxSize: desiredSize = available; break;
-        default: break;
-    }
 }
-void Layout::ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis) {
-    actual = actualRect;
-
-    Vector2 pos{};
+void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis) {
+    Vector2 innerPos = { innerRect.x, innerRect.y };
+    Vector2 innerDim = { innerRect.width, innerRect.height };
+    float offset = 0.0f;
+    
     switch (layoutSpec.align)
     {
-    case Alignment::Beginning:{
-        pos = {actualRect.x, actualRect.y};
-        for (auto& child : childs) {
-            Rectangle r = rect(pos, child->DesiredSize());
-            child->OnArrange(r);
-            Vector2 dims = {child->FinalRect().width, child->FinalRect().height};
-            pos.*mainAxis += dims.*mainAxis + layoutSpec.spacing;
-        }
-        break;
-    }
     case Alignment::Center:{
-        Vector2 actualDim = {actualRect.width, actualRect.height};
-        auto difference = actualDim.*mainAxis - contentSize.*mainAxis;
-        pos = {actualRect.x, actualRect.y};
-        pos.*mainAxis += difference/2;
-        for (auto& child : childs) {
-            Rectangle r = rect(pos, child->DesiredSize());
-            child->OnArrange(r);
-            Vector2 dims = {child->FinalRect().width, child->FinalRect().height};
-            pos.*mainAxis += dims.*mainAxis + layoutSpec.spacing;
-        }
+        offset = (innerDim.*mainAxis - contentSize.*mainAxis) / 2;
         break;
     }
     case Alignment::End:{
-        pos = {actualRect.x + actualRect.width, actualRect.y + actualRect.height};
-        for (auto& child : childs) {
-            Rectangle r = rect(pos - child->DesiredSize(), child->DesiredSize());
-            child->OnArrange(r);
-            Vector2 dims = {child->FinalRect().width, child->FinalRect().height};
-            pos.*mainAxis -= dims.*mainAxis + layoutSpec.spacing;
-        }
+        offset = (innerDim.*mainAxis - contentSize.*mainAxis);
         break;
     }
     default:
         break;
     }
+    innerPos.*mainAxis += offset;
+    for (auto& child : childs) {
+        Rectangle r = rect(innerPos, child->DesiredSize());
+        child->OnArrange(r);
+        Vector2 dims = {child->FinalRect().width, child->FinalRect().height};
+        innerPos.*mainAxis += dims.*mainAxis + layoutSpec.spacing;
+    }
 }
 
-void VerticalLayout::OnMeasure(Vector2 available)
+void VerticalLayout::MeasureContent(Vector2 available)
 {
     MeasureAxialLayout(available, &Vector2::y, &Vector2::x);
 }
 
-void VerticalLayout::OnArrange(Rectangle actualRect)
+void VerticalLayout::ArrangeContent(Rectangle actualRect)
 {
     ArrangeAxialLayout(actualRect, &Vector2::y);
 }
 
 
-void HorizontalLayout::OnMeasure(Vector2 available)
+void HorizontalLayout::MeasureContent(Vector2 available)
 {
     MeasureAxialLayout(available, &Vector2::x, &Vector2::y);
 }
 
-void HorizontalLayout::OnArrange(Rectangle actualRect)
+void HorizontalLayout::ArrangeContent(Rectangle actualRect)
 {
     ArrangeAxialLayout(actualRect, &Vector2::x);
 }
 
-void Root::OnMeasure(Vector2 available){
-    desiredSize = available;
+void Root::MeasureContent(Vector2 available){
+    contentSize = available;
     for (auto&child: childs){
         child->OnMeasure(available);
     }
 }
-void Root::OnArrange(Rectangle rect){
+void Root::ArrangeContent(Rectangle rect){
     for (auto&child: childs){
         child->OnArrange(rect);
     }
@@ -139,16 +114,18 @@ Button::Button(
 void Button::OnDraw(){
     auto& manager = GetServices().recManager;
     auto texture = manager.getTexture(m_textureName);
-    DrawTexturePro(texture,rect(texture),actual,{0,0},0.f,RAYWHITE);
+    auto target = GetDrawRect();
+    DrawTexturePro(texture,rect(texture), target,{0,0},0.f,RAYWHITE);
     DrawText(m_text.c_str(),
-                 static_cast<int>(actual.x + 5),
-                 static_cast<int>(actual.y + actual.height / 2 - 10),
+                 static_cast<int>(target.x + 5),
+                 static_cast<int>(target.y + target.height / 2 - 10),
                  20, BLACK);                   
 }
 
 void Button::OnUpdate(){
-    bool hovered = CheckCollisionPointRec(GetMousePosition(), actual);
-    // Если мышь над кнопкой и отпустили левую кнопку
+    auto target = GetDrawRect();
+    bool hovered = CheckCollisionPointRec(GetMousePosition(), target);
+
     if (hovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         if (m_onClick) m_onClick();
     }

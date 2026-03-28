@@ -12,11 +12,11 @@ void TestScene::OnEnter(){
                     UIComponentSpec{FillMode::FillMaxWidth},
                     LayoutSpec{Alignment::Center});
         for(int j = 0; j < 5; j++){
-            row->AddChild(std::make_unique<Button>(
+            row->Add(
                 Button("Test",
                     [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
-                "button_default",{300,100})
-            ));
+                    "button_default",{300,100})
+            );
         }
         column->AddChild(std::move(row));    
     }
@@ -39,7 +39,8 @@ void TestScene::OnResize(){
         static_cast<float>(::GetScreenWidth()),
         static_cast<float>(::GetScreenHeight())
     };
-    Rectangle rectangle = rect({0,0}, dims);
+    MyRectangle rectangle = {{0,0}, dims};
+    dbg::GetLogger().LogFormat(dbg::Severity::ERROR, "hey this: {}", dims.x);
 
     root.OnMeasure(dims);
     root.OnArrange(rectangle);

@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <sstream>
+#include <format>
 
 namespace dbg {
 
@@ -53,28 +54,37 @@ public:
     void Write(const MyMessage& message) override;
 };
 
+template<typename T> // Required since we use it in logging alternative is format
+concept Streamable = requires(std::ostream& os, T a) {
+    { os << a } -> std::same_as<std::ostream&>;
+};
+
 class Logger
 {
 public:
     static Logger& GetLogger();
 
-    template<typename ...Args>
+    template<typename... Args> //supports <format>
+    void LogFormat(Severity s, std::format_string<Args...> fmt, Args&&... args) {
+        Log(s, std::format(fmt, std::forward<Args>(args)...));
+    }
+    template<Streamable ...Args>
     void DebugInfo(Args&& ...args) {
         LogTemplate(Severity::DBGINFO, std::forward<Args>(args)...);
     }
-    template<typename ...Args>
+    template<Streamable ...Args>
     void Info(Args&& ...args) {
         LogTemplate(Severity::INFO, std::forward<Args>(args)...);
     }
-    template<typename ...Args>
+    template<Streamable ...Args>
     void Warn(Args&& ...args) {
         LogTemplate(Severity::WRN, std::forward<Args>(args)...);
     }
-    template<typename ...Args>
+    template<Streamable ...Args>
     void Error(Args&& ...args) {
         LogTemplate(Severity::ERROR, std::forward<Args>(args)...);
     }
-    template<typename ...Args>
+    template<Streamable ...Args>
     void Fatal(Args&& ...args) {
         LogTemplate(Severity::FATAL, std::forward<Args>(args)...);
     }
@@ -90,7 +100,7 @@ private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
-    template<typename ...Args>
+    template<Streamable ...Args>
     void LogTemplate(Severity s, Args&&... args) {
         std::ostringstream oss;
         (oss << ... << args);

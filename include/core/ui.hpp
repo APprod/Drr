@@ -117,6 +117,12 @@ class Layout: public UIComponent{
 public:
     Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base);
     virtual ~Layout() = default;
+    
+    template<typename T>
+    Layout& Add(T&& child) {
+        AddChild(std::make_unique<std::decay_t<T>>(std::forward<T>(child)));
+        return *this;
+    }
     void AddChild(std::unique_ptr<UIComponent>&& child);
     void OnDraw() override;
     void OnUpdate() override;

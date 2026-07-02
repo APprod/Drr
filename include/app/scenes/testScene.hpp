@@ -4,17 +4,13 @@
 #include "core/recManager.hpp"
 
 
-class TestScene: public IScene{
+class TestScene: public BaseScene{
 public:
     TestScene(RecourceManager& manager);
     void OnEnter() override;
-    virtual void OnRestore() override;
-    virtual void OnUpdate() override;
-    void OnResize();
-    virtual void OnDraw() override;
-    virtual void OnExit() override; 
-    virtual void OnSuspend() override;
+    void OnResize() override;
+    void OnDrawContent() override;
+    void OnUpdateState() override;
 private:
-    Root root;
     RecourceManager& m_manager;
 };

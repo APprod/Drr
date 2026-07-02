@@ -4,7 +4,8 @@
 #include <vector>
 
 #include "core/debug.hpp"
-
+#include "core/ui.hpp"
+#include "core/util.hpp"
 
 class IScene{ //Base class for Scene
 public:
@@ -74,4 +75,37 @@ private:
     std::vector<std::unique_ptr<IScene>> m_scenes;
 };
 
+class BaseScene: public IScene{
+public:
+    void OnRestore() override {};
+    void OnSuspend() override {};
+    void OnExit() override {};
 
+    void OnDraw() override {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        OnDrawContent();
+        DrawFPS(20, 20);
+        EndDrawing();
+    };
+    void OnUpdate() override {
+        root.OnUpdate();
+        if (::IsWindowResized()) {
+            OnResize();
+        }
+        OnUpdateState();
+    };
+protected:
+    virtual void OnResize(){
+        auto dims = Vector2{
+                static_cast<float>(::GetScreenWidth()),
+                static_cast<float>(::GetScreenHeight())
+            };
+            MyRectangle rect = {{0,0}, dims};
+            root.OnMeasure(dims);
+            root.OnArrange(rect);
+    }
+    virtual void OnDrawContent() = 0;
+    virtual void OnUpdateState() = 0;
+    Root root;
+};

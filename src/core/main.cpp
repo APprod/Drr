@@ -5,10 +5,6 @@
 
 #include <iostream>
 
-
-
-
-
 int main(void)
 {
     App myapp(800, 450);

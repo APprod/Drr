@@ -24,13 +24,7 @@ void TestScene::OnEnter(){
     OnResize();
 }
 
-void TestScene::OnRestore(){}
-
-void TestScene::OnUpdate(){
-    root.OnUpdate();
-    if (::IsWindowResized()){
-        OnResize();
-    }
+void TestScene::OnUpdateState(){
 }
 
 void TestScene::OnResize(){
@@ -45,16 +39,7 @@ void TestScene::OnResize(){
     root.OnMeasure(dims);
     root.OnArrange(rectangle);
 }
-void TestScene::OnDraw(){
-    BeginDrawing();
-        ClearBackground(BLACK); 
-        
-        DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
-        root.OnDraw();
-        DrawFPS(20, 20);
-    EndDrawing();  
+void TestScene::OnDrawContent(){
+    DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
+    root.OnDraw();
 }
-
-void TestScene::OnExit(){}
-
-void TestScene::OnSuspend(){}

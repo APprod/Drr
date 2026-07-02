@@ -17,4 +17,10 @@ void MyInput::getInput(Vector2 screenRel)
     m_pressMovement = GetMouseDelta()/screenRel;
     m_activePos = GetMousePosition()/screenRel;
     m_zoomAction = GetMouseWheelMove();
+
+    bool pressed = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_MIDDLE);
+    if (pressed) {dbg::GetLogger().Error("Middle Button");}
+
+    bool pressed2 = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT);
+    if (pressed2) {dbg::GetLogger().Error("left Button");}
 }

@@ -46,6 +46,7 @@ void App::run()
         {
             Tester test("Input", 500.0f, DEB_PR); 
             // m_input.getInput(m_renderer.getScreenRelativeRes());
+            m_input.getInput({123, 123});
         }
         {
             Tester test("Update", 500.0f, DEB_PR);

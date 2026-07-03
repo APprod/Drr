@@ -27,6 +27,23 @@ void Layout::OnUpdate()
         child->OnUpdate();
 }
 
+bool Layout::OnEvent(const MyEvent& event){
+    bool hitTestedEvent = std::holds_alternative<CursorActionEvent>(event);
+    for (auto it = childs.rbegin(); it != childs.rend(); ++it){
+        auto& child = (*it);
+        if (hitTestedEvent){
+            if (child->HitTest(std::get<CursorActionEvent>(event).pos)){
+                bool handled = child->OnEvent(event);
+                if (handled) return true;        
+            }
+        }else{
+            bool handled = child->OnEvent(event);
+            if (handled) return true;        
+        }
+    }
+    return UIComponent::OnEvent(event);
+}
+
 void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis) {
     contentSize = {0, 0};
     for (auto& child : childs) {
@@ -90,13 +107,13 @@ void HorizontalLayout::ArrangeContent(Rectangle actualRect)
     ArrangeAxialLayout(actualRect, &Vector2::x);
 }
 
-void Root::MeasureContent(Vector2 available){
+void Stack::MeasureContent(Vector2 available){
     contentSize = available;
     for (auto&child: childs){
         child->OnMeasure(available);
     }
 }
-void Root::ArrangeContent(Rectangle rect){
+void Stack::ArrangeContent(Rectangle rect){
     for (auto&child: childs){
         child->OnArrange(rect);
     }
@@ -108,8 +125,9 @@ Button::Button(
     std::string textureName,
     Vector2 targetSize,
     UIComponentSpec spec
-): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName}
-{this->targetSize = targetSize;}
+): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName} {
+    this->targetSize = targetSize;
+}
 
 void Button::OnDraw(){
     auto& manager = GetServices().recManager;
@@ -122,11 +140,22 @@ void Button::OnDraw(){
                  20, BLACK);                   
 }
 
-void Button::OnUpdate(){
-    auto target = GetDrawRect();
-    bool hovered = CheckCollisionPointRec(GetMousePosition(), target);
-
-    if (hovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-        if (m_onClick) m_onClick();
+bool Button::OnEvent(const MyEvent& event){
+    if (std::holds_alternative<CursorActionEvent>(event)){
+        CursorActionEvent btn = std::get<CursorActionEvent>(event);
+        if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && btn.pressed){
+            m_onClick();
+            return true;
+        }
     }
+    return false;
+}
+
+void Button::OnUpdate(){
+    // auto target = GetDrawRect();
+    // bool hovered = CheckCollisionPointRec(GetMousePosition(), target);
+
+    // if (hovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+    //     if (m_onClick) m_onClick();
+    // }
 }

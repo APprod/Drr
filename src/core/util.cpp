@@ -60,6 +60,13 @@ Vector2& operator+=(Vector2 &vec, float val)
     return vec;
 }
 
+bool operator==(Vector2 vec, Vector2 vec2){
+    return (vec.x == vec2.x) && (vec.y == vec2.y);
+}
+bool operator!=(Vector2 vec, Vector2 vec2){
+    return !(vec==vec2);
+}
+
 Vector2 operator*(Vector2 vec, Vector2 vec2)
 {
     return {vec.x*vec2.x, vec.y*vec2.y};

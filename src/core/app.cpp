@@ -34,20 +34,17 @@ void App::run()
                 SetTargetFPS(GetMonitorRefreshRate(m));
                 SetWindowState(::FLAG_WINDOW_MAXIMIZED); 
     }
-    m_manager.init();
-    m_manager.load();
+    auto& recManager = GetServices().recManager;
+    auto& input = GetServices().input;
+    recManager.init();
+    recManager.load();
     SetExitKey(0);
     
     // float dt = 0.016f;
-    m_sceneManager.QueTransit<TestScene>(m_manager);
+    m_sceneManager.QueTransit<TestScene>(recManager);
     
     while(!WindowShouldClose())
     {
-        {
-            Tester test("Input", 500.0f, DEB_PR); 
-            // m_input.getInput(m_renderer.getScreenRelativeRes());
-            m_input.getInput({123, 123});
-        }
         {
             Tester test("Update", 500.0f, DEB_PR);
             m_sceneManager.Update();

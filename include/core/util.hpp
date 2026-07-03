@@ -25,6 +25,8 @@ Vector2& operator+=(Vector2 &vec, float val);
 Vector2 operator*(Vector2 vec, Vector2 vec2);
 Vector2 operator/(Vector2 vec, Vector2 vec2);
 
+bool operator==(Vector2 vec, Vector2 vec2);
+bool operator!=(Vector2 vec, Vector2 vec2);
 
 Vector2 operator*(Vector2 vec, float val);
 Vector2 operator/(Vector2 vec, float val);

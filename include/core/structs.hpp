@@ -4,11 +4,13 @@
 #include <string>
 #include <cstdint>
 #include "core/recManager.hpp"
+#include "core/myinput.hpp"
 
 struct Services
 {
     float dt = 16.7f;
     RecourceManager recManager;
+    MyInput input;
 
     static Services& Get(){
         static Services services;

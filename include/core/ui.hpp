@@ -6,6 +6,7 @@
 #include <functional>
 
 #include "raylib.h"
+#include "core/events.hpp"
 
 
 struct Padding
@@ -41,7 +42,7 @@ public:
     virtual ~UIComponent() = default;
 
     virtual void OnUpdate(){} //potentionally if we want to update status based on dynamic value
-    virtual bool OnEvent(const UIEvent& ){ return false;}  //returns true if handled, false by default
+    virtual bool OnEvent(const MyEvent& ){ return false;}  //returns true if handled, false by default
     virtual void OnDraw(){}
 
     virtual void OnMeasure(Vector2 available) final{
@@ -75,6 +76,7 @@ public:
         ArrangeContent(inner);
     }
     virtual void ArrangeContent(Rectangle ) {}
+    virtual bool HitTest(Vector2 point) const {return CheckCollisionPointRec(point, actual);}
 
     Vector2 DesiredSize(){return desiredSize;}
     Rectangle FinalRect(){return actual;}
@@ -126,6 +128,7 @@ public:
     void AddChild(std::unique_ptr<UIComponent>&& child);
     void OnDraw() override;
     void OnUpdate() override;
+    bool OnEvent(const MyEvent& event) override;
 protected:
     LayoutSpec layoutSpec;
     std::vector<std::unique_ptr<UIComponent>> childs; //calls their Update/Draw Function
@@ -135,7 +138,7 @@ protected:
     void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis);
 };
 
-//TODO
+//TODO (I think no longer todo)
 class VerticalLayout: public Layout{
     using Layout::Layout;
     virtual void MeasureContent(Vector2 available) override;
@@ -148,12 +151,15 @@ class HorizontalLayout: public Layout{
     virtual void ArrangeContent(Rectangle actualRect) override;
 };
 
-class Root: public Layout{ // Just to be explicit, actually just Stack layout
+
+class Stack: public Layout{ // Just to be explicit, actually just Stack layout
 public:
     using Layout::Layout;
     virtual void MeasureContent(Vector2 available) override;
     virtual void ArrangeContent(Rectangle rect) override;
 };
+
+using Root = Stack;
 
 class Button: public UIComponent{
 public:
@@ -166,6 +172,7 @@ public:
     );
     void OnUpdate() override;
     void OnDraw() override;
+    bool OnEvent(const MyEvent& event) override;
 protected:
     std::string m_text;
     std::function<void()> m_onClick;

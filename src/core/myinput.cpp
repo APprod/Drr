@@ -9,18 +9,20 @@ MyInput::~MyInput()
 {
 }
 
-void MyInput::getInput(Vector2 screenRel)
-{
-    m_click = IsMouseButtonPressed(MOUSE_BUTTON_LEFT); 
-    m_hold = IsMouseButtonDown(MOUSE_BUTTON_LEFT); 
-    m_release = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
-    m_pressMovement = GetMouseDelta()/screenRel;
-    m_activePos = GetMousePosition()/screenRel;
-    m_zoomAction = GetMouseWheelMove();
-
-    bool pressed = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_MIDDLE);
-    if (pressed) {dbg::GetLogger().Error("Middle Button");}
-
-    bool pressed2 = IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT);
-    if (pressed2) {dbg::GetLogger().Error("left Button");}
+std::vector<MyEvent> MyInput::pollEvents(){
+    _events.clear();
+    { //Mouse events
+        Vector2 delta = ::GetMouseDelta();
+        Vector2 pos = ::GetMousePosition();
+        if (delta != Vector2{0,0}){ //moved
+            _events.push_back(CursorMoveEvent{.pos = pos, .delta =  delta});
+        }
+        for (MouseButton btn : {MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE}) {
+            if (IsMouseButtonPressed(btn))
+                _events.push_back(CursorActionEvent{pos, btn, true});
+            if (IsMouseButtonReleased(btn))
+                _events.push_back(CursorActionEvent{pos, btn, false});
+        }   
+    }
+    return _events;
 }

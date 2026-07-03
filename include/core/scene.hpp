@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "core/structs.hpp"
 #include "core/debug.hpp"
 #include "core/ui.hpp"
 #include "core/util.hpp"
@@ -89,11 +90,20 @@ public:
         EndDrawing();
     };
     void OnUpdate() override {
-        root.OnUpdate();
-        if (::IsWindowResized()) {
+        auto& input = GetServices().input;
+        {
+            Tester test("Input", 500.0f, DEB_PR); 
+            input.pollEvents();
+        }
+        auto events = input.getEvents();
+        for (auto& event: events){
+            root.OnEvent(event); //updates states
+        }
+        root.OnUpdate(); //updates other data related to UI states
+        if (::IsWindowResized()) { //resize if needed
             OnResize();
         }
-        OnUpdateState();
+        OnUpdateState(); //updates scene data not UI
     };
 protected:
     virtual void OnResize(){

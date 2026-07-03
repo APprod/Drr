@@ -12,9 +12,6 @@ class App
 private:
     int m_screenHeight;
     int m_screenWidth;
-
-    RecourceManager m_manager;
-    MyInput m_input;
     SceneManager m_sceneManager;
 
 public:

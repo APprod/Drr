@@ -90,9 +90,10 @@ public:
         EndDrawing();
     };
     void OnUpdate() override {
+        PerfTester tester = GetServices().perfLog.log("Scene OnUpdate Full");
         auto& input = GetServices().input;
         {
-            Tester test("Input", 500.0f, true); 
+            PerfTester tester = GetServices().perfLog.log("Scene input.pollEvents");
             input.pollEvents();
         }
         auto events = input.getEvents();

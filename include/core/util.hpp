@@ -4,6 +4,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#include <functional>
+#include <numeric>
 
 #include "raylib.h"
 #include "core/debug.hpp"
@@ -89,7 +91,7 @@ std::vector<K> getKeys(std::unordered_map<K,V> map)
 
 
 template<class T>
-void myClamp(T &val, T min, T max)
+void myClamp(T &val, T min, T max)  
 {
     if (val < min) val = min;
     if (val > max) val = max;
@@ -108,4 +110,38 @@ public:
     ~Tester();
 };
 
-constexpr uint32_t BIT(int v){return 1 << v;}
+constexpr uint32_t BIT(int v){return 1u << v;}
+
+struct PerfStat{
+    std::vector<float> deltas;
+    float average(){return deltas.size() ? (std::accumulate(deltas.begin(), deltas.end(), 0.0) / deltas.size()) : 0 ;}
+    float peak(){return deltas.size() ? (*std::max_element(deltas.begin(), deltas.end())) : 0;}
+};
+
+class PerfTester
+{
+    friend class PerformanceLog; //we cannot create PerfTest without existing PerformanceLog
+    std::function<void(std::string, float)> m_callback;
+    std::chrono::steady_clock::time_point m_start;
+    std::string m_name;
+    PerfTester(std::string m_name, std::function<void(std::string, float)> callback);
+public:
+    
+    ~PerfTester();
+};
+
+
+class PerformanceLog
+{
+public:
+    PerformanceLog(float logTimeSeconds): m_logTimeSeconds{logTimeSeconds}, m_lastLog{std::chrono::steady_clock::now()}{}
+    void setLogTime(float logTime) {if (logTime > 0) m_logTimeSeconds = logTime;}
+    PerfTester log(std::string name);
+    void update();
+    void getData(std::string name, float delta);
+private:
+    float m_logTimeSeconds;
+    std::chrono::steady_clock::time_point m_lastLog;
+    std::unordered_map<std::string, PerfStat> m_logData;
+};
+

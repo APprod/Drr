@@ -11,6 +11,7 @@ struct Services
     float dt = 16.7f;
     RecourceManager recManager;
     MyInput input;
+    PerformanceLog perfLog{2};
 
     static Services& Get(){
         static Services services;

@@ -6,8 +6,6 @@
 
 #include <memory>
 
-// static bool DEB_PR = true;
-static bool DEB_PR = false;
 
 App::App(int screenWidth, int screenHeight): m_screenHeight(screenHeight), m_screenWidth(screenWidth)
 { 
@@ -45,13 +43,14 @@ void App::run()
     while(!WindowShouldClose())
     {
         {
-            Tester test("Update", 500.0f, DEB_PR);
+            PerfTester tester = GetServices().perfLog.log("Scene Update");
             m_sceneManager.Update();
         }
         {
-            Tester test("Render", 17000.0f, DEB_PR);
+            PerfTester tester = GetServices().perfLog.log("Scene Render");
             m_sceneManager.Draw();
         }            
+        GetServices().perfLog.update();
         // dt = 1000.0f/GetFPS();
     }
 }

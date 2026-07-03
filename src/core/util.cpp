@@ -144,3 +144,41 @@ Tester::~Tester()
     if (dur.count() > edge * 2) dbg::GetLogger().Info("!!!!!! Tester " + name + " , ms:", dur.count() / 1000.0f, true);
     else if (dur.count() > edge) dbg::GetLogger().Info("Tester: " + name + " , ms:", dur.count() / 1000.0f, true);
 }
+
+PerfTester PerformanceLog::log(std::string name){
+    auto callback = [this](std::string name, float delta){getData(name, delta);};
+    return PerfTester(name, callback);
+}
+void PerformanceLog::getData(std::string name, float delta){
+    PerfStat& stat = m_logData[name]; //creates automatically on first access
+    stat.deltas.push_back(delta);
+}
+void PerformanceLog::update(){
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<float, std::milli> dur = end - m_lastLog;
+    float ms = dur.count();
+    if (ms > m_logTimeSeconds * 1000.0f){
+        dbg::GetLogger().LogFormat(dbg::Severity::DBGINFO, "---------------------- Peformance LOG:");
+        for (auto& [name, perf]: m_logData){
+            auto peak = perf.peak();
+            auto average = perf.average();
+            dbg::GetLogger().LogFormat(dbg::Severity::DBGINFO, "{:<25} : avg: {:>8.4f}ms, peak:{:>8.4f}ms", name, average, peak);
+            perf.deltas.clear();
+        }
+        m_lastLog = end;
+    }
+}
+
+PerfTester::PerfTester(std::string name, std::function<void(std::string, float)> callback):
+        m_callback(callback),
+        m_start(std::chrono::steady_clock::now()), 
+        m_name(name)
+{
+}
+
+PerfTester::~PerfTester()
+{
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<float, std::milli> dur = end - m_start;
+    m_callback(m_name, dur.count());
+}

@@ -46,6 +46,7 @@ Vector2 Root::getPos(const MyEvent& event){
 }
 
 EventResult Root::OnEvent(const MyEvent& event){
+    PerfTester tester = GetServices().perfLog.log("Root::OnEvent");
     if (m_captured){
         EventMask mask = m_captured->getCaptureTypes();
         if (mask & getEventType(event)){

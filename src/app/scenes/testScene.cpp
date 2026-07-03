@@ -40,6 +40,7 @@ void TestScene::OnResize(){
     root.OnArrange(rectangle);
 }
 void TestScene::OnDrawContent(){
+    PerfTester tester = GetServices().perfLog.log("OnDrawContent");
     DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
     root.OnDraw();
 }

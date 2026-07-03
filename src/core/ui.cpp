@@ -1,13 +1,22 @@
 #include "core/ui.hpp"
 #include "core/util.hpp"
+#include "core/structs.hpp"
 
+// helper type for the visitor #4
+template<class... Ts>
+struct overloaded : Ts... { using Ts::operator()...; };
+
+UIComponent* UIComponent::FindTarget(Vector2 point){
+    if (HitTest(point)) return this;
+    return nullptr;
+}
 
 Layout::Layout(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         : UIComponent(uiSpec), layoutSpec(layoutSpec) {}
 
 void Layout::AddChild(std::unique_ptr<UIComponent>&& child)
 {
-    childs.push_back(std::move(child));
+    children.push_back(std::move(child));
 }
 
 Color GetColor(){
@@ -17,36 +26,72 @@ Color GetColor(){
 void Layout::OnDraw()
 {
     // ::DrawRectangleRec(actual,GetColor());
-    for(auto& child : childs)
+    for(auto& child : children)
         child->OnDraw();
 }
 
 void Layout::OnUpdate()
 {
-    for(auto& child : childs)
+    for(auto& child : children)
         child->OnUpdate();
 }
 
-bool Layout::OnEvent(const MyEvent& event){
-    bool hitTestedEvent = std::holds_alternative<CursorActionEvent>(event);
-    for (auto it = childs.rbegin(); it != childs.rend(); ++it){
-        auto& child = (*it);
-        if (hitTestedEvent){
-            if (child->HitTest(std::get<CursorActionEvent>(event).pos)){
-                bool handled = child->OnEvent(event);
-                if (handled) return true;        
+Vector2 Root::getPos(const MyEvent& event){
+    Vector2 res = std::visit(overloaded{
+        [](const CursorMoveEvent& e) -> Vector2 {return e.pos;},
+        [](const CursorActionEvent& e) -> Vector2 {return e.pos;},
+        [](const auto&){throw std::runtime_error("Required to get a position of an event without the position"); return Vector2{0,0};}
+    }, event);
+    return res;
+}
+
+EventResult Root::OnEvent(const MyEvent& event){
+    if (m_captured){
+        EventMask mask = m_captured->getCaptureTypes();
+        if (mask & getEventType(event)){
+            EventResult result = m_captured->OnEvent(event);
+            if (result == EventResult::ReleaseCapture){
+                m_captured = nullptr;
             }
-        }else{
-            bool handled = child->OnEvent(event);
-            if (handled) return true;        
+            return result;
         }
+    }
+    { //normal execution
+        EventResult result = Layout::OnEvent(event);
+        if (result == EventResult::RequireCapture){
+            Vector2 target = getPos(event);
+            m_captured = FindTarget(target);
+        }
+        return result;
+    }
+}
+
+
+UIComponent* Layout::FindTarget(Vector2 point){
+    for (auto it = children.rbegin(); it != children.rend(); ++it){
+        auto& child = (*it);
+        UIComponent* comp = child->FindTarget(point);
+        if (comp){ //we found it
+            return comp;
+        }
+    }
+    if (this->HitTest(point)) return this;
+    return nullptr;
+}
+EventResult Layout::OnEvent(const MyEvent& event){
+    // bool hitTestedEvent = std::holds_alternative<CursorActionEvent>(event);
+    for (auto it = children.rbegin(); it != children.rend(); ++it){
+        auto& child = (*it);
+        EventResult result = child->OnEvent(event);
+        if (result == EventResult::NotHandled) continue;        
+        return result;
     }
     return UIComponent::OnEvent(event);
 }
 
 void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis) {
     contentSize = {0, 0};
-    for (auto& child : childs) {
+    for (auto& child : children) {
         child->OnMeasure(available);
 
         contentSize.*crossAxis = std::max(
@@ -55,7 +100,7 @@ void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis
         );
         contentSize.*mainAxis += child->DesiredSize().*mainAxis + layoutSpec.spacing;
     }
-    if (!childs.empty()){
+    if (!children.empty()){
         contentSize.*mainAxis -= layoutSpec.spacing;
     }
 }
@@ -78,7 +123,7 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis) {
         break;
     }
     innerPos.*mainAxis += offset;
-    for (auto& child : childs) {
+    for (auto& child : children) {
         Rectangle r = rect(innerPos, child->DesiredSize());
         child->OnArrange(r);
         Vector2 dims = {child->FinalRect().width, child->FinalRect().height};
@@ -109,12 +154,12 @@ void HorizontalLayout::ArrangeContent(Rectangle actualRect)
 
 void Stack::MeasureContent(Vector2 available){
     contentSize = available;
-    for (auto&child: childs){
+    for (auto&child: children){
         child->OnMeasure(available);
     }
 }
 void Stack::ArrangeContent(Rectangle rect){
-    for (auto&child: childs){
+    for (auto&child: children){
         child->OnArrange(rect);
     }
 }
@@ -133,29 +178,44 @@ void Button::OnDraw(){
     auto& manager = GetServices().recManager;
     auto texture = manager.getTexture(m_textureName);
     auto target = GetDrawRect();
-    DrawTexturePro(texture,rect(texture), target,{0,0},0.f,RAYWHITE);
-    DrawText(m_text.c_str(),
+    ::DrawTexturePro(texture,rect(texture), target,{0,0},0.f,RAYWHITE);
+    ::DrawText(m_text.c_str(),
                  static_cast<int>(target.x + 5),
                  static_cast<int>(target.y + target.height / 2 - 10),
                  20, BLACK);                   
+    if (m_hover && !m_hold){
+        ::DrawRectanglePro(target,{0,0},0.f,{255,255,255,50});
+    }
+    else if (m_hover && m_hold){
+        ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
+        ::DrawRectanglePro(target,{0,0},0.f,{150,150,150,255});
+        ::EndBlendMode();
+    }
 }
 
-bool Button::OnEvent(const MyEvent& event){
+EventResult Button::OnEvent(const MyEvent& event){
     if (std::holds_alternative<CursorActionEvent>(event)){
         CursorActionEvent btn = std::get<CursorActionEvent>(event);
         if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && btn.pressed){
-            m_onClick();
-            return true;
+            if (HitTest(btn.pos)){
+                m_hold = true;
+                return EventResult::RequireCapture;
+            }
+        }
+        if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && !btn.pressed){
+            if (HitTest(btn.pos)){
+                m_onClick();
+            }
+            m_hold = false;
+            return EventResult::ReleaseCapture;
         }
     }
-    return false;
+    if (std::holds_alternative<CursorMoveEvent>(event)){
+        CursorMoveEvent move = std::get<CursorMoveEvent>(event);
+        m_hover = HitTest(move.pos);
+    }
+    return EventResult::NotHandled;
 }
 
 void Button::OnUpdate(){
-    // auto target = GetDrawRect();
-    // bool hovered = CheckCollisionPointRec(GetMousePosition(), target);
-
-    // if (hovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-    //     if (m_onClick) m_onClick();
-    // }
 }

@@ -11,8 +11,8 @@ public:
     ~MyInput();
     std::vector<MyEvent> pollEvents();
     //Can be called after call. Retrieves all events between frames
-    std::vector<MyEvent> getEvents(){return _events;}
+    std::vector<MyEvent> getEvents(){return m_events;}
 private:
-    std::vector<MyEvent> _events;
+    std::vector<MyEvent> m_events;
 };
 

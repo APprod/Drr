@@ -1,12 +1,32 @@
 #pragma once
 
 #include <chrono>
-#include "core/debug.hpp"
 #include <iostream>
-#include "raylib.h"
-#include "core/structs.hpp"
 #include <unordered_map>
 #include <vector>
+
+#include "raylib.h"
+#include "core/debug.hpp"
+
+
+struct Ivec2
+{
+    int32_t x;
+    int32_t y;
+};
+
+struct MyRectangle {
+    Rectangle rect;
+
+    MyRectangle() = default;
+    MyRectangle(const Vector2& a, const Vector2& b)
+        : rect{a.x, a.y, b.x - a.x, b.y - a.y} {}
+
+    // Implicit conversion to Raylib Rectangle
+    operator Rectangle() const {
+        return rect;
+    }
+};
 
 std::ostream& operator<<(std::ostream& out, Vector2 vec);
 
@@ -87,3 +107,5 @@ public:
     Tester(std::string name, float edge, bool active);
     ~Tester();
 };
+
+constexpr uint32_t BIT(int v){return 1 << v;}

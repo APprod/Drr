@@ -92,7 +92,7 @@ public:
     void OnUpdate() override {
         auto& input = GetServices().input;
         {
-            Tester test("Input", 500.0f, DEB_PR); 
+            Tester test("Input", 500.0f, true); 
             input.pollEvents();
         }
         auto events = input.getEvents();

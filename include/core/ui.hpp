@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include <functional>
-
 #include "raylib.h"
 #include "core/events.hpp"
 
@@ -32,9 +31,9 @@ struct UIComponentSpec {
     UIComponentSpec& Padding(Padding p){padding = p; return *this;}
 };
 
-class UIEvent{
+class UIComponent;
+enum class EventResult { NotHandled, Handled, RequireCapture, ReleaseCapture};
 
-};
 
 class UIComponent{
 public:
@@ -42,7 +41,7 @@ public:
     virtual ~UIComponent() = default;
 
     virtual void OnUpdate(){} //potentionally if we want to update status based on dynamic value
-    virtual bool OnEvent(const MyEvent& ){ return false;}  //returns true if handled, false by default
+    virtual EventResult OnEvent(const MyEvent& ){ return EventResult::NotHandled;} 
     virtual void OnDraw(){}
 
     virtual void OnMeasure(Vector2 available) final{
@@ -77,6 +76,8 @@ public:
     }
     virtual void ArrangeContent(Rectangle ) {}
     virtual bool HitTest(Vector2 point) const {return CheckCollisionPointRec(point, actual);}
+    virtual UIComponent* FindTarget(Vector2 point);
+    virtual EventMask getCaptureTypes() const {return 0;}
 
     Vector2 DesiredSize(){return desiredSize;}
     Rectangle FinalRect(){return actual;}
@@ -128,10 +129,12 @@ public:
     void AddChild(std::unique_ptr<UIComponent>&& child);
     void OnDraw() override;
     void OnUpdate() override;
-    bool OnEvent(const MyEvent& event) override;
+    EventResult OnEvent(const MyEvent& event) override;
+    const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return children;}
+    virtual UIComponent* FindTarget(Vector2 point) override;
 protected:
     LayoutSpec layoutSpec;
-    std::vector<std::unique_ptr<UIComponent>> childs; //calls their Update/Draw Function
+    std::vector<std::unique_ptr<UIComponent>> children; //calls their Update/Draw Function
 
     using Axis = float Vector2::*;
     void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis);
@@ -159,7 +162,14 @@ public:
     virtual void ArrangeContent(Rectangle rect) override;
 };
 
-using Root = Stack;
+class Root: public Stack{
+public:
+    using Stack::Stack;
+    virtual EventResult OnEvent(const MyEvent& event) override;
+    Vector2 getPos(const MyEvent& event);
+private:
+    UIComponent* m_captured = nullptr;
+};
 
 class Button: public UIComponent{
 public:
@@ -172,8 +182,11 @@ public:
     );
     void OnUpdate() override;
     void OnDraw() override;
-    bool OnEvent(const MyEvent& event) override;
-protected:
+    EventResult OnEvent(const MyEvent& event) override;
+    virtual EventMask getCaptureTypes() const override {return EventType::CursorAction | EventType::CursorMove;}
+protected: 
+    bool m_hold = false;
+    bool m_hover = false;
     std::string m_text;
     std::function<void()> m_onClick;
     std::string m_textureName;

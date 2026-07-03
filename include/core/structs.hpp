@@ -25,22 +25,3 @@ private:
 inline Services& GetServices() {
     return Services::Get();
 }
-
-struct Ivec2
-{
-    int32_t x;
-    int32_t y;
-};
-
-struct MyRectangle {
-    Rectangle rect;
-
-    MyRectangle() = default;
-    MyRectangle(const Vector2& a, const Vector2& b)
-        : rect{a.x, a.y, b.x - a.x, b.y - a.y} {}
-
-    // Implicit conversion to Raylib Rectangle
-    operator Rectangle() const {
-        return rect;
-    }
-};

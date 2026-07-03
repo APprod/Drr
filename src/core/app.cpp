@@ -35,7 +35,6 @@ void App::run()
                 SetWindowState(::FLAG_WINDOW_MAXIMIZED); 
     }
     auto& recManager = GetServices().recManager;
-    auto& input = GetServices().input;
     recManager.init();
     recManager.load();
     SetExitKey(0);

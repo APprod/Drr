@@ -119,21 +119,7 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
     Flex totalFlex{0,0};
     auto sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare, totalFlex);
     
-    Vector2 offset{0,0};
-    if (!((spare > 0 && totalFlex.growth > 0) || (spare < 0 && totalFlex.shrink > 0))){
-        switch (layoutSpec.align)
-        {
-        case Alignment::Center:{
-            offset.*mainAxis = spare / 2; break;
-        }
-        case Alignment::End:{
-            offset.*mainAxis = spare; break;
-        }
-        default: break;
-        }
-    }
-
-    innerPos.*mainAxis += offset.*mainAxis;
+    
     
     float spacing = layoutSpec.spacing;
 
@@ -149,6 +135,22 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
             
             spacing += missed / (sizes.size() - 1);
         }
+    }else if (layoutSpec.justifyContent == JustifyContent::None){
+        Vector2 offset{0,0};
+        if (!((spare > 0 && totalFlex.growth > 0) || (spare < 0 && totalFlex.shrink > 0))){
+            switch (layoutSpec.align)
+            {
+            case Alignment::Center:{
+                offset.*mainAxis = spare / 2; break;
+            }
+            case Alignment::End:{
+                offset.*mainAxis = spare; break;
+            }
+            default: break;
+            }
+        }
+
+        innerPos.*mainAxis += offset.*mainAxis;
     }
 
     for (size_t i = 0; i < children.size(); ++i) {

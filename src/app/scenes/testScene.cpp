@@ -9,13 +9,13 @@ void TestScene::OnEnter(){
     auto column= std::make_unique<VerticalLayout>(UIComponentSpec{},LayoutSpec{Alignment::End});
     for(int i = 0; i < 1; i++){
         auto row = std::make_unique<HorizontalLayout>(
-                    UIComponentSpec{FillMode::FillMaxWidth},
-                    LayoutSpec{Alignment::Beginning, Alignment::End});
+                    UIComponentSpec{FillMode::FillMaxWidth}.Padding({.left = 50, .right = 50}),
+                    LayoutSpec{Alignment::Center, Alignment::Center,JustifyContent::SpaceEvenly});
         for(int j = 0; j < 5; j++){
             row->Add(
                 Button("Test",
                     [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
-                    "button_default",{(float)300,(float)100 + 50*(j+1)}, 
+                    "button_default",{(float)300,(float)200}, 
                     UICSpec().SetFlex({.growth = 0, .shrink = 1}).
                     MinSize({100,50}))
             );

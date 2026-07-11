@@ -71,32 +71,71 @@ void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis
         contentSize.*mainAxis -= layoutSpec.spacing;
     }
 }
+
+std::vector<Vector2> Layout::CalculateFlex(Vector2 available, Axis mainAxis, float& spare, Flex& totalFlex){
+    std::vector<Vector2> res; res.reserve(children.size());
+    //Calculate total desired size
+    float totalDesiredSize{0};
+    {
+        for (auto& child : children) {
+            totalDesiredSize += child->DesiredSize().*mainAxis + layoutSpec.spacing;
+            totalFlex.growth += child->Spec().flex.growth;
+            totalFlex.shrink += child->Spec().flex.shrink;
+        }
+        if (!children.empty()) totalDesiredSize -= layoutSpec.spacing; //compensate for the extra one
+    }
+
+    spare = available.*mainAxis - totalDesiredSize;
+
+    for (auto& child : children) {
+        auto finalSize = child->DesiredSize();
+        auto childFlex = child->Spec().flex;
+        if (spare > 0 && childFlex.growth > 0 && totalFlex.growth > 0){
+            finalSize.*mainAxis += spare * childFlex.growth / totalFlex.growth;
+        }
+        else if (spare < 0 && childFlex.shrink > 0 && totalFlex.shrink > 0){
+            finalSize.*mainAxis += spare * childFlex.shrink / totalFlex.shrink;
+        }
+        finalSize.*mainAxis = std::min(finalSize.*mainAxis, child->Spec().maxSize.*mainAxis);
+        finalSize.*mainAxis = std::max(finalSize.*mainAxis, child->Spec().minSize.*mainAxis);
+        res.push_back(finalSize);
+    } 
+    return res;
+}
+
 void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis) {
+    //Assume we now have flex.
     Vector2 innerPos = { innerRect.x, innerRect.y };
     Vector2 innerDim = { innerRect.width, innerRect.height };
-    float offset = 0.0f;
     
-    switch (layoutSpec.align)
-    {
-    case Alignment::Center:{
-        offset = (innerDim.*mainAxis - contentSize.*mainAxis) / 2;
-        break;
+    float spare{0};
+    Flex totalFlex{0,0};
+    auto sizes = CalculateFlex(innerDim, mainAxis, spare, totalFlex);
+    
+    float offset = 0.0f;
+    if (!((spare > 0 && totalFlex.growth > 0) || (spare < 0 && totalFlex.shrink > 0))){
+        switch (layoutSpec.align)
+        {
+        case Alignment::Center:{
+            offset = spare / 2; break;
+        }
+        case Alignment::End:{
+            offset = spare; break;
+        }
+        default: break;
+        }
     }
-    case Alignment::End:{
-        offset = (innerDim.*mainAxis - contentSize.*mainAxis);
-        break;
-    }
-    default:
-        break;
-    }
+
     innerPos.*mainAxis += offset;
-    for (auto& child : children) {
-        Rectangle r = rect(innerPos, child->DesiredSize());
-        child->OnArrange(r);
-        Vector2 dims = {child->FinalRect().width, child->FinalRect().height};
-        innerPos.*mainAxis += dims.*mainAxis + layoutSpec.spacing;
-    }
+    for (size_t i = 0; i < children.size(); ++i) {
+        auto finalSize = sizes[i];
+        Rectangle r = rect(innerPos, finalSize);
+        children[i]->OnArrange(r);
+        innerPos.*mainAxis += finalSize.*mainAxis + layoutSpec.spacing;
+    } 
 }
+
+
 
 void VerticalLayout::MeasureContent(Vector2 available)
 {

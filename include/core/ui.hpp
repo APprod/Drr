@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <numeric>
 #include "raylib.h"
 #include "core/events.hpp"
 
@@ -23,13 +24,30 @@ enum class FillMode {
     ByTargetSize
 };
 
+struct Flex{
+    float growth{0};
+    float shrink{0};
+};
+
 struct UIComponentSpec {
     FillMode fillMode = FillMode::ByTargetSize;
     Padding padding{};
+    Flex flex{0,0};
+    Flex crossFlex{0,1}; // only shrinks
+    Vector2 minSize{0,0};
+    Vector2 maxSize{std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
 
+    UIComponentSpec& SetFlex(Flex iflex){flex = iflex; return *this;}
+    UIComponentSpec& MinSize(Vector2 size){minSize = size; return *this;}
+    UIComponentSpec& MaxSize(Vector2 size){maxSize = size; return *this;}
     UIComponentSpec& FillMode(FillMode mode){fillMode = mode; return *this;}
+    UIComponentSpec& FillMaxWidth(){fillMode = FillMode::FillMaxWidth; return *this;}
+    UIComponentSpec& FillMaxHeight(){fillMode = FillMode::FillMaxHeight; return *this;}
+    UIComponentSpec& FillMaxSize(){fillMode = FillMode::FillMaxSize; return *this;}
+    UIComponentSpec& FillTargetSize(){fillMode = FillMode::ByTargetSize; return *this;}
     UIComponentSpec& Padding(Padding p){padding = p; return *this;}
 };
+using UICSpec = UIComponentSpec;
 
 class UIComponent;
 enum class EventResult { NotHandled, Handled, RequireCapture, ReleaseCapture};
@@ -39,6 +57,10 @@ class UIComponent{
 public:
     UIComponent(UIComponentSpec spec = {}): compSpec{spec}{}
     virtual ~UIComponent() = default;
+
+    const UIComponentSpec& Spec() const {
+        return compSpec;
+    }
 
     virtual void OnUpdate(){} //potentionally if we want to update status based on dynamic value
     virtual EventResult OnEvent(const MyEvent& ){ return EventResult::NotHandled;} 
@@ -84,10 +106,10 @@ public:
     
 protected:
     UIComponentSpec compSpec;
-    Rectangle actual; 
-    Vector2 desiredSize{0,0};
-    Vector2 contentSize{0,0};
-    Vector2 targetSize{10,10}; //temporary
+    Rectangle actual; //Result after arrange - all available, actual location
+    Vector2 desiredSize{0,0}; //What gets after its measured
+    Vector2 contentSize{0,0}; //Result of OnMeasure Size of all the contents, excluding padding
+    Vector2 targetSize{10,10}; //Target size in case Ui element uses it, may replaced by min/max size
     bool active = true; //for those wich should be skipped as Layer
 
     Rectangle GetDrawRect() const{
@@ -106,11 +128,18 @@ enum class Alignment{
     Center,
     End
 };
+//Defines how components will be spaced out if they don't acquire all the available place
+enum class JustifyContent{
+    SpaceEvenly,
+    None,
+};
 
 struct LayoutSpec{
     Alignment align;
+    JustifyContent justifyContent{JustifyContent::None};
     int spacing = 5; //places chids with specified spacing
     LayoutSpec& Alignment(Alignment a) { align = a; return *this; }
+    LayoutSpec& JustifyContent(JustifyContent j) { justifyContent = j; return *this; }
     LayoutSpec& Spacing(int s) { spacing = s; return *this; }
 };
 
@@ -139,9 +168,10 @@ protected:
     using Axis = float Vector2::*;
     void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis);
     void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis);
+
+    std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, float& spare, Flex& totalFlex);
 };
 
-//TODO (I think no longer todo)
 class VerticalLayout: public Layout{
     using Layout::Layout;
     virtual void MeasureContent(Vector2 available) override;

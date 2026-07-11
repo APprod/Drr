@@ -10,12 +10,15 @@ void TestScene::OnEnter(){
     for(int i = 0; i < 1; i++){
         auto row = std::make_unique<HorizontalLayout>(
                     UIComponentSpec{FillMode::FillMaxWidth},
-                    LayoutSpec{Alignment::Center});
+                    LayoutSpec{Alignment::Beginning});
         for(int j = 0; j < 5; j++){
             row->Add(
                 Button("Test",
                     [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
-                    "button_default",{300,100})
+                    "button_default",{300,100}, 
+                    UICSpec{}
+                    .SetFlex({.growth = 0, .shrink = 1}).
+                    MinSize({100,50}))
             );
         }
         column->AddChild(std::move(row));    

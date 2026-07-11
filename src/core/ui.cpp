@@ -2,7 +2,8 @@
 #include "core/util.hpp"
 #include "core/structs.hpp"
 
-// helper type for the visitor #4
+
+// helper type for the visitor
 template<class... Ts>
 struct overloaded : Ts... { using Ts::operator()...; };
 
@@ -10,6 +11,7 @@ UIComponent* UIComponent::FindTarget(Vector2 point){
     if (HitTest(point)) return this;
     return nullptr;
 }
+
 
 Layout::Layout(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         : UIComponent(uiSpec), layoutSpec(layoutSpec) {}
@@ -19,13 +21,8 @@ void Layout::AddChild(std::unique_ptr<UIComponent>&& child)
     children.push_back(std::move(child));
 }
 
-Color GetColor(){
-    return Color{225,225,225,100};
-}
-
 void Layout::OnDraw()
 {
-    // ::DrawRectangleRec(actual,GetColor());
     for(auto& child : children)
         child->OnDraw();
 }
@@ -35,38 +32,6 @@ void Layout::OnUpdate()
     for(auto& child : children)
         child->OnUpdate();
 }
-
-Vector2 Root::getPos(const MyEvent& event){
-    Vector2 res = std::visit(overloaded{
-        [](const CursorMoveEvent& e) -> Vector2 {return e.pos;},
-        [](const CursorActionEvent& e) -> Vector2 {return e.pos;},
-        [](const auto&){throw std::runtime_error("Required to get a position of an event without the position"); return Vector2{0,0};}
-    }, event);
-    return res;
-}
-
-EventResult Root::OnEvent(const MyEvent& event){
-    PerfTester tester = GetServices().perfLog.log("Root::OnEvent");
-    if (m_captured){
-        EventMask mask = m_captured->getCaptureTypes();
-        if (mask & getEventType(event)){
-            EventResult result = m_captured->OnEvent(event);
-            if (result == EventResult::ReleaseCapture){
-                m_captured = nullptr;
-            }
-            return result;
-        }
-    }
-    { //normal execution
-        EventResult result = Layout::OnEvent(event);
-        if (result == EventResult::RequireCapture){
-            Vector2 target = getPos(event);
-            m_captured = FindTarget(target);
-        }
-        return result;
-    }
-}
-
 
 UIComponent* Layout::FindTarget(Vector2 point){
     for (auto it = children.rbegin(); it != children.rend(); ++it){
@@ -79,6 +44,7 @@ UIComponent* Layout::FindTarget(Vector2 point){
     if (this->HitTest(point)) return this;
     return nullptr;
 }
+
 EventResult Layout::OnEvent(const MyEvent& event){
     // bool hitTestedEvent = std::holds_alternative<CursorActionEvent>(event);
     for (auto it = children.rbegin(); it != children.rend(); ++it){
@@ -153,6 +119,7 @@ void HorizontalLayout::ArrangeContent(Rectangle actualRect)
     ArrangeAxialLayout(actualRect, &Vector2::x);
 }
 
+
 void Stack::MeasureContent(Vector2 available){
     contentSize = available;
     for (auto&child: children){
@@ -164,6 +131,39 @@ void Stack::ArrangeContent(Rectangle rect){
         child->OnArrange(rect);
     }
 }
+
+
+Vector2 Root::getPos(const MyEvent& event){
+    Vector2 res = std::visit(overloaded{
+        [](const CursorMoveEvent& e) -> Vector2 {return e.pos;},
+        [](const CursorActionEvent& e) -> Vector2 {return e.pos;},
+        [](const auto&){throw std::runtime_error("Required to get a position of an event without the position"); return Vector2{0,0};}
+    }, event);
+    return res;
+}
+
+EventResult Root::OnEvent(const MyEvent& event){
+    PerfTester tester = GetServices().perfLog.log("Root::OnEvent");
+    if (m_captured){
+        EventMask mask = m_captured->getCaptureTypes();
+        if (mask & getEventType(event)){
+            EventResult result = m_captured->OnEvent(event);
+            if (result == EventResult::ReleaseCapture){
+                m_captured = nullptr;
+            }
+            return result;
+        }
+    }
+    { //normal execution
+        EventResult result = Layout::OnEvent(event);
+        if (result == EventResult::RequireCapture){
+            Vector2 target = getPos(event);
+            m_captured = FindTarget(target);
+        }
+        return result;
+    }
+}
+
 
 Button::Button(
     std::string text,

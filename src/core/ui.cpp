@@ -1,6 +1,7 @@
 #include "core/ui.hpp"
 #include "core/util.hpp"
 #include "core/structs.hpp"
+#include <numeric>
 
 
 // helper type for the visitor
@@ -57,22 +58,22 @@ EventResult Layout::OnEvent(const MyEvent& event){
 }
 
 void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis) {
-    contentSize = {0, 0};
+    contentDesiredSize = {0, 0};
     for (auto& child : children) {
         child->OnMeasure(available);
 
-        contentSize.*crossAxis = std::max(
-            contentSize.*crossAxis,
+        contentDesiredSize.*crossAxis = std::max(
+            contentDesiredSize.*crossAxis,
             child->DesiredSize().*crossAxis
         );
-        contentSize.*mainAxis += child->DesiredSize().*mainAxis + layoutSpec.spacing;
+        contentDesiredSize.*mainAxis += child->DesiredSize().*mainAxis + layoutSpec.spacing;
     }
     if (!children.empty()){
-        contentSize.*mainAxis -= layoutSpec.spacing;
+        contentDesiredSize.*mainAxis -= layoutSpec.spacing;
     }
 }
 
-std::vector<Vector2> Layout::CalculateFlex(Vector2 available, Axis mainAxis, float& spare, Flex& totalFlex){
+std::vector<Vector2> Layout::CalculateFlex(Vector2 innerDim, Axis mainAxis, Axis crossAxis, float& spare, Flex& totalFlex){
     std::vector<Vector2> res; res.reserve(children.size());
     //Calculate total desired size
     float totalDesiredSize{0};
@@ -85,7 +86,7 @@ std::vector<Vector2> Layout::CalculateFlex(Vector2 available, Axis mainAxis, flo
         if (!children.empty()) totalDesiredSize -= layoutSpec.spacing; //compensate for the extra one
     }
 
-    spare = available.*mainAxis - totalDesiredSize;
+    spare = innerDim.*mainAxis - totalDesiredSize;
 
     for (auto& child : children) {
         auto finalSize = child->DesiredSize();
@@ -96,42 +97,74 @@ std::vector<Vector2> Layout::CalculateFlex(Vector2 available, Axis mainAxis, flo
         else if (spare < 0 && childFlex.shrink > 0 && totalFlex.shrink > 0){
             finalSize.*mainAxis += spare * childFlex.shrink / totalFlex.shrink;
         }
-        finalSize.*mainAxis = std::min(finalSize.*mainAxis, child->Spec().maxSize.*mainAxis);
-        finalSize.*mainAxis = std::max(finalSize.*mainAxis, child->Spec().minSize.*mainAxis);
+        if (layoutSpec.crossShrink){
+            finalSize.*crossAxis = std::min(finalSize.*crossAxis, innerDim.*crossAxis);
+        }
+        finalSize.y = std::min(finalSize.y, child->Spec().maxSize.y);
+        finalSize.y = std::max(finalSize.y, child->Spec().minSize.y);
+        finalSize.x = std::min(finalSize.x, child->Spec().maxSize.x);
+        finalSize.x = std::max(finalSize.x, child->Spec().minSize.x);
         res.push_back(finalSize);
     } 
     return res;
 }
 
-void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis) {
+void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAxis) {
     //Assume we now have flex.
-    Vector2 innerPos = { innerRect.x, innerRect.y };
+    Vector2 innerPosStart = { innerRect.x, innerRect.y };
+    Vector2 innerPos = innerPosStart;
     Vector2 innerDim = { innerRect.width, innerRect.height };
     
     float spare{0};
     Flex totalFlex{0,0};
-    auto sizes = CalculateFlex(innerDim, mainAxis, spare, totalFlex);
+    auto sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare, totalFlex);
     
-    float offset = 0.0f;
+    Vector2 offset{0,0};
     if (!((spare > 0 && totalFlex.growth > 0) || (spare < 0 && totalFlex.shrink > 0))){
         switch (layoutSpec.align)
         {
         case Alignment::Center:{
-            offset = spare / 2; break;
+            offset.*mainAxis = spare / 2; break;
         }
         case Alignment::End:{
-            offset = spare; break;
+            offset.*mainAxis = spare; break;
         }
         default: break;
         }
     }
 
-    innerPos.*mainAxis += offset;
+    innerPos.*mainAxis += offset.*mainAxis;
+    
+    float spacing = layoutSpec.spacing;
+
+    if (layoutSpec.justifyContent == JustifyContent::SpaceEvenly){    
+        if (sizes.size() > 1)
+        {
+            float total = std::accumulate(sizes.begin(),sizes.end(),0.0f,
+            [mainAxis](float a, const Vector2& v){return a + v.*mainAxis;});
+
+            float occupied = total + layoutSpec.spacing * (sizes.size() - 1);
+            float missed = innerDim.*mainAxis - occupied;
+            missed = std::max(0.0f, missed);
+            
+            spacing += missed / (sizes.size() - 1);
+        }
+    }
+
     for (size_t i = 0; i < children.size(); ++i) {
         auto finalSize = sizes[i];
+
+        switch (layoutSpec.crossAlign)
+        {
+        case Alignment::Beginning: innerPos.*crossAxis = innerPosStart.*crossAxis; break;
+        case Alignment::Center: innerPos.*crossAxis = (innerPosStart + (innerDim - finalSize)/2).*crossAxis; break;
+        case Alignment::End: innerPos.*crossAxis = (innerPosStart + (innerDim - finalSize)).*crossAxis; break;
+        default: break;
+        }
+
         Rectangle r = rect(innerPos, finalSize);
         children[i]->OnArrange(r);
-        innerPos.*mainAxis += finalSize.*mainAxis + layoutSpec.spacing;
+        innerPos.*mainAxis += finalSize.*mainAxis + spacing;
     } 
 }
 
@@ -144,7 +177,7 @@ void VerticalLayout::MeasureContent(Vector2 available)
 
 void VerticalLayout::ArrangeContent(Rectangle actualRect)
 {
-    ArrangeAxialLayout(actualRect, &Vector2::y);
+    ArrangeAxialLayout(actualRect, &Vector2::y,&Vector2::x);
 }
 
 
@@ -155,12 +188,12 @@ void HorizontalLayout::MeasureContent(Vector2 available)
 
 void HorizontalLayout::ArrangeContent(Rectangle actualRect)
 {
-    ArrangeAxialLayout(actualRect, &Vector2::x);
+    ArrangeAxialLayout(actualRect, &Vector2::x, &Vector2::y);
 }
 
 
 void Stack::MeasureContent(Vector2 available){
-    contentSize = available;
+    contentDesiredSize = available;
     for (auto&child: children){
         child->OnMeasure(available);
     }

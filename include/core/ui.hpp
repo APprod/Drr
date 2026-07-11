@@ -33,7 +33,6 @@ struct UIComponentSpec {
     FillMode fillMode = FillMode::ByTargetSize;
     Padding padding{};
     Flex flex{0,0};
-    Flex crossFlex{0,1}; // only shrinks
     Vector2 minSize{0,0};
     Vector2 maxSize{std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
 
@@ -75,8 +74,8 @@ public:
         };
         MeasureContent(innerAvailable);
         desiredSize = {
-            contentSize.x + horPad,
-            contentSize.y + vertPad
+            contentDesiredSize.x + horPad,
+            contentDesiredSize.y + vertPad
         };
         switch (compSpec.fillMode) {
             case FillMode::FillMaxWidth: desiredSize.x = available.x; break;
@@ -86,7 +85,7 @@ public:
         }
     }
     virtual void MeasureContent(Vector2 available) {
-        contentSize = {
+        contentDesiredSize = {
             std::min(available.x, targetSize.x),
             std::min(available.y, targetSize.y)
         };
@@ -108,7 +107,7 @@ protected:
     UIComponentSpec compSpec;
     Rectangle actual; //Result after arrange - all available, actual location
     Vector2 desiredSize{0,0}; //What gets after its measured
-    Vector2 contentSize{0,0}; //Result of OnMeasure Size of all the contents, excluding padding
+    Vector2 contentDesiredSize{0,0}; //Result of OnMeasure Size of all the contents, excluding padding
     Vector2 targetSize{10,10}; //Target size in case Ui element uses it, may replaced by min/max size
     bool active = true; //for those wich should be skipped as Layer
 
@@ -134,11 +133,16 @@ enum class JustifyContent{
     None,
 };
 
+
 struct LayoutSpec{
     Alignment align;
+    Alignment crossAlign{Alignment::Center};
     JustifyContent justifyContent{JustifyContent::None};
     int spacing = 5; //places chids with specified spacing
-    LayoutSpec& Alignment(Alignment a) { align = a; return *this; }
+    bool crossShrink = true;
+    LayoutSpec& SetAlign(Alignment a) { align = a; return *this; }
+    LayoutSpec& CrossAlign(Alignment a) { crossAlign = a; return *this; }
+    LayoutSpec& CrossShrink(bool a) { crossShrink = a; return *this; }
     LayoutSpec& JustifyContent(JustifyContent j) { justifyContent = j; return *this; }
     LayoutSpec& Spacing(int s) { spacing = s; return *this; }
 };
@@ -167,9 +171,9 @@ protected:
 
     using Axis = float Vector2::*;
     void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis);
-    void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis);
+    void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis, Axis crossAxis);
 
-    std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, float& spare, Flex& totalFlex);
+    std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, Axis crossAxis, float& spare, Flex& totalFlex);
 };
 
 class VerticalLayout: public Layout{

@@ -276,16 +276,28 @@ EventResult Button::OnEvent(const MyEvent& event){
             }
         }
         if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && !btn.pressed){
-            if (HitTest(btn.pos)){
-                m_onClick();
+            if (m_hold){
+                if (HitTest(btn.pos)){
+                    m_onClick();
+                }
+                m_hold = false;   
+                return EventResult::ReleaseCapture; // always release if held
             }
-            m_hold = false;
-            return EventResult::ReleaseCapture;
+            
         }
     }
-    if (std::holds_alternative<CursorMoveEvent>(event)){
+    else if (std::holds_alternative<CursorMoveEvent>(event)){
         CursorMoveEvent move = std::get<CursorMoveEvent>(event);
         m_hover = HitTest(move.pos);
+    }
+    else if (std::holds_alternative<ScreenInterEvent>(event)){
+        ScreenInterEvent inter = std::get<ScreenInterEvent>(event);
+        if (inter.action == ScreenInteraction::EXIT){
+            m_hover = false;
+        }
+        else if (inter.action == ScreenInteraction::ENTER){
+            m_hover = false;
+        }
     }
     return EventResult::NotHandled;
 }

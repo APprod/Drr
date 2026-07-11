@@ -96,7 +96,7 @@ public:
         ArrangeContent(inner);
     }
     virtual void ArrangeContent(Rectangle ) {}
-    virtual bool HitTest(Vector2 point) const {return CheckCollisionPointRec(point, actual);}
+    virtual bool HitTest(Vector2 point) const {return CheckCollisionPointRec(point, actual) && CheckCollisionPointRec(point, {0,0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())});}
     virtual UIComponent* FindTarget(Vector2 point);
     virtual EventMask getCaptureTypes() const {return 0;}
 

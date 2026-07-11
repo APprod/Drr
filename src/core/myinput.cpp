@@ -23,6 +23,18 @@ std::vector<MyEvent> MyInput::pollEvents(){
             if (IsMouseButtonReleased(btn))
                 m_events.push_back(CursorActionEvent{pos, btn, false});
         }   
+        if (cursorOnScreen){
+            if (!IsCursorOnScreen()){
+                cursorOnScreen = false;
+                m_events.push_back(ScreenInterEvent{.action = ScreenInteraction::EXIT});
+            };
+        }else{
+            if (IsCursorOnScreen()){
+                cursorOnScreen = true;
+                m_events.push_back(ScreenInterEvent{.pos = pos, .action = ScreenInteraction::ENTER});
+            };
+        }
+        
     }
     return m_events;
 }

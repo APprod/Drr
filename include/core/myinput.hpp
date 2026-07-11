@@ -14,5 +14,6 @@ public:
     std::vector<MyEvent> getEvents(){return m_events;}
 private:
     std::vector<MyEvent> m_events;
+    bool cursorOnScreen = true;
 };
 

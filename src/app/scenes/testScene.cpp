@@ -9,7 +9,7 @@ void TestScene::OnEnter(){
     auto column= std::make_unique<VerticalLayout>(UIComponentSpec{},LayoutSpec{Alignment::End});
     for(int i = 0; i < 1; i++){
         auto row = std::make_unique<HorizontalLayout>(
-                    UICSpec{}.FillMaxWidth().Padding({.left = 50, .right = 50}),
+                    UICSpec{}.FillMaxWidth().SetPaddingPct({.left = 5, .right = 5}),
                     LayoutSpec{}.AlignCenter().CrossCenter().JustifyEvenly()
                 );
         for(int j = 0; j < 5; j++){
@@ -17,8 +17,8 @@ void TestScene::OnEnter(){
                 Button("Test",
                     [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
                     "button_default",{(float)300,(float)200}, 
-                    UICSpec().SetFlex({.growth = 0, .shrink = 1})
-                    .MinSize({100,50}))
+                    UICSpec().SetFlex({.growth = 1, .shrink = 1})
+                    .MinSize({5,50}))
             );
         }
         column->AddChild(std::move(row));    

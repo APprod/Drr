@@ -17,6 +17,14 @@ struct Padding
     int right = 0;
 };
 
+struct PaddingPct
+{
+    float top = 0.0f;
+    float bottom = 0.0f;
+    float left = 0.0f;
+    float right = 0.0f;
+};
+
 enum class FillMode {
     FillMaxWidth,
     FillMaxHeight,
@@ -32,6 +40,7 @@ struct Flex{
 struct UIComponentSpec {
     FillMode fillMode = FillMode::ByTargetSize;
     Padding padding{};
+    PaddingPct paddingPct{};
     Flex flex{0,0};
     Vector2 minSize{0,0};
     Vector2 maxSize{std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
@@ -44,7 +53,10 @@ struct UIComponentSpec {
     UIComponentSpec& FillMaxHeight(){fillMode = FillMode::FillMaxHeight; return *this;}
     UIComponentSpec& FillMaxSize(){fillMode = FillMode::FillMaxSize; return *this;}
     UIComponentSpec& FillTargetSize(){fillMode = FillMode::ByTargetSize; return *this;}
-    UIComponentSpec& Padding(Padding p){padding = p; return *this;}
+    UIComponentSpec& SetPadding(Padding p){padding = p; return *this;}
+    UIComponentSpec& SetPaddingPct(PaddingPct p){paddingPct = p; return *this;}
+
+    Padding ResolvePadding(Vector2 dims) const;
 };
 using UICSpec = UIComponentSpec;
 
@@ -66,8 +78,9 @@ public:
     virtual void OnDraw(){}
 
     virtual void OnMeasure(Vector2 available) final{
-        auto vertPad = compSpec.padding.top + compSpec.padding.bottom;
-        auto horPad = compSpec.padding.left + compSpec.padding.right;
+        auto pad = compSpec.ResolvePadding(available);
+        auto vertPad = pad.top + pad.bottom;
+        auto horPad = pad.left + pad.right;
         Vector2 innerAvailable{
             std::max(0.0f, available.x - horPad),
             std::max(0.0f, available.y - vertPad)
@@ -112,10 +125,11 @@ protected:
     bool active = true; //for those wich should be skipped as Layer
 
     Rectangle GetDrawRect() const{
+        auto pad = compSpec.ResolvePadding({actual.width, actual.height});
         return {
-            actual.x + compSpec.padding.left, actual.y + compSpec.padding.top,
-            actual.width - compSpec.padding.left - compSpec.padding.right,
-            actual.height - compSpec.padding.top - compSpec.padding.bottom,
+            actual.x + pad.left, actual.y + pad.top,
+            actual.width - pad.left - pad.right,
+            actual.height - pad.top - pad.bottom,
         };
     }
 

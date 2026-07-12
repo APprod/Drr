@@ -352,8 +352,9 @@ Button::Button(
     std::function<void()> onClick,
     std::string textureName,
     Vector2 targetSize,
-    UIComponentSpec spec
-): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName} {
+    UIComponentSpec spec,
+    float fontSize
+): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName}, m_fontSize{fontSize} {
     this->targetSize = targetSize;
 }
 
@@ -361,11 +362,12 @@ void Button::OnDrawContent(){
     auto& manager = GetServices().recManager;
     auto texture = manager.getTexture(m_textureName);
     auto target = GetDrawRect();
-    ::DrawTexturePro(texture,rect(texture), target,{0,0},0.f,RAYWHITE);
-    ::DrawText(m_text.c_str(),
-                 static_cast<int>(target.x + 5),
-                 static_cast<int>(target.y + target.height / 2 - 10),
-                 20, BLACK);                   
+    ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
+
+    int textWidth = ::MeasureText(m_text.c_str(), static_cast<int>(m_fontSize));
+    int textX = static_cast<int>(target.x) + (static_cast<int>(target.width) - textWidth) / 2;
+    int textY = static_cast<int>(target.y) + (static_cast<int>(target.height) - static_cast<int>(m_fontSize)) / 2;
+    ::DrawText(m_text.c_str(), textX, textY, static_cast<int>(m_fontSize), BLACK);
     if (m_hover && !m_hold){
         ::DrawRectanglePro(target,{0,0},0.f,{255,255,255,50});
     }

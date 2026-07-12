@@ -141,9 +141,19 @@ struct LayoutSpec{
     int spacing = 5; //places chids with specified spacing
     bool crossShrink = true;
     LayoutSpec& SetAlign(Alignment a) { align = a; return *this; }
+    LayoutSpec& AlignBegin() { align = Alignment::Beginning; return *this; }
+    LayoutSpec& AlignCenter() { align = Alignment::Center; return *this; }
+    LayoutSpec& AlignEnd() { align = Alignment::End; return *this; }
     LayoutSpec& CrossAlign(Alignment a) { crossAlign = a; return *this; }
+    LayoutSpec& CrossBegin() { crossAlign = Alignment::Beginning; return *this; }
+    LayoutSpec& CrossCenter() { crossAlign = Alignment::Center; return *this; }
+    LayoutSpec& CrossEnd() { crossAlign = Alignment::End; return *this; }
     LayoutSpec& CrossShrink(bool a) { crossShrink = a; return *this; }
+    LayoutSpec& ShrinkOn() { crossShrink = true; return *this; }
+    LayoutSpec& ShrinkOff() { crossShrink = false; return *this; }
     LayoutSpec& JustifyContent(JustifyContent j) { justifyContent = j; return *this; }
+    LayoutSpec& JustifyEvenly() { justifyContent = JustifyContent::SpaceEvenly; return *this; }
+    LayoutSpec& JustifyNone() { justifyContent = JustifyContent::None; return *this; }
     LayoutSpec& Spacing(int s) { spacing = s; return *this; }
 };
 

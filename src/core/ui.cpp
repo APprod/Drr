@@ -405,20 +405,32 @@ void Button::OnUpdate(){
 
 Label::Label(
     std::string text,
-    Vector2 targetSize,
-    UIComponentSpec spec
-): UIComponent{spec}, m_text{text}{
-    this->targetSize = targetSize;
+    UIComponentSpec spec,
+    std::string fontName,
+    float fontSize,
+    float fontSpacing,
+    Color color
+): UIComponent{spec}, m_text{text},
+   m_fontName{fontName}, m_fontSize{fontSize},
+   m_fontSpacing{fontSpacing}, m_color{color} {}
+
+void Label::SetText(std::string text){
+    m_text = std::move(text);
 }
 
-//TODO proper functionality
-void Label::OnUpdate(){
-    auto font = GetServices().recManager.getFont("default");
-    this->targetSize = ::MeasureTextEx(font, m_text.c_str(),32, 2);
+void Label::OnUpdate(){}
+
+void Label::MeasureContent(Vector2 available){
+    auto font = GetServices().recManager.getFont(m_fontName);
+    Vector2 textSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
+    contentDesiredSize = {
+        std::min(available.x, textSize.x),
+        std::min(available.y, textSize.y)
+    };
 }
 
 void Label::OnDrawContent(){
-    auto font = GetServices().recManager.getFont("default");
+    auto font = GetServices().recManager.getFont(m_fontName);
     auto rect = GetDrawRect();
-    ::DrawTextEx(font, m_text.c_str(),{rect.x,rect.y},32,2,RAYWHITE);
+    ::DrawTextEx(font, m_text.c_str(), {rect.x, rect.y}, m_fontSize, m_fontSpacing, m_color);
 }

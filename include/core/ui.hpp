@@ -278,11 +278,20 @@ class Label: public UIComponent{
 public:
     Label(
         std::string text,
-        Vector2 targetSize,
-        UIComponentSpec spec = {}
+        UIComponentSpec spec = {},
+        std::string fontName = "default",
+        float fontSize = 32,
+        float fontSpacing = 2,
+        Color color = RAYWHITE
     );
+    void SetText(std::string text);
     void OnUpdate() override;
+    void MeasureContent(Vector2 available) override;
     void OnDrawContent() override;
-protected: 
+protected:
     std::string m_text;
+    std::string m_fontName;
+    float m_fontSize;
+    float m_fontSpacing;
+    Color m_color;
 };

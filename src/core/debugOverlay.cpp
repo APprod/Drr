@@ -9,19 +9,18 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         UICSpec{}.SetPaddingPct({1,1,1,1}),
         LayoutSpec{}.AlignBegin().CrossBegin());
     column->Add(
-        FPSDraw("",{10,10},{}),
-        CursorTrack("", {10,10})
+        FPSDraw(""),
+        CursorTrack("")
     );
     AddChild(std::move(column));
 }
 
 
 void FPSDraw::OnUpdate(){
-    if (GetServices().runtimeCfg.showFPS){
-        m_text = std::to_string(GetFPS()) + " FPS";
-    }else{
-        m_text = "";
-    }
+    if (GetServices().runtimeCfg.showFPS)
+        SetText(std::to_string(GetFPS()) + " FPS");
+    else
+        SetText("");
     Label::OnUpdate();
 }
 
@@ -35,10 +34,9 @@ EventResult CursorTrack::OnEvent(const MyEvent& event){
 
 
 void CursorTrack::OnUpdate(){
-    if (GetServices().runtimeCfg.showCursorPos){
-        m_text = toString(m_pos);
-    }else{
-        m_text = "";
-    }
+    if (GetServices().runtimeCfg.showCursorPos)
+        SetText(toString(m_pos));
+    else
+        SetText("");
     Label::OnUpdate();
 }

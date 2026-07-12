@@ -80,39 +80,76 @@ void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis
     }
 }
 
+
+void Layout::ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
+    float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance){
+        
+    std::vector<bool> frozen(children.size());
+    for (size_t i = 0; i < children.size(); ++i)
+        frozen[i] = children[i]->Spec().flex.*flexField == 0;
+
+    while ((spare > 0 && spare > tolerance) || (spare < 0 && spare < -tolerance))
+    {
+        float total = 0;
+        for (size_t i = 0; i < children.size(); ++i)
+            if (!frozen[i]) total += children[i]->Spec().flex.*flexField;
+        if (total == 0) break;
+
+        bool changed = false;
+        for (size_t i = 0; i < children.size(); ++i)
+        {
+            if (frozen[i]) continue;
+            sizes[i].*mainAxis += spare * children[i]->Spec().flex.*flexField / total;
+
+            float limit = (children[i]->Spec().*limitField).*mainAxis;
+            if ((spare > 0 && sizes[i].*mainAxis >= limit) ||
+                (spare < 0 && sizes[i].*mainAxis <= limit))
+            {
+                sizes[i].*mainAxis = limit;
+                frozen[i] = true;
+            }
+            changed = true;
+        }
+
+        float used = layoutSpec.spacing * std::max<int>(0, children.size() - 1);
+        for (auto& s : sizes) used += s.*mainAxis;
+        spare = innerDim.*mainAxis - used;
+        if (!changed) break;
+    }
+}
+
+
 std::vector<Vector2> Layout::CalculateFlex(Vector2 innerDim, Axis mainAxis, Axis crossAxis, float& spare, Flex& totalFlex){
     std::vector<Vector2> res; res.reserve(children.size());
-    //Calculate total desired size
+
     float totalDesiredSize{0};
-    {
-        for (auto& child : children) {
-            totalDesiredSize += child->DesiredSize().*mainAxis + layoutSpec.spacing;
-            totalFlex.growth += child->Spec().flex.growth;
-            totalFlex.shrink += child->Spec().flex.shrink;
-        }
-        if (!children.empty()) totalDesiredSize -= layoutSpec.spacing; //compensate for the extra one
+    for (auto& child : children) {
+        totalDesiredSize += child->DesiredSize().*mainAxis + layoutSpec.spacing;
+        totalFlex.growth += child->Spec().flex.growth;
+        totalFlex.shrink += child->Spec().flex.shrink;
     }
+    if (!children.empty())
+        totalDesiredSize -= layoutSpec.spacing;
 
     spare = innerDim.*mainAxis - totalDesiredSize;
 
-    for (auto& child : children) {
-        auto finalSize = child->DesiredSize();
-        auto childFlex = child->Spec().flex;
-        if (spare > 0 && childFlex.growth > 0 && totalFlex.growth > 0){
-            finalSize.*mainAxis += spare * childFlex.growth / totalFlex.growth;
-        }
-        else if (spare < 0 && childFlex.shrink > 0 && totalFlex.shrink > 0){
-            finalSize.*mainAxis += spare * childFlex.shrink / totalFlex.shrink;
-        }
-        if (layoutSpec.crossShrink){
-            finalSize.*crossAxis = std::min(finalSize.*crossAxis, innerDim.*crossAxis);
-        }
-        finalSize.y = std::min(finalSize.y, child->Spec().maxSize.y);
-        finalSize.y = std::max(finalSize.y, child->Spec().minSize.y);
-        finalSize.x = std::min(finalSize.x, child->Spec().maxSize.x);
-        finalSize.x = std::max(finalSize.x, child->Spec().minSize.x);
-        res.push_back(finalSize);
-    } 
+    for (auto& child : children)
+        res.push_back(child->DesiredSize());
+
+    if (spare > 0.01f)
+        ResolveFlex(res, innerDim, mainAxis, spare, &Flex::growth, &UIComponentSpec::maxSize, 0.01f);
+    else if (spare < -0.01f)
+        ResolveFlex(res, innerDim, mainAxis, spare, &Flex::shrink, &UIComponentSpec::minSize, 0.01f);
+
+    for (size_t i = 0; i < children.size(); ++i){
+        if (layoutSpec.crossShrink)
+            res[i].*crossAxis = std::min(res[i].*crossAxis, innerDim.*crossAxis);
+
+        res[i].x = std::clamp(res[i].x,
+            children[i]->Spec().minSize.x, children[i]->Spec().maxSize.x);
+        res[i].y = std::clamp(res[i].y,
+            children[i]->Spec().minSize.y, children[i]->Spec().maxSize.y);
+    }
     return res;
 }
 
@@ -125,8 +162,6 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
     float spare{0};
     Flex totalFlex{0,0};
     auto sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare, totalFlex);
-    
-    
     
     float spacing = layoutSpec.spacing;
 
@@ -144,7 +179,7 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         }
     }else if (layoutSpec.justifyContent == JustifyContent::None){
         Vector2 offset{0,0};
-        if (!((spare > 0 && totalFlex.growth > 0) || (spare < 0 && totalFlex.shrink > 0))){
+        if (std::abs(spare) > 0.01f){
             switch (layoutSpec.align)
             {
             case Alignment::Center:{

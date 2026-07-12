@@ -202,6 +202,10 @@ protected:
     void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis, Axis crossAxis);
 
     std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, Axis crossAxis, float& spare, Flex& totalFlex);
+    void ResolveGrowth(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare);
+    void ResolveShrink(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare);
+    void ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
+        float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance);
 };
 
 class VerticalLayout: public Layout{

@@ -110,6 +110,8 @@ public:
     }
     virtual void ArrangeContent(Rectangle ) {}
     virtual bool HitTest(Vector2 point) const {return CheckCollisionPointRec(point, actual) && CheckCollisionPointRec(point, {0,0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())});}
+    virtual void OnHoverEnter(){}
+    virtual void OnHoverExit(){}
     virtual UIComponent* FindTarget(Vector2 point);
     virtual EventMask getCaptureTypes() const {return 0;}
 
@@ -224,9 +226,13 @@ class Root: public Stack{
 public:
     using Stack::Stack;
     virtual EventResult OnEvent(const MyEvent& event) override;
+    void UpdateHover();
+    std::optional<EventResult> CheckCaptured(const MyEvent& event);
     Vector2 getPos(const MyEvent& event);
 private:
+    Vector2 m_cursorPos{};
     UIComponent* m_captured = nullptr;
+    UIComponent* m_hovered = nullptr;
 };
 
 class Button: public UIComponent{
@@ -241,7 +247,9 @@ public:
     void OnUpdate() override;
     void OnDraw() override;
     EventResult OnEvent(const MyEvent& event) override;
-    virtual EventMask getCaptureTypes() const override {return EventType::CursorAction | EventType::CursorMove;}
+    void OnHoverEnter() override;
+    void OnHoverExit() override;
+    virtual EventMask getCaptureTypes() const override {return EventType::CursorAction;}
 protected: 
     bool m_hold = false;
     bool m_hover = false;

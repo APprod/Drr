@@ -55,7 +55,6 @@ UIComponent* Layout::FindTarget(Vector2 point){
 }
 
 EventResult Layout::OnEvent(const MyEvent& event){
-    // bool hitTestedEvent = std::holds_alternative<CursorActionEvent>(event);
     for (auto it = children.rbegin(); it != children.rend(); ++it){
         auto& child = (*it);
         EventResult result = child->OnEvent(event);
@@ -224,28 +223,80 @@ Vector2 Root::getPos(const MyEvent& event){
     return res;
 }
 
+void Root::UpdateHover()
+{
+    UIComponent* newHovered = nullptr;
+
+    if (m_captured){
+        if (m_captured->HitTest(m_cursorPos))
+            newHovered = m_captured;
+    }
+    else{
+        newHovered = FindTarget(m_cursorPos);
+    }
+
+    if (newHovered == m_hovered)
+        return;
+    if (m_hovered)
+        m_hovered->OnHoverExit();
+
+    m_hovered = newHovered;
+    if (m_hovered)
+        m_hovered->OnHoverEnter();
+}
+
+std::optional<EventResult> Root::CheckCaptured(const MyEvent& event){
+    if (!m_captured)
+        return std::nullopt;
+    if (!(m_captured->getCaptureTypes() & getEventType(event)))
+        return std::nullopt;
+
+    EventResult result = m_captured->OnEvent(event);
+    if (result == EventResult::ReleaseCapture)
+    {
+        m_captured = nullptr;
+        UpdateHover();
+    }
+    return result;
+}
+
 EventResult Root::OnEvent(const MyEvent& event){
     PerfTester tester = GetServices().perfLog.log("Root::OnEvent");
-    if (m_captured){
-        EventMask mask = m_captured->getCaptureTypes();
-        if (mask & getEventType(event)){
-            EventResult result = m_captured->OnEvent(event);
-            if (result == EventResult::ReleaseCapture){
-                m_captured = nullptr;
-            }
-            return result;
-        }
+
+    if (auto* move = std::get_if<CursorMoveEvent>(&event))
+    {
+        m_cursorPos = move->pos;
+        if (auto r = CheckCaptured(event))
+            return *r;
+        Layout::OnEvent(event);
+        UpdateHover();
+        return EventResult::Handled;
     }
-    { //normal execution
+
+    if (auto* screen = std::get_if<ScreenInterEvent>(&event))
+    {
+        if (screen->action == ScreenInteraction::EXIT)
+        {
+            if (m_hovered)
+            {
+                m_hovered->OnHoverExit();
+                m_hovered = nullptr;
+            }
+        }
+
+        return EventResult::Handled;
+    }
+    { 
+        if (auto r = CheckCaptured(event)) return *r;
         EventResult result = Layout::OnEvent(event);
-        if (result == EventResult::RequireCapture){
-            Vector2 target = getPos(event);
-            m_captured = FindTarget(target);
+        if (result == EventResult::RequireCapture)
+        {
+            m_captured = FindTarget(getPos(event));
+            UpdateHover();
         }
         return result;
     }
 }
-
 
 Button::Button(
     std::string text,
@@ -296,23 +347,17 @@ EventResult Button::OnEvent(const MyEvent& event){
             
         }
     }
-    else if (std::holds_alternative<CursorMoveEvent>(event)){
-        CursorMoveEvent move = std::get<CursorMoveEvent>(event);
-        m_hover = HitTest(move.pos);
-        if (m_hover){
-            return EventResult::Handled;
-        }
-    }
-    else if (std::holds_alternative<ScreenInterEvent>(event)){
-        ScreenInterEvent inter = std::get<ScreenInterEvent>(event);
-        if (inter.action == ScreenInteraction::EXIT){
-            m_hover = false;
-        }
-        else if (inter.action == ScreenInteraction::ENTER){
-            m_hover = false;
-        }
-    }
     return EventResult::NotHandled;
+}
+
+void Button::OnHoverEnter()
+{
+    m_hover = true;
+}
+
+void Button::OnHoverExit()
+{
+    m_hover = false;
 }
 
 void Button::OnUpdate(){

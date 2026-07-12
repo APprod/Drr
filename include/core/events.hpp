@@ -16,6 +16,7 @@ struct ScreenInterEvent{
     Vector2 pos{0,0};
     ScreenInteraction action;
 };
+
 using CursorAction = MouseButton; // temporary
 struct CursorActionEvent{
     Vector2 pos{};
@@ -32,7 +33,8 @@ struct ActionEvent{
     bool pressed{};
 };
 
-using MyEvent = std::variant<CursorActionEvent, CursorMoveEvent, InputKeyEvent, ActionEvent, ScreenInterEvent>;
+using MyEvent = std::variant<CursorActionEvent, CursorMoveEvent, InputKeyEvent,
+    ActionEvent, ScreenInterEvent>;
 using EventMask = uint32_t;
 
 namespace EventType{
@@ -41,15 +43,15 @@ enum EventType : uint32_t {
     CursorAction = BIT(1),
     InputKey     = BIT(2),
     Action       = BIT(3),
-    ScreenInter = BIT(4),
+    ScreenInter  = BIT(4),
 };
 }
 
 inline constexpr EventMask getEventType(const MyEvent& e){
     if (std::holds_alternative<CursorMoveEvent>(e))   return EventType::CursorMove;
-    if (std::holds_alternative<CursorActionEvent>(e)) return EventType::CursorAction;
-    if (std::holds_alternative<InputKeyEvent>(e))     return EventType::InputKey;
-    if (std::holds_alternative<ActionEvent>(e))       return EventType::Action;
-    if (std::holds_alternative<ScreenInterEvent>(e)) return EventType::ScreenInter;
+    else if (std::holds_alternative<CursorActionEvent>(e)) return EventType::CursorAction;
+    else if (std::holds_alternative<InputKeyEvent>(e))     return EventType::InputKey;
+    else if (std::holds_alternative<ActionEvent>(e))       return EventType::Action;
+    else if (std::holds_alternative<ScreenInterEvent>(e)) return EventType::ScreenInter;
     return 0;
 }

@@ -30,21 +30,25 @@ void Layout::AddChild(std::unique_ptr<UIComponent>&& child)
     children.push_back(std::move(child));
 }
 
-void Layout::OnDraw()
+void Layout::OnDrawContent()
 {
-    for(auto& child : children)
+    for(auto& child : children){
+        if (!child->visible) continue;
         child->OnDraw();
+    }
 }
 
 void Layout::OnUpdate()
 {
-    for(auto& child : children)
+    for(auto& child : children){
         child->OnUpdate();
+    }
 }
 
 UIComponent* Layout::FindTarget(Vector2 point){
     for (auto it = children.rbegin(); it != children.rend(); ++it){
         auto& child = (*it);
+        if (!child->interactive) continue;
         UIComponent* comp = child->FindTarget(point);
         if (comp){ //we found it
             return comp;
@@ -343,7 +347,7 @@ Button::Button(
     this->targetSize = targetSize;
 }
 
-void Button::OnDraw(){
+void Button::OnDrawContent(){
     auto& manager = GetServices().recManager;
     auto texture = manager.getTexture(m_textureName);
     auto target = GetDrawRect();
@@ -396,4 +400,25 @@ void Button::OnHoverExit()
 }
 
 void Button::OnUpdate(){
+}
+
+
+Label::Label(
+    std::string text,
+    Vector2 targetSize,
+    UIComponentSpec spec
+): UIComponent{spec}, m_text{text}{
+    this->targetSize = targetSize;
+}
+
+//TODO proper functionality
+void Label::OnUpdate(){
+    auto font = GetServices().recManager.getFont("default");
+    this->targetSize = ::MeasureTextEx(font, m_text.c_str(),32, 2);
+}
+
+void Label::OnDrawContent(){
+    auto font = GetServices().recManager.getFont("default");
+    auto rect = GetDrawRect();
+    ::DrawTextEx(font, m_text.c_str(),{rect.x,rect.y},32,2,RAYWHITE);
 }

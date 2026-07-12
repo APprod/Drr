@@ -6,7 +6,7 @@ TestComp::TestComp(Vector2 targetSize)
 }
 void TestComp::OnUpdate() {}
 
-void TestComp::OnDraw()
+void TestComp::OnDrawContent()
 {
     ::DrawRectangleRec(actual, RAYWHITE);
 }

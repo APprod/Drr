@@ -86,7 +86,6 @@ public:
         BeginDrawing();
         ClearBackground(BLACK);
         OnDrawContent();
-        DrawFPS(20, 20);
         EndDrawing();
     };
     void OnUpdate() override {

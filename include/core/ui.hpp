@@ -7,6 +7,7 @@
 #include <numeric>
 #include "raylib.h"
 #include "core/events.hpp"
+#include "core/structs.hpp"
 
 
 struct Padding
@@ -75,7 +76,17 @@ public:
 
     virtual void OnUpdate(){} //potentionally if we want to update status based on dynamic value
     virtual EventResult OnEvent(const MyEvent& ){ return EventResult::NotHandled;} 
-    virtual void OnDraw(){}
+    virtual void OnDraw() final{
+        OnDrawContent();
+        if (GetServices().runtimeCfg.showLayoutContentBounds){
+            auto rec = GetDrawRect();
+            DrawRectangleLinesEx(rec,2,RED);
+        }
+        if (GetServices().runtimeCfg.showLayoutBounds){
+            DrawRectangleLinesEx(actual,2,RAYWHITE);
+        }
+    }
+    virtual void OnDrawContent(){}
 
     virtual void OnMeasure(Vector2 available) final{
         auto pad = compSpec.ResolvePadding(available);
@@ -119,14 +130,15 @@ public:
 
     Vector2 DesiredSize(){return desiredSize;}
     Rectangle FinalRect(){return actual;}
-    
+    bool interactive = true; //for those who want to recieve events
+    bool visible = true; //for those wich should be skipped as Layer
 protected:
     UIComponentSpec compSpec;
     Rectangle actual; //Result after arrange - all available, actual location
     Vector2 desiredSize{0,0}; //What gets after its measured
     Vector2 contentDesiredSize{0,0}; //Result of OnMeasure Size of all the contents, excluding padding
     Vector2 targetSize{10,10}; //Target size in case Ui element uses it, may replaced by min/max size
-    bool active = true; //for those wich should be skipped as Layer
+
 
     Rectangle GetDrawRect() const{
         auto pad = compSpec.ResolvePadding({actual.width, actual.height});
@@ -182,13 +194,13 @@ public:
     Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base);
     virtual ~Layout() = default;
     
-    template<typename T>
-    Layout& Add(T&& child) {
-        AddChild(std::make_unique<std::decay_t<T>>(std::forward<T>(child)));
+    template<typename... Ts>
+    Layout& Add(Ts&&... children) {
+        (AddChild(std::make_unique<std::decay_t<Ts>>(std::forward<Ts>(children))), ...);
         return *this;
     }
     void AddChild(std::unique_ptr<UIComponent>&& child);
-    void OnDraw() override;
+    void OnDrawContent() override;
     void OnUpdate() override;
     EventResult OnEvent(const MyEvent& event) override;
     const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return children;}
@@ -202,8 +214,6 @@ protected:
     void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis, Axis crossAxis);
 
     std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, Axis crossAxis, float& spare, Flex& totalFlex);
-    void ResolveGrowth(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare);
-    void ResolveShrink(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare);
     void ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
         float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance);
 };
@@ -251,7 +261,7 @@ public:
         UIComponentSpec spec = {}
     );
     void OnUpdate() override;
-    void OnDraw() override;
+    void OnDrawContent() override;
     EventResult OnEvent(const MyEvent& event) override;
     void OnHoverEnter() override;
     void OnHoverExit() override;
@@ -262,4 +272,17 @@ protected:
     std::string m_text;
     std::function<void()> m_onClick;
     std::string m_textureName;
+};
+
+class Label: public UIComponent{
+public:
+    Label(
+        std::string text,
+        Vector2 targetSize,
+        UIComponentSpec spec = {}
+    );
+    void OnUpdate() override;
+    void OnDrawContent() override;
+protected: 
+    std::string m_text;
 };

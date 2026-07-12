@@ -5,7 +5,7 @@ class TestComp: public UIComponent{
 public:
     TestComp(Vector2 targetSize);
     void OnUpdate() override;
-    void OnDraw() override;
+    void OnDrawContent() override;
     void MeasureContent(Vector2 available) override;
     void ArrangeContent(Rectangle actualRect) override;
 };

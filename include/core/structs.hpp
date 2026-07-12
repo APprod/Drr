@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "core/recManager.hpp"
 #include "core/myinput.hpp"
+#include "core/runtimeConfig.hpp"
 
 
 struct Services
@@ -13,6 +14,7 @@ struct Services
     RecourceManager recManager;
     MyInput input;
     PerformanceLog perfLog{20};
+    RuntimeConfig runtimeCfg;
 
     static Services& Get(){
         static Services services;

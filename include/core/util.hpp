@@ -115,8 +115,8 @@ constexpr uint32_t BIT(int v){return 1u << v;}
 
 struct PerfStat{
     std::vector<float> deltas;
-    float average(){return deltas.size() ? (std::accumulate(deltas.begin(), deltas.end(), 0.0) / deltas.size()) : 0 ;}
-    float peak(){return deltas.size() ? (*std::max_element(deltas.begin(), deltas.end())) : 0;}
+    float average() const {return deltas.size() ? (std::accumulate(deltas.begin(), deltas.end(), 0.0) / deltas.size()) : 0 ;}
+    float peak() const {return deltas.size() ? (*std::max_element(deltas.begin(), deltas.end())) : 0;}
 };
 
 class PerfTester
@@ -140,6 +140,7 @@ public:
     PerfTester log(std::string name);
     void update();
     void getData(std::string name, float delta);
+    const std::unordered_map<std::string, PerfStat>& getLogData() const { return m_logData; }
 private:
     float m_logTimeSeconds;
     std::chrono::steady_clock::time_point m_lastLog;

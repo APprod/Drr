@@ -20,9 +20,9 @@ enum class Severity
     FATAL
 };
 
-inline const char* SeverityColor(dbg::Severity s);
+const char* SeverityColor(dbg::Severity s);
 
-inline const char* ToString(Severity s);
+const char* ToString(Severity s);
 
 struct MyMessage
 {

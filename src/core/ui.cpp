@@ -2,6 +2,7 @@
 #include "core/util.hpp"
 #include "core/structs.hpp"
 #include <numeric>
+#include <cmath>
 
 
 // helper type for the visitor
@@ -169,6 +170,11 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
     Flex totalFlex{0,0};
     auto sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare, totalFlex);
     
+    for (auto& s : sizes) {
+        s.*mainAxis = std::round(s.*mainAxis);
+        s.*crossAxis = std::round(s.*crossAxis);
+    }
+
     float spacing = layoutSpec.spacing;
 
     if (layoutSpec.justifyContent == JustifyContent::SpaceEvenly){    
@@ -181,7 +187,8 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
             float missed = innerDim.*mainAxis - occupied;
             missed = std::max(0.0f, missed);
             
-            spacing += missed / (sizes.size() - 1);
+            spacing = layoutSpec.spacing + missed / (sizes.size() - 1);
+            spacing = std::round(spacing);
         }
     }else if (layoutSpec.justifyContent == JustifyContent::None){
         Vector2 offset{0,0};
@@ -189,16 +196,16 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
             switch (layoutSpec.align)
             {
             case Alignment::Center:{
-                offset.*mainAxis = spare / 2; break;
+                offset.*mainAxis = std::round(spare / 2); break;
             }
             case Alignment::End:{
-                offset.*mainAxis = spare; break;
+                offset.*mainAxis = std::round(spare); break;
             }
             default: break;
             }
         }
 
-        innerPos.*mainAxis += offset.*mainAxis;
+        innerPos.*mainAxis = std::round(innerPos.*mainAxis + offset.*mainAxis);
     }
 
     for (size_t i = 0; i < children.size(); ++i) {
@@ -207,14 +214,15 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         switch (layoutSpec.crossAlign)
         {
         case Alignment::Beginning: innerPos.*crossAxis = innerPosStart.*crossAxis; break;
-        case Alignment::Center: innerPos.*crossAxis = (innerPosStart + (innerDim - finalSize)/2).*crossAxis; break;
-        case Alignment::End: innerPos.*crossAxis = (innerPosStart + (innerDim - finalSize)).*crossAxis; break;
+        case Alignment::Center: innerPos.*crossAxis = std::round((innerPosStart + (innerDim - finalSize)/2).*crossAxis); break;
+        case Alignment::End: innerPos.*crossAxis = std::round((innerPosStart + (innerDim - finalSize)).*crossAxis); break;
         default: break;
         }
 
         Rectangle r = rect(innerPos, finalSize);
         children[i]->OnArrange(r);
         innerPos.*mainAxis += finalSize.*mainAxis + spacing;
+        innerPos.*mainAxis = std::round(innerPos.*mainAxis);
     } 
 }
 

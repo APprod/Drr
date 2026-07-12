@@ -1,10 +1,11 @@
 #pragma once
 
 struct RuntimeConfig {
-    bool showFPS{true}; //Yes
-    bool showLayoutBounds{true}; //Yes
-    bool showLayoutContentBounds{true}; //Yes
-    bool showCapture{true}; //No
-    bool showCursorPos{true}; 
+    bool showFPS{true};
+    bool showLayoutBounds{true};
+    bool showLayoutContentBounds{true};
+    bool showCursorPos{true};
     bool showPerformance{true};
+    bool showDebugLog{true};
+    int debugMessagesCount{10};
 };

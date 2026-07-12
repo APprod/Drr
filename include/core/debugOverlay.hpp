@@ -21,3 +21,13 @@ public:
     bool OnUpdate() override;
     Vector2 m_pos{0,0};
 };
+
+class PerformanceDisplay: public Label {
+    using Label::Label;
+    bool OnUpdate() override;
+};
+
+class DebugLogDisplay: public Label {
+    using Label::Label;
+    bool OnUpdate() override;
+};

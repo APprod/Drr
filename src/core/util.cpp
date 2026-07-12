@@ -123,6 +123,10 @@ std::string toString(Vector2 vec)
 {
     return std::to_string(vec.x) + " "+std::to_string(vec.y);
 }
+std::string toString(Ivec2 vec)
+{
+    return std::to_string(vec.x) + " "+std::to_string(vec.y);
+}
 std::string toString(Rectangle vec)
 {
     return std::to_string(vec.x) + " "+std::to_string(vec.y) + "\n"\

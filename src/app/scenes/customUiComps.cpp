@@ -4,7 +4,7 @@ TestComp::TestComp(Vector2 targetSize)
 {
     this->targetSize = targetSize;
 }
-void TestComp::OnUpdate() {}
+bool TestComp::OnUpdate() { return false; }
 
 void TestComp::OnDrawContent()
 {

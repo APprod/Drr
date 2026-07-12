@@ -75,6 +75,7 @@ bool operator==(const Ivec2 &vec1, const Ivec2 &vec2);
 
 Rectangle source(Texture2D &tex);
 std::string toString(Vector2 vec);
+std::string toString(Ivec2 vec);
 std::string toString(Rectangle vec);
 
 template <class K, class V>

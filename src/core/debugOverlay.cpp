@@ -1,5 +1,6 @@
 #include "core/debugOverlay.hpp"
 #include "core/structs.hpp"
+#include <format>
 
 DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
@@ -9,19 +10,19 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         UICSpec{}.SetPaddingPct({1,1,1,1}),
         LayoutSpec{}.AlignBegin().CrossBegin());
     column->Add(
-        FPSDraw(""),
-        CursorTrack("")
+        FPSDraw("", {}, "TNR", 32, 2),
+        CursorTrack("", {}, "TNR", 32, 2)
     );
     AddChild(std::move(column));
 }
 
 
-void FPSDraw::OnUpdate(){
+bool FPSDraw::OnUpdate(){
     if (GetServices().runtimeCfg.showFPS)
         SetText(std::to_string(GetFPS()) + " FPS");
     else
         SetText("");
-    Label::OnUpdate();
+    return Label::OnUpdate();
 }
 
 EventResult CursorTrack::OnEvent(const MyEvent& event){
@@ -33,10 +34,11 @@ EventResult CursorTrack::OnEvent(const MyEvent& event){
 }
 
 
-void CursorTrack::OnUpdate(){
+bool CursorTrack::OnUpdate(){
     if (GetServices().runtimeCfg.showCursorPos)
-        SetText(toString(m_pos));
+        SetText(std::format("Cursor pos: {:04d} {:04d}",
+            static_cast<int>(m_pos.x), static_cast<int>(m_pos.y)));
     else
         SetText("");
-    Label::OnUpdate();
+    return Label::OnUpdate();
 }

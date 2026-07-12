@@ -38,11 +38,13 @@ void Layout::OnDrawContent()
     }
 }
 
-void Layout::OnUpdate()
+bool Layout::OnUpdate()
 {
+    bool dirty = false;
     for(auto& child : children){
-        child->OnUpdate();
+        dirty = child->OnUpdate() || dirty;
     }
+    return dirty;
 }
 
 UIComponent* Layout::FindTarget(Vector2 point){
@@ -399,8 +401,6 @@ void Button::OnHoverExit()
     m_hover = false;
 }
 
-void Button::OnUpdate(){
-}
 
 
 Label::Label(
@@ -412,13 +412,26 @@ Label::Label(
     Color color
 ): UIComponent{spec}, m_text{text},
    m_fontName{fontName}, m_fontSize{fontSize},
-   m_fontSpacing{fontSpacing}, m_color{color} {}
+   m_fontSpacing{fontSpacing}, m_color{color} 
+{
+    auto font = GetServices().recManager.getFont(m_fontName);
+    m_lastMeasuredSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
+}
 
 void Label::SetText(std::string text){
     m_text = std::move(text);
 }
 
-void Label::OnUpdate(){}
+bool Label::OnUpdate()
+{
+    auto font = GetServices().recManager.getFont(m_fontName);
+    Vector2 newSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
+    if (newSize != m_lastMeasuredSize) {
+        m_lastMeasuredSize = newSize;
+        return true;
+    }
+    return false;
+}
 
 void Label::MeasureContent(Vector2 available){
     auto font = GetServices().recManager.getFont(m_fontName);

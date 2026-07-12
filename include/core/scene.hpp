@@ -99,8 +99,8 @@ public:
         for (auto& event: events){
             root.OnEvent(event); //updates states
         }
-        root.OnUpdate(); //updates other data related to UI states
-        if (::IsWindowResized()) { //resize if needed
+        bool needsResize = root.OnUpdate(); //updates other data related to UI states
+        if (needsResize || ::IsWindowResized()) { //resize if needed
             OnResize();
         }
         OnUpdateState(); //updates scene data not UI

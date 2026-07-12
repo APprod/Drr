@@ -11,13 +11,13 @@ public:
 class FPSDraw: public Label{
 public:
     using Label::Label;
-    void OnUpdate() override;
+    bool OnUpdate() override;
 };
 
 class CursorTrack: public Label{
 public:
     using Label::Label;
     virtual EventResult OnEvent(const MyEvent& )override;
-    void OnUpdate() override;
+    bool OnUpdate() override;
     Vector2 m_pos{0,0};
 };

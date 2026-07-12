@@ -74,7 +74,7 @@ public:
         return compSpec;
     }
 
-    virtual void OnUpdate(){} //potentionally if we want to update status based on dynamic value
+    virtual bool OnUpdate(){ return false; } //potentionally if we want to update status based on dynamic value
     virtual EventResult OnEvent(const MyEvent& ){ return EventResult::NotHandled;} 
     virtual void OnDraw() final{
         OnDrawContent();
@@ -201,7 +201,7 @@ public:
     }
     void AddChild(std::unique_ptr<UIComponent>&& child);
     void OnDrawContent() override;
-    void OnUpdate() override;
+    bool OnUpdate() override;
     EventResult OnEvent(const MyEvent& event) override;
     const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return children;}
     virtual UIComponent* FindTarget(Vector2 point) override;
@@ -260,12 +260,12 @@ public:
         Vector2 targetSize,
         UIComponentSpec spec = {}
     );
-    void OnUpdate() override;
     void OnDrawContent() override;
     EventResult OnEvent(const MyEvent& event) override;
     void OnHoverEnter() override;
     void OnHoverExit() override;
     virtual EventMask getCaptureTypes() const override {return EventType::CursorAction;}
+    bool OnUpdate() override { return false; }
 protected: 
     bool m_hold = false;
     bool m_hover = false;
@@ -285,11 +285,12 @@ public:
         Color color = RAYWHITE
     );
     void SetText(std::string text);
-    void OnUpdate() override;
+    bool OnUpdate() override;
     void MeasureContent(Vector2 available) override;
     void OnDrawContent() override;
 protected:
     std::string m_text;
+    Vector2 m_lastMeasuredSize{0, 0};
     std::string m_fontName;
     float m_fontSize;
     float m_fontSpacing;

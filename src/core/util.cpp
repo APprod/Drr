@@ -141,8 +141,8 @@ Tester::~Tester()
     if (!active) return;
     auto end = std::chrono::steady_clock::now();
     auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    if (dur.count() > edge * 2) dbg::GetLogger().Info("!!!!!! Tester " + name + " , ms:", dur.count() / 1000.0f, true);
-    else if (dur.count() > edge) dbg::GetLogger().Info("Tester: " + name + " , ms:", dur.count() / 1000.0f, true);
+    if (dur.count() > edge * 2) dbg::GetLogger().Info("!!!!!! Tester " + name + " , ms:", dur.count() / 1000.0f);
+    else if (dur.count() > edge) dbg::GetLogger().Info("Tester: " + name + " , ms:", dur.count() / 1000.0f);
 }
 
 PerfTester PerformanceLog::log(std::string name){

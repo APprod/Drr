@@ -69,8 +69,18 @@ void SceneManager::AddScene(std::unique_ptr<IScene> scene){
 
 void SceneManager::Update(){
     ResolveTransitions();
+    if (m_scenes.empty()){
+        dbg::GetLogger()
+            .Error("Scene Stack is Empty");
+        return;
+    }
     m_scenes.back()->OnUpdate();
 }
 void SceneManager::Draw(){
+    if (m_scenes.empty()){
+        dbg::GetLogger()
+            .Error("Scene Stack is Empty");
+        return;
+    }
     m_scenes.back()->OnDraw();
 }

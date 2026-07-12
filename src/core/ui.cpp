@@ -329,7 +329,7 @@ void Button::OnDraw(){
 
 EventResult Button::OnEvent(const MyEvent& event){
     if (std::holds_alternative<CursorActionEvent>(event)){
-        CursorActionEvent btn = std::get<CursorActionEvent>(event);
+        const auto& btn = std::get<CursorActionEvent>(event);
         if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && btn.pressed){
             if (HitTest(btn.pos)){
                 m_hold = true;

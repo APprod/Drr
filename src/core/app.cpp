@@ -27,7 +27,6 @@ void App::run()
                 SetWindowPosition(5,20);
                 SetWindowState(::FLAG_WINDOW_RESIZABLE);
 
-                SetTargetFPS(60);
                 auto m = GetCurrentMonitor();  
                 SetTargetFPS(GetMonitorRefreshRate(m));
                 SetWindowState(::FLAG_WINDOW_MAXIMIZED); 

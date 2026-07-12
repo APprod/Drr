@@ -96,6 +96,8 @@ public:
             case FillMode::FillMaxSize: desiredSize = available; break;
             default: break;
         }
+        myClamp(desiredSize.x, compSpec.minSize.x, compSpec.maxSize.x);
+        myClamp(desiredSize.y, compSpec.minSize.y, compSpec.maxSize.y);
     }
     virtual void MeasureContent(Vector2 available) {
         contentDesiredSize = {

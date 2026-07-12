@@ -1,5 +1,3 @@
-#define M_Deb true
-
 #include "core/app.hpp"
 #include "core/debug.hpp"
 

@@ -299,6 +299,9 @@ EventResult Button::OnEvent(const MyEvent& event){
     else if (std::holds_alternative<CursorMoveEvent>(event)){
         CursorMoveEvent move = std::get<CursorMoveEvent>(event);
         m_hover = HitTest(move.pos);
+        if (m_hover){
+            return EventResult::Handled;
+        }
     }
     else if (std::holds_alternative<ScreenInterEvent>(event)){
         ScreenInterEvent inter = std::get<ScreenInterEvent>(event);

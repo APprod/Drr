@@ -105,10 +105,12 @@ Texture2D RecourceManager::getTexture(std::string name)
 
     if (m_textures.count(name) == 0) 
     {
-       lazyLoad(name);
+        bool ok = lazyLoad(name);
+        if (!ok){
+            return getTexture("default");
+        }
     }
     return m_textures[name];
-
 }
 
 bool RecourceManager::lazyLoad(std::string name)
@@ -120,7 +122,7 @@ bool RecourceManager::lazyLoad(std::string name)
         if (name == "default") 
         {
             dbg::GetLogger().Fatal("Default texture is missing");
-            exit(-1);
+            throw std::runtime_error("Default Texture missing, Can't fallback on texture loading failure");
         } // not found(default)s
 
         m_failed_textures.insert(name); 

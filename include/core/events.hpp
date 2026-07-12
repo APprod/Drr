@@ -32,7 +32,7 @@ struct ActionEvent{
     bool pressed{};
 };
 
-using MyEvent = std::variant<CursorActionEvent, CursorMoveEvent, InputKeyEvent, ActionEvent, ScreenInterEvent>;\
+using MyEvent = std::variant<CursorActionEvent, CursorMoveEvent, InputKeyEvent, ActionEvent, ScreenInterEvent>;
 using EventMask = uint32_t;
 
 namespace EventType{

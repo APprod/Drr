@@ -1,31 +1,11 @@
 #include "core/debug.hpp"
+#include "core/platform.hpp"
 
 #include <string>
 #include <iostream>
 #include <cassert>
 
-#include <chrono>
-#include <iomanip>
-
-
-
-
 namespace dbg {
-
-std::string CurrentDateTime()
-{
-    using clock = std::chrono::system_clock;
-
-    auto now = clock::now();
-    std::time_t tt = clock::to_time_t(now);
-
-    std::tm tm{};
-    localtime_s(&tm, &tt); // Windows
-
-    std::ostringstream oss;
-    oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
-    return oss.str();
-}
 
 inline const char* SeverityColor(dbg::Severity s)
 {
@@ -91,7 +71,7 @@ void Logger::AddSink(std::unique_ptr<ISink> sink)
 {
     m_sinks.push_back(std::move(sink));
     m_sinks.back()->Write({Severity::INFO,
-        "\n========== Log started: " + CurrentDateTime() + " =========="});
+        "\n========== Log started: " + platform::CurrentDateTime() + " =========="});
 }
 
 void Logger::SetMinSeverity(Severity s)

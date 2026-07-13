@@ -152,6 +152,35 @@ protected:
 };
 
 
+class Text {
+public:
+    Text() = default;
+    Text(std::string text, std::string fontName = "default",
+         float fontSize = 20, float fontSpacing = 2, Color color = RAYWHITE);
+
+    void SetText(std::string t) { 
+        m_text = std::move(t); 
+        Measure();
+    }
+    const std::string& GetText() const { return m_text; }
+
+    Vector2 Measure();
+    void Draw(Vector2 position);
+    void DrawCentered(Rectangle bounds);
+
+    bool IsDirty() const { return m_dirty; }
+    void ClearDirty() { m_dirty = false; }
+
+private:
+    std::string m_text;
+    std::string m_fontName = "default";
+    float m_fontSize = 20;
+    float m_fontSpacing = 2;
+    Color m_color = RAYWHITE;
+    Vector2 m_lastMeasuredSize{0, 0};
+    bool m_dirty = false;
+};
+
 enum class Alignment{
     Beginning,
     Center,
@@ -271,11 +300,9 @@ public:
 protected: 
     bool m_hold = false;
     bool m_hover = false;
-    std::string m_text;
+    Text m_text;
     std::function<void()> m_onClick;
     std::string m_textureName;
-    float m_fontSize;
-    std::string m_fontName;
 };
 
 class Label: public UIComponent{
@@ -293,10 +320,5 @@ public:
     void MeasureContent(Vector2 available) override;
     void OnDrawContent() override;
 protected:
-    std::string m_text;
-    Vector2 m_lastMeasuredSize{0, 0};
-    std::string m_fontName;
-    float m_fontSize;
-    float m_fontSpacing;
-    Color m_color;
+    Text m_text;
 };

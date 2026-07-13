@@ -1,6 +1,7 @@
 #include "core/ui.hpp"
 #include "core/util.hpp"
 #include "core/structs.hpp"
+#include "core/debug.hpp"
 #include <numeric>
 #include <cmath>
 
@@ -355,7 +356,7 @@ Button::Button(
     UIComponentSpec spec,
     float fontSize,
     std::string fontName
-): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName}, m_fontSize{fontSize}, m_fontName{fontName} {
+): UIComponent{spec}, m_text{text, fontName, fontSize, 0, BLACK}, m_onClick{onClick}, m_textureName{textureName} {
     this->targetSize = targetSize;
 }
 
@@ -365,11 +366,7 @@ void Button::OnDrawContent(){
     auto target = GetDrawRect();
     ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
 
-    auto font = manager.getFont(m_fontName, m_fontSize);
-    Vector2 textSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, 0);
-    float textX = target.x + (target.width - textSize.x) / 2;
-    float textY = target.y + (target.height - textSize.y) / 2;
-    ::DrawTextEx(font, m_text.c_str(), {textX, textY}, m_fontSize, 0, BLACK);
+    m_text.DrawCentered(target);
     if (m_hover && !m_hold){
         ::DrawRectanglePro(target,{0,0},0.f,{255,255,255,50});
     }
@@ -415,6 +412,38 @@ void Button::OnHoverExit()
 
 
 
+Text::Text(std::string text, std::string fontName, float fontSize, float fontSpacing, Color color)
+    : m_text{std::move(text)}, m_fontName{std::move(fontName)}, m_fontSize{fontSize}, m_fontSpacing{fontSpacing}, m_color{color}
+{
+    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
+    m_lastMeasuredSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
+}
+
+Vector2 Text::Measure()
+{
+    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
+    Vector2 newSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
+    if (newSize != m_lastMeasuredSize) {
+        m_lastMeasuredSize = newSize;
+        m_dirty = true;
+    }
+    return m_lastMeasuredSize;
+}
+
+void Text::Draw(Vector2 position)
+{
+    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
+    ::DrawTextEx(font, m_text.c_str(), position, m_fontSize, m_fontSpacing, m_color);
+}
+
+void Text::DrawCentered(Rectangle bounds)
+{
+    float x = bounds.x + (bounds.width - m_lastMeasuredSize.x) / 2;
+    float y = bounds.y + (bounds.height - m_lastMeasuredSize.y) / 2;
+    Draw({x, y});
+}
+
+
 Label::Label(
     std::string text,
     UIComponentSpec spec,
@@ -422,32 +451,25 @@ Label::Label(
     float fontSize,
     float fontSpacing,
     Color color
-): UIComponent{spec}, m_text{text},
-   m_fontName{fontName}, m_fontSize{fontSize},
-   m_fontSpacing{fontSpacing}, m_color{color} 
-{
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    m_lastMeasuredSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
-}
+): UIComponent{spec}, m_text{std::move(text), std::move(fontName), fontSize, fontSpacing, color}
+{}
 
 void Label::SetText(std::string text){
-    m_text = std::move(text);
+    m_text.SetText(std::move(text));
 }
 
 bool Label::OnUpdate()
 {
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    Vector2 newSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
-    if (newSize != m_lastMeasuredSize) {
-        m_lastMeasuredSize = newSize;
+    m_text.Measure();
+    if (m_text.IsDirty()) {
+        m_text.ClearDirty();
         return true;
     }
     return false;
 }
 
 void Label::MeasureContent(Vector2 available){
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    Vector2 textSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
+    auto textSize = m_text.Measure();
     contentDesiredSize = {
         std::min(available.x, textSize.x),
         std::min(available.y, textSize.y)
@@ -455,7 +477,6 @@ void Label::MeasureContent(Vector2 available){
 }
 
 void Label::OnDrawContent(){
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
     auto rect = GetDrawRect();
-    ::DrawTextEx(font, m_text.c_str(), {rect.x, rect.y}, m_fontSize, m_fontSpacing, m_color);
+    m_text.Draw({rect.x, rect.y});
 }

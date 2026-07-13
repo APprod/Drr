@@ -259,7 +259,8 @@ public:
         std::string textureName,
         Vector2 targetSize,
         UIComponentSpec spec = {},
-        float fontSize = 20
+        float fontSize = 20,
+        std::string fontName = "default"
     );
     void OnDrawContent() override;
     EventResult OnEvent(const MyEvent& event) override;
@@ -274,6 +275,7 @@ protected:
     std::function<void()> m_onClick;
     std::string m_textureName;
     float m_fontSize;
+    std::string m_fontName;
 };
 
 class Label: public UIComponent{

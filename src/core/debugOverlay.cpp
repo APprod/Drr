@@ -7,6 +7,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
     
     interactive = false;
+    int fontSize = 20;
     auto mainC = std::make_unique<HorizontalLayout>(
         UICSpec{}.SetPaddingPct({1,1,1,1}),
         LayoutSpec{}.AlignBegin().CrossBegin()
@@ -16,15 +17,15 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
     left->Add(
-        FPSDraw("", {}, "TNR", 32, 1),
-        CursorTrack("", {}, "TNR", 32, 1),
-        DebugLogDisplay("", {}, "TNR", 32, 1)
+        FPSDraw("", {}, "TNR", fontSize, 0),
+        CursorTrack("", {}, "TNR", fontSize, 0),
+        DebugLogDisplay("", {}, "TNR", fontSize, 0)
     );
     auto right = std::make_unique<VerticalLayout>(
         UICSpec{}.SetPaddingPct({1,1,1,1}).SetFlex({1,1}),
         LayoutSpec{}.AlignBegin().CrossEnd());
     right->Add(
-        PerformanceDisplay("", {}, "TNR", 32, 1)
+        PerformanceDisplay("", {}, "TNR", fontSize, 0)
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));

@@ -6,9 +6,7 @@
 #include <vector>
 #include <functional>
 #include <numeric>
-
 #include "raylib.h"
-#include "core/debug.hpp"
 
 
 struct Ivec2
@@ -34,6 +32,18 @@ std::ostream& operator<<(std::ostream& out, Vector2 vec);
 
 std::ostream& operator<<(std::ostream& out, Ivec2 vec);
 std::ostream& operator<<(std::ostream& out, Rectangle rec);
+
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const std::vector<T>& vec){
+    out << "[";
+    for (size_t i = 0; i < vec.size(); ++i){
+        out << vec[i];
+        if (i < vec.size() - 1) out << ", ";
+    }
+    out << "]";
+    return out;
+}
 
 Vector2 operator+(Vector2 vec, int var);
 Vector2 operator-(Vector2 vec, int var);

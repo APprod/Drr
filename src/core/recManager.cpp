@@ -14,11 +14,20 @@ RecourceManager::~RecourceManager()
     {
         unloadTexture(key);
     }
+    for (auto& [name, fontMap] : m_fonts)
+    {
+        for (auto& [size, font] : fontMap)
+        {
+            ::UnloadFont(font);
+        }
+    }
 }
 
 void RecourceManager::init()
 {
-    m_fonts["default"] = ::GetFontDefault();
+    FontMap defFonts;
+    defFonts[10] = ::GetFontDefault();
+    m_fonts["default"] = defFonts;
 }
 
 void RecourceManager::load()
@@ -66,34 +75,72 @@ bool RecourceManager::unloadTexture(std::string name)
     return true;
 }
 
-void RecourceManager::loadFont(std::string name, std::string filepath)
+void RecourceManager::loadFont(std::string name, std::string filepath, std::vector<int> fontSizes)
 {
-    dbg::GetLogger().DebugInfo("loading Font: ", name + " path: " + filepath);
-    if (m_fonts.count(name) != 0)
-    {
-        dbg::GetLogger().Warn("Font is already loaded, font: ", name);
+    dbg::GetLogger().Info("loading Font: ", name, " path: ", filepath, " sizes: ", fontSizes);
+    if (!::FileExists(filepath.c_str())){
+        dbg::GetLogger().Error("Path Does Not exist (loading Font: ", name, " path: ", filepath, ")");
         return;
     }
-    Font newFont = ::LoadFontEx(filepath.c_str(), 32*4, nullptr, 0);
-    ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_BILINEAR);
-    // Font newFont = ::LoadFont(filepath.c_str());
-
-    if (!::IsFontValid(newFont))
-    {
-        dbg::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath);
-        return;
+    auto font = m_fonts.find(name);
+    if (font == m_fonts.end()){ 
+        // Not found, load All
+        FontMap newFontMap;
+        auto success = false;
+        for (auto size: fontSizes){
+            Font newFont = ::LoadFontEx(filepath.c_str(), size, nullptr, 0);
+            ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_BILINEAR);
+            if (!::IsFontValid(newFont))
+            {
+                dbg::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
+                continue;
+            }
+            success = true;
+            newFontMap[size] = newFont;
+        }
+        if (success) {
+            m_fonts[name] = std::move(newFontMap);
+        }
+        else{
+            dbg::GetLogger().Error("Failed to load font for all sizes: " + name +  " path: " + filepath);
+        }
+    }else{
+        auto& fontMap = font->second;
+        for (auto size: fontSizes){
+            auto pos = fontMap.find(size);
+            if (pos == fontMap.end()){
+                //Not found, load
+                Font newFont = ::LoadFontEx(filepath.c_str(), size, nullptr, 0);
+                ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_TRILINEAR);
+                if (!::IsFontValid(newFont)){
+                    dbg::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
+                    continue;
+                }
+                fontMap[size] = newFont;
+            }else{
+                dbg::GetLogger().Info("Font already loaded: ", name, " , size: ", size);
+            }
+        }
     }
-    m_fonts[name] = newFont;
-
 }
-Font RecourceManager::getFont(std::string name)
+
+Font RecourceManager::getFont(std::string name, int fontSize)
 {
-    if (m_fonts.count(name) == 0) 
+    auto fontIter = m_fonts.find(name);
+    if (fontIter == m_fonts.end()) 
     {
         dbg::GetLogger().Error("Font not found:", name);
-        return m_fonts["default"];
+        return m_fonts.at("default")[32];
+    }else{
+        auto& fontMap = fontIter->second;
+        auto fontSizeIter = fontMap.find(fontSize);
+        if (fontSizeIter == fontMap.end()){
+            dbg::GetLogger().Error("Font size not found: ", fontSize);
+            return m_fonts.at("default")[32];
+        }else{
+            return fontSizeIter->second;
+        }
     }
-    return m_fonts[name];
 }
 
 Texture2D RecourceManager::getTexture(std::string name)

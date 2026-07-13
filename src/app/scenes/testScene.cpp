@@ -19,7 +19,7 @@ void TestScene::OnEnter(){
                     [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
                     "button_default",{(float)200,(float)100}, 
                     UICSpec().SetFlex({.growth = 1, .shrink = 1})
-                    .MinSize({100,50}))
+                    .MinSize({100,50}),32, "TNR")
             );
         }
         column->AddChild(std::move(row));    

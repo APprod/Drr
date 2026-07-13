@@ -1,6 +1,6 @@
-#include "core/util.hpp"
 #include <cmath>
-
+#include "core/util.hpp"
+#include "core/debug.hpp"
 
 std::ostream &operator<<(std::ostream &out, Vector2 vec)
 {

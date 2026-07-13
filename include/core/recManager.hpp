@@ -3,9 +3,11 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-
+#include <vector>
 #include "raylib.h"
 // #include "loader.hpp"
+
+using FontMap = std::unordered_map<int, Font>;
 
 class RecourceManager
 {
@@ -20,8 +22,8 @@ public:
     bool loadTexture(std::string name, std::string filepath);
     bool unloadTexture(std::string name); 
 
-    void loadFont(std::string name, std::string filepath);
-    Font getFont(std::string name);
+    void loadFont(std::string name, std::string filepath, std::vector<int> fontSizes = {12,16,20,26,32,40,48,56,64,128});
+    Font getFont(std::string name, int fontSize);
 
     // Loader loader;
 private:
@@ -30,6 +32,6 @@ private:
     std::unordered_map<std::string, Texture2D> m_textures;
     std::unordered_set<std::string> m_failed_textures;
 
-    std::unordered_map<std::string, ::Font> m_fonts;
+    std::unordered_map<std::string, FontMap> m_fonts;
     
 };

@@ -54,9 +54,9 @@ public:
     void Write(const MyMessage& message) override;
 };
 
-template<typename T> // Required since we use it in logging alternative is format
-concept Streamable = requires(std::ostream& os, T a) {
-    { os << a } -> std::same_as<std::ostream&>;
+template<class T>
+concept Streamable = requires(std::ostream& os, const T& t){
+    { os << t } -> std::same_as<std::ostream&>;
 };
 
 class Logger

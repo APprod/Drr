@@ -353,8 +353,9 @@ Button::Button(
     std::string textureName,
     Vector2 targetSize,
     UIComponentSpec spec,
-    float fontSize
-): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName}, m_fontSize{fontSize} {
+    float fontSize,
+    std::string fontName
+): UIComponent{spec}, m_text{text}, m_onClick{onClick}, m_textureName{textureName}, m_fontSize{fontSize}, m_fontName{fontName} {
     this->targetSize = targetSize;
 }
 
@@ -364,10 +365,11 @@ void Button::OnDrawContent(){
     auto target = GetDrawRect();
     ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
 
-    int textWidth = ::MeasureText(m_text.c_str(), static_cast<int>(m_fontSize));
-    int textX = static_cast<int>(target.x) + (static_cast<int>(target.width) - textWidth) / 2;
-    int textY = static_cast<int>(target.y) + (static_cast<int>(target.height) - static_cast<int>(m_fontSize)) / 2;
-    ::DrawText(m_text.c_str(), textX, textY, static_cast<int>(m_fontSize), BLACK);
+    auto font = manager.getFont(m_fontName, m_fontSize);
+    Vector2 textSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, 0);
+    float textX = target.x + (target.width - textSize.x) / 2;
+    float textY = target.y + (target.height - textSize.y) / 2;
+    ::DrawTextEx(font, m_text.c_str(), {textX, textY}, m_fontSize, 0, BLACK);
     if (m_hover && !m_hold){
         ::DrawRectanglePro(target,{0,0},0.f,{255,255,255,50});
     }
@@ -424,7 +426,7 @@ Label::Label(
    m_fontName{fontName}, m_fontSize{fontSize},
    m_fontSpacing{fontSpacing}, m_color{color} 
 {
-    auto font = GetServices().recManager.getFont(m_fontName);
+    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
     m_lastMeasuredSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
 }
 
@@ -434,7 +436,7 @@ void Label::SetText(std::string text){
 
 bool Label::OnUpdate()
 {
-    auto font = GetServices().recManager.getFont(m_fontName);
+    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
     Vector2 newSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
     if (newSize != m_lastMeasuredSize) {
         m_lastMeasuredSize = newSize;
@@ -444,7 +446,7 @@ bool Label::OnUpdate()
 }
 
 void Label::MeasureContent(Vector2 available){
-    auto font = GetServices().recManager.getFont(m_fontName);
+    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
     Vector2 textSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
     contentDesiredSize = {
         std::min(available.x, textSize.x),
@@ -453,7 +455,7 @@ void Label::MeasureContent(Vector2 available){
 }
 
 void Label::OnDrawContent(){
-    auto font = GetServices().recManager.getFont(m_fontName);
+    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
     auto rect = GetDrawRect();
     ::DrawTextEx(font, m_text.c_str(), {rect.x, rect.y}, m_fontSize, m_fontSpacing, m_color);
 }

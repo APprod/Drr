@@ -16,7 +16,7 @@ void TestScene::OnEnter(){
         for(int j = 0; j < 5; j++){
             row->Add(
                 Button("Test",
-                    [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
+                    [j](){ dbg::GetLogger().Info("-------------------------Button"+ std::to_string(j) +" clicked!"); },
                     "button_default",{(float)200,(float)100}, 
                     UICSpec().SetFlex({.growth = 1, .shrink = 1})
                     .MinSize({100,50}),32, "TNR")

@@ -1,7 +1,7 @@
 #include "core/ui.hpp"
 #include "core/util.hpp"
 #include "core/structs.hpp"
-#include "core/debug.hpp"
+
 #include <numeric>
 #include <cmath>
 
@@ -127,9 +127,9 @@ void Layout::ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mai
 }
 
 
-std::vector<Vector2> Layout::CalculateFlex(Vector2 innerDim, Axis mainAxis, Axis crossAxis, float& spare, Flex& totalFlex){
+std::vector<Vector2> Layout::CalculateFlex(Vector2 innerDim, Axis mainAxis, Axis crossAxis, float& spare){
     std::vector<Vector2> res; res.reserve(children.size());
-
+    Flex totalFlex{0,0};
     float totalDesiredSize{0};
     for (auto& child : children) {
         totalDesiredSize += child->DesiredSize().*mainAxis + layoutSpec.spacing;
@@ -167,10 +167,29 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
     Vector2 innerPos = innerPosStart;
     Vector2 innerDim = { innerRect.width, innerRect.height };
     
+    //First pass
     float spare{0};
-    Flex totalFlex{0,0};
-    auto sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare, totalFlex);
-    
+    auto sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare);
+    for (auto& s : sizes) {
+        s.*mainAxis = std::round(s.*mainAxis);
+        s.*crossAxis = std::round(s.*crossAxis);
+    }
+    for (auto& s : sizes) {
+        s.*mainAxis = std::round(s.*mainAxis);
+        s.*crossAxis = std::round(s.*crossAxis);
+    }
+    // Remeasure with final sizes
+    for (size_t i = 0; i < children.size(); ++i)
+    {
+        children[i]->OnMeasure(sizes[i]); 
+    }
+    //Second pass After everyone is satisfied with new sizes
+    spare = {0};
+    sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare);
+    for (auto& s : sizes) {
+        s.*mainAxis = std::round(s.*mainAxis);
+        s.*crossAxis = std::round(s.*crossAxis);
+    }
     for (auto& s : sizes) {
         s.*mainAxis = std::round(s.*mainAxis);
         s.*crossAxis = std::round(s.*crossAxis);
@@ -412,38 +431,6 @@ void Button::OnHoverExit()
 
 
 
-Text::Text(std::string text, std::string fontName, float fontSize, float fontSpacing, Color color)
-    : m_text{std::move(text)}, m_fontName{std::move(fontName)}, m_fontSize{fontSize}, m_fontSpacing{fontSpacing}, m_color{color}
-{
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    m_lastMeasuredSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
-}
-
-Vector2 Text::Measure()
-{
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    Vector2 newSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
-    if (newSize != m_lastMeasuredSize) {
-        m_lastMeasuredSize = newSize;
-        m_dirty = true;
-    }
-    return m_lastMeasuredSize;
-}
-
-void Text::Draw(Vector2 position)
-{
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    ::DrawTextEx(font, m_text.c_str(), position, m_fontSize, m_fontSpacing, m_color);
-}
-
-void Text::DrawCentered(Rectangle bounds)
-{
-    float x = bounds.x + (bounds.width - m_lastMeasuredSize.x) / 2;
-    float y = bounds.y + (bounds.height - m_lastMeasuredSize.y) / 2;
-    Draw({x, y});
-}
-
-
 Label::Label(
     std::string text,
     UIComponentSpec spec,
@@ -460,7 +447,8 @@ void Label::SetText(std::string text){
 
 bool Label::OnUpdate()
 {
-    m_text.Measure();
+    auto r = GetDrawRect();
+    m_text.ReMeasure({r.width,r.height});
     if (m_text.IsDirty()) {
         m_text.ClearDirty();
         return true;
@@ -469,10 +457,10 @@ bool Label::OnUpdate()
 }
 
 void Label::MeasureContent(Vector2 available){
-    auto textSize = m_text.Measure();
+    auto textSize = m_text.ReMeasure(available);
     contentDesiredSize = {
         std::min(available.x, textSize.x),
-        std::min(available.y, textSize.y)
+        textSize.y
     };
 }
 

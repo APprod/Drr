@@ -8,6 +8,7 @@
 #include "raylib.h"
 #include "core/events.hpp"
 #include "core/structs.hpp"
+#include "core/text.hpp"
 
 
 struct Padding
@@ -152,35 +153,6 @@ protected:
 };
 
 
-class Text {
-public:
-    Text() = default;
-    Text(std::string text, std::string fontName = "default",
-         float fontSize = 20, float fontSpacing = 2, Color color = RAYWHITE);
-
-    void SetText(std::string t) { 
-        m_text = std::move(t); 
-        Measure();
-    }
-    const std::string& GetText() const { return m_text; }
-
-    Vector2 Measure();
-    void Draw(Vector2 position);
-    void DrawCentered(Rectangle bounds);
-
-    bool IsDirty() const { return m_dirty; }
-    void ClearDirty() { m_dirty = false; }
-
-private:
-    std::string m_text;
-    std::string m_fontName = "default";
-    float m_fontSize = 20;
-    float m_fontSpacing = 2;
-    Color m_color = RAYWHITE;
-    Vector2 m_lastMeasuredSize{0, 0};
-    bool m_dirty = false;
-};
-
 enum class Alignment{
     Beginning,
     Center,
@@ -242,7 +214,7 @@ protected:
     void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis);
     void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis, Axis crossAxis);
 
-    std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, Axis crossAxis, float& spare, Flex& totalFlex);
+    std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, Axis crossAxis, float& spare);
     void ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
         float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance);
 };

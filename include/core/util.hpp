@@ -113,11 +113,11 @@ class Tester
 {
     std::chrono::steady_clock::time_point start;
     std::string name;
-    float edge;
+    float thresholdMs;
     bool active;
 public:
 
-    Tester(std::string name, float edge, bool active);
+    Tester(std::string name, float thresholdMs, bool active);
     ~Tester();
 };
 

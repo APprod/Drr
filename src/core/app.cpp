@@ -43,8 +43,8 @@ void App::run()
     dbg::GetLogger().AddSink(
         std::make_unique<dbg::FileSink>(dbg::FileSink("log.txt")));
 
-    dbg::GetLogger().DebugInfo("app:run \n");
-    dbg::GetLogger().DebugInfo("Running direcotry: ", GetWorkingDirectory());
+    dbg::GetLogger().Info("app:run \n");
+    dbg::GetLogger().Info("Running direcotry: ", GetWorkingDirectory());
     auto path = GetApplicationDirectory();
     ChangeDirectory(path);
     {//temp, initislization

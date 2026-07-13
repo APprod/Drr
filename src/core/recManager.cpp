@@ -46,7 +46,7 @@ bool RecourceManager::loadTexture(std::string name)
 
 bool RecourceManager::loadTexture(std::string name, std::string filepath)
 {
-    dbg::GetLogger().DebugInfo("loading texture: ", name + " path: " + filepath);
+    dbg::GetLogger().Info("loading texture: ", name + " path: " + filepath);
     if (m_textures.count(name) != 0)
     {
         dbg::GetLogger().Warn("Texture is already loaded, texture: ", name);
@@ -64,7 +64,7 @@ bool RecourceManager::loadTexture(std::string name, std::string filepath)
 
 bool RecourceManager::unloadTexture(std::string name)
 {
-    dbg::GetLogger().DebugInfo("Unloading texture: ", name);
+    dbg::GetLogger().Info("Unloading texture: ", name);
     if (m_textures.count(name) == 0) 
     {
         dbg::GetLogger().Warn("Failed no unload cause: no texture: " + name);
@@ -162,7 +162,7 @@ Texture2D RecourceManager::getTexture(std::string name)
 
 bool RecourceManager::lazyLoad(std::string name)
 {
-    dbg::GetLogger().DebugInfo("LazyLoading texture: ", name);
+    dbg::GetLogger().Info("LazyLoading texture: ", name);
     bool success = loadTexture(name);
     if (!success)
     {

@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <filesystem>
 
 namespace dbg {
 
@@ -31,13 +32,27 @@ inline const char* ToString(Severity s) {
     }
 }
 
-FileSink::FileSink(const std::string& path)
-    : file(path, std::ios::app)
-{}
+FileSink::FileSink(const std::string& path, size_t maxBytes)
+    : m_maxBytes(maxBytes)
+{
+    std::error_code ec;
+    if (std::filesystem::exists(path, ec)) {
+        auto size = std::filesystem::file_size(path, ec);
+        if (!ec && size > maxBytes) {
+            auto backup = std::filesystem::path(path);
+            backup += ".old";
+            std::filesystem::rename(path, backup, ec);
+            if (ec) {
+                std::cerr << "Log: rename failed (" << ec.message() << ")\n";
+            }
+        }
+    }
+    m_file.open(path, std::ios::app);
+}
 
 void FileSink::Write(const MyMessage& message)
 {
-    file << ToString(message.severity)
+    m_file << ToString(message.severity)
          << ": " << message.message << '\n';
 }
 
@@ -46,7 +61,8 @@ void ConsoleSink::Write(const MyMessage& message)
     std::cout << SeverityColor(message.severity)
               << ToString(message.severity)
               << ": " << message.message
-              << "\033[0m\n"; // reset color
+              << "\033[0m\n" // reset color
+              << std::flush; 
 }
 
 Logger& Logger::GetLogger()

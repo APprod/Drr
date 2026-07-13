@@ -40,11 +40,12 @@ public:
 class FileSink : public ISink
 {
 public:
-    FileSink(const std::string& path);
+    FileSink(const std::string& path, size_t maxBytes = {1024*1024*1/4});
     void Write(const MyMessage& message) override;
 
 private:
-    std::ofstream file;
+    size_t m_maxBytes;
+    std::ofstream m_file;
 };
 
 class ConsoleSink : public ISink

@@ -40,9 +40,9 @@ class SceneManager{ //will be a part of Services so acessible everywhere
 public:
 
     SceneManager();
+    //Queues transition
     template<typename T, typename... Args> 
     void QueTransit(Args&&... args){
-        //Queues transition
         if (m_status.action != SceneAction::Idle) {
             dbg::GetLogger().Warn("Transition already queued, ignoring");
             return;
@@ -50,10 +50,11 @@ public:
         m_status.transitingScene = std::make_unique<T>(std::forward<Args>(args)...);
         m_status.action = SceneAction::Transit;
     }
+    //Queues transition current scene will be
+    //Suspended and restored on next Pop
     template<typename T, typename... Args> 
     void QueTransitSus(Args&&... args){
-        //Queues transition current scene will be
-        //Suspended and restored on next Pop
+        
         if (m_status.action != SceneAction::Idle) {
             dbg::GetLogger().Warn("Transition already queued, ignoring");
             return;

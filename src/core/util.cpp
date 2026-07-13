@@ -132,10 +132,10 @@ std::string toString(Rectangle vec)
     return std::to_string(vec.x) + " "+std::to_string(vec.y) + "\n"\
             + std::to_string(vec.width) + " "+std::to_string(vec.height);
 }
-Tester::Tester(std::string name, float edge, bool active): 
+Tester::Tester(std::string name, float thresholdMs, bool active): 
         start(std::chrono::steady_clock::now()), 
         name(name), 
-        edge(edge),
+        thresholdMs(thresholdMs),
         active(active)
 {
 }
@@ -144,9 +144,9 @@ Tester::~Tester()
 {
     if (!active) return;
     auto end = std::chrono::steady_clock::now();
-    auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    if (dur.count() > edge * 2) dbg::GetLogger().Info("!!!!!! Tester " + name + " , ms:", dur.count() / 1000.0f);
-    else if (dur.count() > edge) dbg::GetLogger().Info("Tester: " + name + " , ms:", dur.count() / 1000.0f);
+    auto ms = std::chrono::duration<float, std::milli>(end - start).count();
+    if (ms > thresholdMs * 2) dbg::GetLogger().DebugInfo("!!!!!! Tester " + name + " , ms:", ms);
+    else if (ms > thresholdMs) dbg::GetLogger().DebugInfo("Tester: " + name + " , ms:", ms);
 }
 
 PerfTester PerformanceLog::log(std::string name){

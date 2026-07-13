@@ -471,7 +471,6 @@ EventResult Label::OnEvent(const MyEvent& event){
         if (!hovered){
             return EventResult::NotHandled;
         }
-        dbg::GetLogger().DebugInfo("event scroll:", e->delta);
         auto drawRect = GetDrawRect();
         auto textSize = m_text.RealSize();
         auto maxOffset = textSize.y - drawRect.height;

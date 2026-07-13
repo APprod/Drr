@@ -26,6 +26,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     left->Add(
         FPSDraw(Text("", "TNR", fontSize, 0)),
         CursorTrack(Text("", "TNR", fontSize, 0)),
+        CfgDisplay(Text("", "TNR", fontSize, 0)),
         DebugLogDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1}).FillMaxSize())
     );
     auto right = std::make_unique<DebugVerticalLayout>(
@@ -33,7 +34,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         LayoutSpec{}.AlignBegin().CrossEnd());
     right->Add(
             PerformanceDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1})),
-            Label(Text("F1 - overlay\nF2 - layout\nF3 - content\nF4 - fps\nF5 - cursor\nF6 - perf\nF7 - log", "TNR", fontSize, 0))
+            Label(Text("W/S bright  E/D contrast\nR/F satur     T/G gamma\nY/H alpha\nF1 overlay  F2 layout\nF3 content F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "TNR", fontSize, 0))
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));
@@ -110,20 +111,32 @@ bool DebugLogDisplay::OnUpdate(){
 
 
 void DebugVerticalLayout::OnDrawContent(){
-    auto r = actual;
-    ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
-    ::DrawRectangleGradientV(r.x,r.y,r.width,r.height, {0,0,50,255}, {0,0,0,0});
-    ::EndBlendMode();
+    if (GetServices().runtimeCfg.showOverlayGradient) {
+        auto r = actual;
+        ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
+        ::DrawRectangleGradientV(r.x,r.y,r.width,r.height, {0,0,50,255}, {0,0,0,0});
+        ::EndBlendMode();
+    }
     for(auto& child : children){
         if (!child->visible) continue;
         child->OnDraw();
     }
 }
+bool CfgDisplay::OnUpdate(){
+    auto& cfg = GetServices().runtimeCfg;
+    auto& p = cfg.processing;
+    SetText(std::format(
+        "shader: {}\nbrightness: {:.2f}\ncontrast:   {:.2f}\nsaturation: {:.2f}\ngamma:      {:.2f}\nalpha:      {:.2f}",
+        cfg.useProcessingShader ? "PROCESSING" : "BRIGHTNESS",
+        p.brightness, p.contrast, p.saturation, p.gamma, p.alpha));
+    return Label::OnUpdate();
+}
+
 void DebugHorizontalLayout::OnDrawContent(){
-    auto r = GetDrawRect();
-    // ::BeginBlendMode(BlendMode::BLEND_ADD_COLORS);
-    ::DrawRectangleGradientV(r.x,r.y,r.width,r.height, {0,255,0,255}, {0,0,255,0});
-    // ::EndBlendMode();
+    if (GetServices().runtimeCfg.showOverlayGradient) {
+        auto r = GetDrawRect();
+        ::DrawRectangleGradientV(r.x,r.y,r.width,r.height, {0,255,0,255}, {0,0,255,0});
+    }
     for(auto& child : children){
         if (!child->visible) continue;
         child->OnDraw();

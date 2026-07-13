@@ -33,6 +33,11 @@ class DebugLogDisplay: public Label {
     bool OnUpdate() override;
 };
 
+class CfgDisplay: public Label {
+    using Label::Label;
+    bool OnUpdate() override;
+};
+
 class DebugHorizontalLayout: public HorizontalLayout {
     using HorizontalLayout::HorizontalLayout;
     void OnDrawContent() override;

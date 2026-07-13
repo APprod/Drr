@@ -2,31 +2,17 @@
 #include "core/app.hpp"
 #include "core/debug.hpp"
 #include "core/util.hpp"
+#include "core/structs.hpp"
 #include "app/scenes/testScene.hpp"
 
 #include <memory>
 
-static void setupDebugConfig() {
-    auto& cfg = GetServices().runtimeCfg;
-#ifndef NDEBUG  // Debug build
-    cfg.debugFeaturesAllowed = true;
-    cfg.showFPS = true;
-    cfg.showLayoutBounds = true;
-    cfg.showLayoutContentBounds = true;
-    cfg.showCursorPos = true;
-    cfg.showPerformance = true;
-    cfg.showDebugLog = true;
-    cfg.showDebugOverlay = true;
-#else           // Release build
-    cfg.debugFeaturesAllowed = false;
-    cfg.showFPS = false;
-    cfg.showLayoutBounds = false;
-    cfg.showLayoutContentBounds = false;
-    cfg.showCursorPos = false;
-    cfg.showPerformance = false;
-    cfg.showDebugLog = false;
-    cfg.showDebugOverlay = false;
-    dbg::GetLogger().SetMinSeverity(dbg::Severity::INFO); // фильтрует DebugInfo
+void setupDebugConfig() {
+#ifndef NDEBUG
+    GetServices().runtimeCfg = kDebugConfig;
+#else
+    GetServices().runtimeCfg = kReleaseConfig;
+    dbg::GetLogger().SetMinSeverity(dbg::Severity::INFO);
 #endif
 }
 

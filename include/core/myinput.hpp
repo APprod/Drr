@@ -17,6 +17,11 @@ public:
         return m_keyDown[key];
     }
 
+    float GetAxis(InputKey positive, InputKey negative) const {
+        if (m_keyDown[positive] == m_keyDown[negative]) return 0.0f;
+        return m_keyDown[positive] ? 1.0f : -1.0f;
+    }
+
 private:
     std::vector<MyEvent> m_events;
     std::array<bool, InputKey::KEY_KB_MENU + 1> m_keyDown{};

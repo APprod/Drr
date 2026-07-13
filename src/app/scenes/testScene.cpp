@@ -32,11 +32,21 @@ void TestScene::OnEnter(){
 }
 
 void TestScene::OnUpdateState(){
-    auto& brightness = GetServices().runtimeCfg.brightness;
+    constexpr float speed = 0.02f;
     auto& input = GetServices().input;
-    if (input.IsKeyDown(KEY_W)) brightness += 0.01f;
-    if (input.IsKeyDown(KEY_S)) brightness -= 0.01f;
-    myClamp(brightness, 0.1f, 3.0f);
+    auto& p = GetServices().runtimeCfg.processing;
+
+    p.brightness += input.GetAxis(KEY_W, KEY_S) * speed;
+    p.contrast   += input.GetAxis(KEY_E, KEY_D) * speed;
+    p.saturation += input.GetAxis(KEY_R, KEY_F) * speed;
+    p.gamma      += input.GetAxis(KEY_T, KEY_G) * speed;
+    p.alpha      += input.GetAxis(KEY_Y, KEY_H) * speed;
+
+    myClamp(p.brightness, 0.1f, 3.0f);
+    myClamp(p.contrast,   0.0f, 5.0f);
+    myClamp(p.saturation, 0.0f, 5.0f);
+    myClamp(p.gamma,      0.1f, 5.0f);
+    myClamp(p.alpha,      0.0f, 1.0f);
 }
 
 void TestScene::OnResize(){
@@ -52,9 +62,23 @@ void TestScene::OnResize(){
 void TestScene::OnDrawContent(){
     PerfTester tester = GetServices().perfLog.log("OnDrawContent");
 
+    auto& cfg = GetServices().runtimeCfg;
+    auto& p = cfg.processing;
     auto drawCall = [this](){
-        ::DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
+        ::DrawTexture(m_manager.getTexture("menu"), 0, 0, RAYWHITE);
     };
-    useShader(m_manager.getShaderProgram("brightness"),{{"brightness", GetServices().runtimeCfg.brightness}},drawCall);
+    if (cfg.useProcessingShader) {
+        useShader(m_manager.getShaderProgram("processing"),
+            {{"brightness", p.brightness},
+             {"contrast",   p.contrast},
+             {"saturation", p.saturation},
+             {"gamma",      p.gamma},
+             {"alpha",      p.alpha}},
+            drawCall);
+    } else {
+        useShader(m_manager.getShaderProgram("brightness"),
+            {{"brightness", p.brightness}},
+            drawCall);
+    }
     root.OnDraw();
 }

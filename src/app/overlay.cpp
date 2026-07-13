@@ -29,5 +29,11 @@ Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     listener->Bind(InputKeyEvent{InputKey::KEY_F7}, []{
         GetServices().runtimeCfg.showDebugLog ^= true;
     });
+    listener->Bind(InputKeyEvent{InputKey::KEY_F8}, []{
+        GetServices().runtimeCfg.useProcessingShader ^= true;
+    });
+    listener->Bind(InputKeyEvent{InputKey::KEY_F9}, []{
+        GetServices().runtimeCfg.showOverlayGradient ^= true;
+    });
     AddChild(std::move(listener));
 }

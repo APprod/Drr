@@ -12,20 +12,20 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         UICSpec{}.SetPaddingPct({1,1,1,1}),
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
-    auto left = std::make_unique<VerticalLayout>(
+    auto left = std::make_unique<DebugVerticalLayout>(
         UICSpec{}.SetPaddingPct({1,1,1,1}).SetFlex({1,1}),
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
     left->Add(
-        FPSDraw("", {}, "TNR", fontSize, 0),
-        CursorTrack("", {}, "TNR", fontSize, 0),
-        DebugLogDisplay("", {}, "TNR", fontSize, 0)
+        FPSDraw(Text("", "TNR", fontSize, 0)),
+        CursorTrack(Text("", "TNR", fontSize, 0)),
+        DebugLogDisplay(Text("", "TNR", fontSize, 0))
     );
-    auto right = std::make_unique<VerticalLayout>(
+    auto right = std::make_unique<DebugVerticalLayout>(
         UICSpec{}.SetPaddingPct({1,1,1,1}).SetFlex({1,1}),
         LayoutSpec{}.AlignBegin().CrossEnd());
     right->Add(
-        PerformanceDisplay("", {}, "TNR", fontSize, 0)
+        PerformanceDisplay(Text("", "TNR", fontSize, 0))
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));
@@ -86,4 +86,26 @@ bool DebugLogDisplay::OnUpdate(){
     }
     SetText(out);
     return Label::OnUpdate();
+}
+
+
+void DebugVerticalLayout::OnDrawContent(){
+    auto r = actual;
+    ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
+    ::DrawRectangleGradientV(r.x,r.y,r.width,r.height, {0,0,50,255}, {0,0,0,0});
+    ::EndBlendMode();
+    for(auto& child : children){
+        if (!child->visible) continue;
+        child->OnDraw();
+    }
+}
+void DebugHorizontalLayout::OnDrawContent(){
+    auto r = GetDrawRect();
+    // ::BeginBlendMode(BlendMode::BLEND_ADD_COLORS);
+    ::DrawRectangleGradientV(r.x,r.y,r.width,r.height, {0,255,0,255}, {0,0,255,0});
+    // ::EndBlendMode();
+    for(auto& child : children){
+        if (!child->visible) continue;
+        child->OnDraw();
+    }
 }

@@ -28,7 +28,6 @@ public:
     void SetText(std::string t) { 
         m_text = std::move(t); 
         m_dirtyText = true;
-        ReMeasure({0,0});
     }
     const std::string& GetText() const { return m_text; }
 
@@ -53,7 +52,7 @@ private:
     Vector2 m_desiredFullSize{0, 0};
 
     std::vector<Line> m_lines;
-    std::vector<Line> m_linesConstrainted;
+    std::vector<Line> m_linesConstrained;
     bool m_dirtyText = false;
     bool m_dirtyFull = false;
 };

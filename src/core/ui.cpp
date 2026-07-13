@@ -368,14 +368,12 @@ EventResult Root::OnEvent(const MyEvent& event){
 }
 
 Button::Button(
-    std::string text,
+    Text text,
     std::function<void()> onClick,
     std::string textureName,
     Vector2 targetSize,
-    UIComponentSpec spec,
-    float fontSize,
-    std::string fontName
-): UIComponent{spec}, m_text{text, fontName, fontSize, 0, BLACK}, m_onClick{onClick}, m_textureName{textureName} {
+    UIComponentSpec spec
+): UIComponent{spec}, m_text{std::move(text)}, m_onClick{onClick}, m_textureName{textureName} {
     this->targetSize = targetSize;
 }
 
@@ -432,13 +430,9 @@ void Button::OnHoverExit()
 
 
 Label::Label(
-    std::string text,
-    UIComponentSpec spec,
-    std::string fontName,
-    float fontSize,
-    float fontSpacing,
-    Color color
-): UIComponent{spec}, m_text{std::move(text), std::move(fontName), fontSize, fontSpacing, color}
+    Text text,
+    UIComponentSpec spec
+): UIComponent{spec}, m_text{std::move(text)}
 {}
 
 void Label::SetText(std::string text){

@@ -1,11 +1,11 @@
 #include "core/text.hpp"
 #include "core/structs.hpp"
+#include "core/debug.hpp"
 
 Text::Text(std::string text, std::string fontName, float fontSize, float fontSpacing, Color color)
     : m_text{std::move(text)}, m_fontName{std::move(fontName)}, m_fontSize{fontSize}, m_fontSpacing{fontSpacing}, m_color{color}
 {
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    m_lastMeasuredSize = ::MeasureTextEx(font, m_text.c_str(), m_fontSize, m_fontSpacing);
+    m_dirtyText = true;
 }
 
 std::vector<Line> splitLines(std::string& text){
@@ -108,30 +108,31 @@ Vector2 Text::ReMeasure(Vector2 borders)
             m_desiredFullSize.x = std::max(line.size.x, m_desiredFullSize.x);
             m_desiredFullSize.y += line.size.y;
         }
-        m_dirtyText = false;
         if (lastDesired != m_desiredFullSize){
             m_dirtyFull = true;
         }
     }
-    if (borders != m_lastBorder){
-        m_linesConstrainted = constructConstrained(m_lines, borders);
+    if (borders != m_lastBorder || m_dirtyText){
+        m_linesConstrained = constructConstrained(m_lines, borders);
         m_lastMeasuredSize = {0,0};
-        for (auto& line: m_linesConstrainted){
+        for (auto& line: m_linesConstrained){
             m_lastMeasuredSize.x = std::max(line.size.x, m_lastMeasuredSize.x);
             m_lastMeasuredSize.y += line.size.y;
         }
         m_lastBorder = borders;
     }
-    
+    m_dirtyText = false;
     return m_lastMeasuredSize;
 }
 
 
 void Text::Draw(Vector2 position)
 {
+
     auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
     auto pos = position;
-    for (auto& line: m_linesConstrainted){
+    for (auto& line: m_linesConstrained){
+        
         ::DrawTextEx(font, line.lineView.c_str(), pos, m_fontSize, m_fontSpacing, m_color);
         pos.y += line.size.y;
     }

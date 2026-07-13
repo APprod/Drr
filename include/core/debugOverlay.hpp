@@ -31,3 +31,13 @@ class DebugLogDisplay: public Label {
     using Label::Label;
     bool OnUpdate() override;
 };
+
+class DebugHorizontalLayout: public HorizontalLayout {
+    using HorizontalLayout::HorizontalLayout;
+    void OnDrawContent() override;
+};
+
+class DebugVerticalLayout: public VerticalLayout {
+    using VerticalLayout::VerticalLayout;
+    void OnDrawContent() override;
+};

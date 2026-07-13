@@ -15,11 +15,11 @@ void TestScene::OnEnter(){
                 );
         for(int j = 0; j < 5; j++){
             row->Add(
-                Button("Test",
-                    [j](){ dbg::GetLogger().Info("-------------------------Button"+ std::to_string(j) +" clicked!"); },
+                Button(Text("Test", "TNR", 32, 0, RAYWHITE),
+                    [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
                     "button_default",{(float)200,(float)100}, 
                     UICSpec().SetFlex({.growth = 1, .shrink = 1})
-                    .MinSize({100,50}),32, "TNR")
+                    .MinSize({100,50}))
             );
         }
         column->AddChild(std::move(row));    
@@ -46,6 +46,9 @@ void TestScene::OnResize(){
 }
 void TestScene::OnDrawContent(){
     PerfTester tester = GetServices().perfLog.log("OnDrawContent");
-    DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
+    ::DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
+    ::BeginBlendMode(BlendMode::BLEND_ADDITIVE);
+    ::DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),{25,25,25,255});
+    ::EndBlendMode();
     root.OnDraw();
 }

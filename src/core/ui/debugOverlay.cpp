@@ -1,5 +1,5 @@
-#include "core/debugOverlay.hpp"
-#include "core/structs.hpp"
+#include "core/ui/debugOverlay.hpp"
+#include "core/services.hpp"
 #include "core/debug.hpp"
 #include <format>
 

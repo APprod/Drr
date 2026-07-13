@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "core/structs.hpp"
+#include "core/services.hpp"
 #include "core/debug.hpp"
-#include "core/ui.hpp"
+#include "core/ui/root.hpp"
 #include "core/util.hpp"
 
 class IScene{ //Base class for Scene

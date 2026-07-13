@@ -1,5 +1,4 @@
 #include "core/myinput.hpp"
-#include "core/util.hpp"
 
 MyInput::MyInput()
 {

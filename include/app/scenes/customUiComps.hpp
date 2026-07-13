@@ -1,5 +1,5 @@
 #pragma once
-#include "core/ui.hpp"
+#include "core/ui/component.hpp"
 
 class TestComp: public UIComponent{
 public:

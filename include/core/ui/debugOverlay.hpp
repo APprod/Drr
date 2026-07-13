@@ -1,6 +1,7 @@
 #pragma once
 
-#include "core/ui.hpp"
+#include "core/ui/layout.hpp"
+#include "core/ui/label.hpp"
 
 class DebugOverlay: public Stack{
     //Does not consume events

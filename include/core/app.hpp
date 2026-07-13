@@ -1,9 +1,6 @@
 /* all functionality in this class */
 #pragma once
 
-#include "core/recManager.hpp"
-#include "core/myinput.hpp"
-#include "core/structs.hpp"
 #include "core/scene.hpp"
 
 

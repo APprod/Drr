@@ -3,7 +3,6 @@
 
 #include <string>
 #include <iostream>
-#include <cassert>
 #include <filesystem>
 
 namespace dbg {

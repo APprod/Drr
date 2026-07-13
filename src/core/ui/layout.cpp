@@ -1,29 +1,8 @@
-#include "core/ui.hpp"
+#include "core/ui/layout.hpp"
 #include "core/util.hpp"
-#include "core/structs.hpp"
-#include "core/debug.hpp"
 
 #include <numeric>
 #include <cmath>
-
-
-// helper type for the visitor
-template<class... Ts>
-struct overloaded : Ts... { using Ts::operator()...; };
-
-UIComponent* UIComponent::FindTarget(Vector2 point){
-    if (HitTest(point)) return this;
-    return nullptr;
-}
-
-Padding UICSpec::ResolvePadding(Vector2 dims) const{
-    return {
-        static_cast<int>(padding.top + dims.y*paddingPct.top / 100.0f),
-        static_cast<int>(padding.bottom + dims.y*paddingPct.bottom / 100.0f),
-        static_cast<int>(padding.left + dims.x*paddingPct.left / 100.0f),
-        static_cast<int>(padding.right + dims.x*paddingPct.right / 100.0f),
-    };
-}
 
 Layout::Layout(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         : UIComponent(uiSpec), layoutSpec(layoutSpec) {}
@@ -55,11 +34,10 @@ UIComponent* Layout::FindTarget(Vector2 point){
         auto& child = (*it);
         if (!child->interactive) continue;
         UIComponent* comp = child->FindTarget(point);
-        if (comp){ //we found it
+        if (comp){
             return comp;
         }
     }
-    // if (this->HitTest(point)) return this;
     return nullptr;
 }
 
@@ -67,7 +45,7 @@ EventResult Layout::OnEvent(const MyEvent& event){
     for (auto it = children.rbegin(); it != children.rend(); ++it){
         auto& child = (*it);
         EventResult result = child->OnEvent(event);
-        if (result == EventResult::NotHandled) continue;        
+        if (result == EventResult::NotHandled) continue;
         return result;
     }
     return EventResult::NotHandled;
@@ -89,10 +67,9 @@ void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis
     }
 }
 
-
 void Layout::ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
     float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance){
-        
+
     std::vector<bool> frozen(children.size());
     for (size_t i = 0; i < children.size(); ++i)
         frozen[i] = children[i]->Spec().flex.*flexField == 0;
@@ -126,7 +103,6 @@ void Layout::ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mai
         if (!changed) break;
     }
 }
-
 
 std::vector<Vector2> Layout::CalculateFlex(Vector2 innerDim, Axis mainAxis, Axis crossAxis, float& spare){
     std::vector<Vector2> res; res.reserve(children.size());
@@ -163,12 +139,10 @@ std::vector<Vector2> Layout::CalculateFlex(Vector2 innerDim, Axis mainAxis, Axis
 }
 
 void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAxis) {
-    //Assume we now have flex.
     Vector2 innerPosStart = { innerRect.x, innerRect.y };
     Vector2 innerPos = innerPosStart;
     Vector2 innerDim = { innerRect.width, innerRect.height };
-    
-    //First pass
+
     float spare{0};
     auto sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare);
     for (auto& s : sizes) {
@@ -179,12 +153,12 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         s.*mainAxis = std::round(s.*mainAxis);
         s.*crossAxis = std::round(s.*crossAxis);
     }
-    // Remeasure with final sizes
+
     for (size_t i = 0; i < children.size(); ++i)
     {
-        children[i]->OnMeasure(sizes[i]); 
+        children[i]->OnMeasure(sizes[i]);
     }
-    //Second pass After everyone is satisfied with new sizes
+
     spare = {0};
     sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare);
     for (auto& s : sizes) {
@@ -198,7 +172,7 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
 
     float spacing = layoutSpec.spacing;
 
-    if (layoutSpec.justifyContent == JustifyContent::SpaceEvenly){    
+    if (layoutSpec.justifyContent == JustifyContent::SpaceEvenly){
         if (sizes.size() > 1)
         {
             float total = std::accumulate(sizes.begin(),sizes.end(),0.0f,
@@ -207,7 +181,7 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
             float occupied = total + layoutSpec.spacing * (sizes.size() - 1);
             float missed = innerDim.*mainAxis - occupied;
             missed = std::max(0.0f, missed);
-            
+
             spacing = layoutSpec.spacing + missed / (sizes.size() - 1);
             spacing = std::round(spacing);
         }
@@ -244,10 +218,8 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         children[i]->OnArrange(r);
         innerPos.*mainAxis += finalSize.*mainAxis + spacing;
         innerPos.*mainAxis = std::round(innerPos.*mainAxis);
-    } 
+    }
 }
-
-
 
 void VerticalLayout::MeasureContent(Vector2 available)
 {
@@ -259,7 +231,6 @@ void VerticalLayout::ArrangeContent(Rectangle actualRect)
     ArrangeAxialLayout(actualRect, &Vector2::y,&Vector2::x);
 }
 
-
 void HorizontalLayout::MeasureContent(Vector2 available)
 {
     MeasureAxialLayout(available, &Vector2::x, &Vector2::y);
@@ -269,7 +240,6 @@ void HorizontalLayout::ArrangeContent(Rectangle actualRect)
 {
     ArrangeAxialLayout(actualRect, &Vector2::x, &Vector2::y);
 }
-
 
 void Stack::MeasureContent(Vector2 available){
     contentDesiredSize = available;
@@ -281,202 +251,4 @@ void Stack::ArrangeContent(Rectangle rect){
     for (auto&child: children){
         child->OnArrange(rect);
     }
-}
-
-
-Vector2 Root::getPos(const MyEvent& event){
-    Vector2 res = std::visit(overloaded{
-        [](const CursorMoveEvent& e) -> Vector2 {return e.pos;},
-        [](const CursorActionEvent& e) -> Vector2 {return e.pos;},
-        [](const auto&){throw std::runtime_error("Required to get a position of an event without the position"); return Vector2{0,0};}
-    }, event);
-    return res;
-}
-
-void Root::UpdateHover()
-{
-    UIComponent* newHovered = nullptr;
-
-    if (m_captured){
-        if (m_captured->HitTest(m_cursorPos))
-            newHovered = m_captured;
-    }
-    else{
-        newHovered = FindTarget(m_cursorPos);
-    }
-
-    if (newHovered == m_hovered)
-        return;
-    if (m_hovered)
-        m_hovered->OnHoverExit();
-
-    m_hovered = newHovered;
-    if (m_hovered)
-        m_hovered->OnHoverEnter();
-}
-
-std::optional<EventResult> Root::CheckCaptured(const MyEvent& event){
-    if (!m_captured)
-        return std::nullopt;
-    if (!(m_captured->getCaptureTypes() & getEventType(event)))
-        return std::nullopt;
-
-    EventResult result = m_captured->OnEvent(event);
-    if (result == EventResult::ReleaseCapture)
-    {
-        m_captured = nullptr;
-        UpdateHover();
-    }
-    return result;
-}
-
-EventResult Root::OnEvent(const MyEvent& event){
-    PerfTester tester = GetServices().perfLog.log("Root::OnEvent");
-
-    if (auto* move = std::get_if<CursorMoveEvent>(&event))
-    {
-        m_cursorPos = move->pos;
-        if (auto r = CheckCaptured(event))
-            return *r;
-        Layout::OnEvent(event);
-        UpdateHover();
-        return EventResult::Handled;
-    }
-
-    if (auto* screen = std::get_if<ScreenInterEvent>(&event))
-    {
-        if (screen->action == ScreenInteraction::EXIT)
-        {
-            if (m_hovered)
-            {
-                m_hovered->OnHoverExit();
-                m_hovered = nullptr;
-            }
-        }
-
-        return EventResult::Handled;
-    }
-    { 
-        if (auto r = CheckCaptured(event)) return *r;
-        EventResult result = Layout::OnEvent(event);
-        if (result == EventResult::RequireCapture)
-        {
-            m_captured = FindTarget(getPos(event));
-            UpdateHover();
-        }
-        return result;
-    }
-}
-
-Button::Button(
-    Text text,
-    std::function<void()> onClick,
-    std::string textureName,
-    Vector2 targetSize,
-    UIComponentSpec spec
-): UIComponent{spec}, m_text{std::move(text)}, m_onClick{onClick}, m_textureName{textureName} {
-    this->targetSize = targetSize;
-}
-
-void Button::OnDrawContent(){
-    auto& manager = GetServices().recManager;
-    auto texture = manager.getTexture(m_textureName);
-    auto target = GetDrawRect();
-    ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
-
-    m_text.DrawCentered(target);
-    if (m_hover && !m_hold){
-        ::DrawRectanglePro(target,{0,0},0.f,{255,255,255,50});
-    }
-    else if (m_hover && m_hold){
-        ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
-        ::DrawRectanglePro(target,{0,0},0.f,{150,150,150,255});
-        ::EndBlendMode();
-    }
-}
-
-EventResult Button::OnEvent(const MyEvent& event){
-    if (std::holds_alternative<CursorActionEvent>(event)){
-        const auto& btn = std::get<CursorActionEvent>(event);
-        if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && btn.pressed){
-            if (HitTest(btn.pos)){
-                m_hold = true;
-                return EventResult::RequireCapture;
-            }
-        }
-        if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && !btn.pressed){
-            if (m_hold){
-                if (HitTest(btn.pos)){
-                    m_onClick();
-                }
-                m_hold = false;   
-                return EventResult::ReleaseCapture; // always release if held
-            }
-            
-        }
-    }
-    return EventResult::NotHandled;
-}
-
-void Button::OnHoverEnter()
-{
-    m_hover = true;
-}
-
-void Button::OnHoverExit()
-{
-    m_hover = false;
-}
-
-
-
-Label::Label(
-    Text text,
-    UIComponentSpec spec
-): UIComponent{spec}, m_text{std::move(text)}
-{}
-
-void Label::SetText(std::string text){
-    m_text.SetText(std::move(text));
-}
-
-bool Label::OnUpdate()
-{
-    auto r = GetDrawRect();
-    m_text.ReMeasure({r.width,r.height});
-    if (m_text.IsDirty()) {
-        m_text.ClearDirty();
-        return true;
-    }
-    return false;
-}
-
-void Label::MeasureContent(Vector2 available){
-    auto textSize = m_text.ReMeasure(available);
-    contentDesiredSize = {
-        std::min(available.x, textSize.x),
-        textSize.y
-    };
-}
-
-void Label::OnDrawContent(){
-    auto rect = GetDrawRect();
-    BeginScissorMode(rect.x, rect.y, rect.width, rect.height);
-    m_text.Draw({rect.x, rect.y - m_scrollOffset});
-    EndScissorMode();
-}
-
-EventResult Label::OnEvent(const MyEvent& event){
-    if (auto* e = std::get_if<ScrollEvent>(&event)){
-        if (!hovered){
-            return EventResult::NotHandled;
-        }
-        auto drawRect = GetDrawRect();
-        auto textSize = m_text.RealSize();
-        auto maxOffset = textSize.y - drawRect.height;
-        m_scrollOffset -= m_scrollSpeed * e->delta.y;
-        myClamp(m_scrollOffset,0.0f,maxOffset);
-        return EventResult::Handled;
-    }
-    return EventResult::NotHandled;
 }

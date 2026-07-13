@@ -2,7 +2,7 @@
 #include "core/app.hpp"
 #include "core/debug.hpp"
 #include "core/util.hpp"
-#include "core/structs.hpp"
+#include "core/services.hpp"
 #include "app/scenes/testScene.hpp"
 
 #include <memory>

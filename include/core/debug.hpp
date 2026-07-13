@@ -3,7 +3,6 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <cassert>
 #include <memory>
 #include <vector>
 #include <sstream>

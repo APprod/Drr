@@ -1,0 +1,24 @@
+#pragma once
+
+#include <string>
+#include <unordered_map>
+#include <variant>
+#include <functional>
+#include "raylib.h"
+
+using UniformValue = std::variant<float, int, Vector2, Vector3, Vector4>;
+
+using Uniforms = std::unordered_map<std::string, UniformValue>;
+
+struct UniformInput{
+    std::string name;
+    UniformValue value;
+};
+
+struct ShaderProgram{
+    Shader shader;
+    std::unordered_map<std::string, int> locations;
+    Uniforms defaults;
+};
+
+void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall);

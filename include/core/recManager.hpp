@@ -4,30 +4,10 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <variant>
-#include <functional>
 #include "raylib.h"
-// #include "loader.hpp"
+#include "core/shader.hpp"
 
 using FontMap = std::unordered_map<int, Font>;
-
-
-using UniformValue = std::variant<float, int, Vector2, Vector3, Vector4>;
-
-using Uniforms = std::unordered_map<std::string, UniformValue>;
-
-
-struct UniformInput{
-    std::string name;
-    UniformValue value;
-};
-
-
-struct ShaderProgram{
-    Shader shader;
-    std::unordered_map<std::string, int> locations;
-    Uniforms defaults;
-};
 
 class RecourceManager
 {
@@ -58,6 +38,3 @@ private:
     std::unordered_map<std::string, FontMap> m_fonts;
     std::unordered_map<std::string, ShaderProgram> m_shaders;
 };
-
-
-void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall);

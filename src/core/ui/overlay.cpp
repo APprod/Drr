@@ -1,6 +1,6 @@
-#include "app/overlay.hpp"
-#include "core/structs.hpp"
-#include "core/debugOverlay.hpp"
+#include "core/ui/overlay.hpp"
+#include "core/services.hpp"
+#include "core/ui/debugOverlay.hpp"
 
 Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {

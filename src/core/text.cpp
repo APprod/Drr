@@ -1,6 +1,5 @@
 #include "core/text.hpp"
-#include "core/structs.hpp"
-#include "core/debug.hpp"
+#include "core/services.hpp"
 
 Text::Text(std::string text, std::string fontName, float fontSize, float fontSpacing, Color color)
     : m_text{std::move(text)}, m_fontName{std::move(fontName)}, m_fontSize{fontSize}, m_fontSpacing{fontSpacing}, m_color{color}

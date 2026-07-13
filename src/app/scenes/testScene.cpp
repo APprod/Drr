@@ -1,8 +1,10 @@
 #include "app/scenes/testScene.hpp"
 #include "app/scenes/customUIComps.hpp"
-#include "app/overlay.hpp"
+#include "core/ui/overlay.hpp"
 #include "core/util.hpp"
-#include "core/debugOverlay.hpp"
+#include "core/ui/debugOverlay.hpp"
+#include "core/ui/button.hpp"
+#include "core/ui/layout.hpp"
 
 TestScene::TestScene(RecourceManager& manager): m_manager{manager}
 {}

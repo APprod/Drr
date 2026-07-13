@@ -1,8 +1,5 @@
 /*just definitions of all structs used in different parts*/
 #pragma once
-#include "raylib.h"
-#include <string>
-#include <cstdint>
 #include "core/recManager.hpp"
 #include "core/myinput.hpp"
 #include "core/runtimeConfig.hpp"

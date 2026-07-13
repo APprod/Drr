@@ -1,0 +1,90 @@
+#pragma once
+
+#include <memory>
+#include <vector>
+
+#include "core/ui/component.hpp"
+
+enum class Alignment{
+    Beginning,
+    Center,
+    End
+};
+
+enum class JustifyContent{
+    SpaceEvenly,
+    None,
+};
+
+struct LayoutSpec{
+    Alignment align;
+    Alignment crossAlign{Alignment::Center};
+    JustifyContent justifyContent{JustifyContent::None};
+    int spacing = 5;
+    bool crossShrink = true;
+    LayoutSpec& SetAlign(Alignment a) { align = a; return *this; }
+    LayoutSpec& AlignBegin() { align = Alignment::Beginning; return *this; }
+    LayoutSpec& AlignCenter() { align = Alignment::Center; return *this; }
+    LayoutSpec& AlignEnd() { align = Alignment::End; return *this; }
+    LayoutSpec& CrossAlign(Alignment a) { crossAlign = a; return *this; }
+    LayoutSpec& CrossBegin() { crossAlign = Alignment::Beginning; return *this; }
+    LayoutSpec& CrossCenter() { crossAlign = Alignment::Center; return *this; }
+    LayoutSpec& CrossEnd() { crossAlign = Alignment::End; return *this; }
+    LayoutSpec& CrossShrink(bool a) { crossShrink = a; return *this; }
+    LayoutSpec& ShrinkOn() { crossShrink = true; return *this; }
+    LayoutSpec& ShrinkOff() { crossShrink = false; return *this; }
+    LayoutSpec& JustifyContent(JustifyContent j) { justifyContent = j; return *this; }
+    LayoutSpec& JustifyEvenly() { justifyContent = JustifyContent::SpaceEvenly; return *this; }
+    LayoutSpec& JustifyNone() { justifyContent = JustifyContent::None; return *this; }
+    LayoutSpec& Spacing(int s) { spacing = s; return *this; }
+};
+
+inline LayoutSpec base{Alignment::Beginning};
+
+class Layout: public UIComponent{
+public:
+    Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base);
+    virtual ~Layout() = default;
+
+    template<typename... Ts>
+    Layout& Add(Ts&&... children) {
+        (AddChild(std::make_unique<std::decay_t<Ts>>(std::forward<Ts>(children))), ...);
+        return *this;
+    }
+    void AddChild(std::unique_ptr<UIComponent>&& child);
+    void OnDrawContent() override;
+    bool OnUpdate() override;
+    EventResult OnEvent(const MyEvent& event) override;
+    const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return children;}
+    virtual UIComponent* FindTarget(Vector2 point) override;
+protected:
+    LayoutSpec layoutSpec;
+    std::vector<std::unique_ptr<UIComponent>> children;
+
+    using Axis = float Vector2::*;
+    void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis);
+    void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis, Axis crossAxis);
+
+    std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, Axis crossAxis, float& spare);
+    void ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
+        float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance);
+};
+
+class VerticalLayout: public Layout{
+    using Layout::Layout;
+    virtual void MeasureContent(Vector2 available) override;
+    virtual void ArrangeContent(Rectangle actualRect) override;
+};
+
+class HorizontalLayout: public Layout{
+    using Layout::Layout;
+    virtual void MeasureContent(Vector2 available) override;
+    virtual void ArrangeContent(Rectangle actualRect) override;
+};
+
+class Stack: public Layout{
+public:
+    using Layout::Layout;
+    virtual void MeasureContent(Vector2 available) override;
+    virtual void ArrangeContent(Rectangle rect) override;
+};

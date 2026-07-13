@@ -32,7 +32,8 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxHeight(),
         LayoutSpec{}.AlignBegin().CrossEnd());
     right->Add(
-            PerformanceDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1}))
+            PerformanceDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1})),
+            Label(Text("F1 - overlay\nF2 - layout\nF3 - content\nF4 - fps\nF5 - cursor\nF6 - perf\nF7 - log", "TNR", fontSize, 0))
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));

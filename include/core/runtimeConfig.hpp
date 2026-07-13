@@ -2,10 +2,10 @@
 
 struct RuntimeConfig {
     bool showFPS{true};
-    bool showLayoutBounds{false};
-    bool showLayoutContentBounds{false};
+    bool showLayoutBounds{true};
+    bool showLayoutContentBounds{true};
     bool showCursorPos{true};
     bool showPerformance{true};
     bool showDebugLog{true};
-    int debugMessagesCount{10};
+    int debugMessagesCount{20};
 };

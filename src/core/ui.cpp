@@ -1,6 +1,7 @@
 #include "core/ui.hpp"
 #include "core/util.hpp"
 #include "core/structs.hpp"
+#include "core/debug.hpp"
 
 #include <numeric>
 #include <cmath>
@@ -58,7 +59,7 @@ UIComponent* Layout::FindTarget(Vector2 point){
             return comp;
         }
     }
-    if (this->HitTest(point)) return this;
+    // if (this->HitTest(point)) return this;
     return nullptr;
 }
 
@@ -69,7 +70,7 @@ EventResult Layout::OnEvent(const MyEvent& event){
         if (result == EventResult::NotHandled) continue;        
         return result;
     }
-    return UIComponent::OnEvent(event);
+    return EventResult::NotHandled;
 }
 
 void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis) {
@@ -460,5 +461,23 @@ void Label::MeasureContent(Vector2 available){
 
 void Label::OnDrawContent(){
     auto rect = GetDrawRect();
-    m_text.Draw({rect.x, rect.y});
+    BeginScissorMode(rect.x, rect.y, rect.width, rect.height);
+    m_text.Draw({rect.x, rect.y - m_scrollOffset});
+    EndScissorMode();
+}
+
+EventResult Label::OnEvent(const MyEvent& event){
+    if (auto* e = std::get_if<ScrollEvent>(&event)){
+        if (!hovered){
+            return EventResult::NotHandled;
+        }
+        dbg::GetLogger().DebugInfo("event scroll:", e->delta);
+        auto drawRect = GetDrawRect();
+        auto textSize = m_text.RealSize();
+        auto maxOffset = textSize.y - drawRect.height;
+        m_scrollOffset -= m_scrollSpeed * e->delta.y;
+        myClamp(m_scrollOffset,0.0f,maxOffset);
+        return EventResult::Handled;
+    }
+    return EventResult::NotHandled;
 }

@@ -128,7 +128,6 @@ Vector2 Text::ReMeasure(Vector2 borders)
 
 void Text::Draw(Vector2 position)
 {
-
     auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
     auto pos = position;
     for (auto& line: m_linesConstrained){

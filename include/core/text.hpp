@@ -39,6 +39,7 @@ public:
 
     bool IsDirty() const { return m_dirtyFull; }
     void ClearDirty() { m_dirtyFull = false; }
+    Vector2 RealSize() { return m_lastMeasuredSize; }
 
 private:
     std::string m_text;

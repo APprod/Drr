@@ -6,30 +6,44 @@
 DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
     
-    interactive = false;
+    interactive = true;
     int fontSize = 20;
+    
+    PaddingPct padBase{1,1,1,1};
+
+    auto temp = std::make_unique<VerticalLayout>(
+        UICSpec{}.SetPaddingPct(padBase),
+        LayoutSpec{}.AlignBegin()
+    );
     auto mainC = std::make_unique<HorizontalLayout>(
-        UICSpec{}.SetPaddingPct({1,1,1,1}),
-        LayoutSpec{}.AlignBegin().CrossBegin()
+        UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
+        LayoutSpec{}.AlignBegin().CrossBegin().CrossShrink(true)
     );
     auto left = std::make_unique<DebugVerticalLayout>(
-        UICSpec{}.SetPaddingPct({1,1,1,1}).SetFlex({1,1}),
+        UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}),
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
     left->Add(
         FPSDraw(Text("", "TNR", fontSize, 0)),
         CursorTrack(Text("", "TNR", fontSize, 0)),
-        DebugLogDisplay(Text("", "TNR", fontSize, 0))
+        DebugLogDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1}))
     );
     auto right = std::make_unique<DebugVerticalLayout>(
-        UICSpec{}.SetPaddingPct({1,1,1,1}).SetFlex({1,1}),
+        UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxHeight(),
         LayoutSpec{}.AlignBegin().CrossEnd());
     right->Add(
-        PerformanceDisplay(Text("", "TNR", fontSize, 0))
+            PerformanceDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1}))
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));
-    AddChild(std::move(mainC));
+
+    auto tempBottom = std::make_unique<HorizontalLayout>(
+        UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
+        LayoutSpec{}.AlignBegin().CrossBegin()
+    );
+    temp->AddChild(std::move(mainC));
+    temp->AddChild(std::move(tempBottom));
+    AddChild(std::move(temp));
 }
 
 

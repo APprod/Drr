@@ -23,6 +23,11 @@ std::vector<MyEvent> MyInput::pollEvents(){
             if (IsMouseButtonReleased(btn))
                 m_events.push_back(CursorActionEvent{pos, btn, false});
         }   
+        auto wheel = ::GetMouseWheelMoveV();
+        if (wheel.x != 0 || wheel.y != 0){
+            m_events.push_back(ScrollEvent{ wheel });
+        }
+
         if (cursorOnScreen){
             if (!IsCursorOnScreen()){
                 cursorOnScreen = false;

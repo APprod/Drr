@@ -15,17 +15,21 @@ void Button::OnDrawContent(){
     auto& manager = GetServices().recManager;
     auto texture = manager.getTexture(m_textureName);
     auto target = GetDrawRect();
-    ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
-
-    m_text.DrawCentered(target);
+    auto& shader = GetServices().recManager.getShaderProgram("processing");
+    float brightness = 1.0f;
     if (m_hover && !m_hold){
-        ::DrawRectanglePro(target,{0,0},0.f,{255,255,255,50});
+        brightness = 1.5f;
     }
     else if (m_hover && m_hold){
-        ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
-        ::DrawRectanglePro(target,{0,0},0.f,{150,150,150,255});
-        ::EndBlendMode();
+        brightness = 0.7f;
     }
+    useShader(shader,{{"brightness", brightness}},
+            [this, texture, target](){
+                ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
+                m_text.DrawCentered(target);
+            }
+    );
+
 }
 
 EventResult Button::OnEvent(const MyEvent& event){

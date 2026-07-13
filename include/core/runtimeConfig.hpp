@@ -8,5 +8,6 @@ struct RuntimeConfig {
     bool showPerformance{true};
     bool showDebugLog{true};
     bool showDebugOverlay{false};
+    bool debugFeaturesAllowed{true};
     int debugMessagesCount{20};
 };

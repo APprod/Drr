@@ -41,8 +41,6 @@ void TestScene::OnResize(){
         static_cast<float>(::GetScreenHeight())
     };
     MyRectangle rectangle = {{0,0}, dims};
-    dbg::GetLogger().LogFormat(dbg::Severity::ERROR, "hey this: {}", dims.x);
-
     root.OnMeasure(dims);
     root.OnArrange(rectangle);
 }

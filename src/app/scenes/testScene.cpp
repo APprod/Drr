@@ -32,6 +32,11 @@ void TestScene::OnEnter(){
 }
 
 void TestScene::OnUpdateState(){
+    auto& brightness = GetServices().runtimeCfg.brightness;
+    auto& input = GetServices().input;
+    if (input.IsKeyDown(KEY_W)) brightness += 0.01f;
+    if (input.IsKeyDown(KEY_S)) brightness -= 0.01f;
+    myClamp(brightness, 0.1f, 3.0f);
 }
 
 void TestScene::OnResize(){
@@ -46,9 +51,10 @@ void TestScene::OnResize(){
 }
 void TestScene::OnDrawContent(){
     PerfTester tester = GetServices().perfLog.log("OnDrawContent");
-    ::DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
-    ::BeginBlendMode(BlendMode::BLEND_ADDITIVE);
-    ::DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),{25,25,25,255});
-    ::EndBlendMode();
+
+    auto drawCall = [this](){
+        ::DrawTexture(m_manager.getTexture("menu"), 0,0,RAYWHITE);
+    };
+    useShader(m_manager.getShaderProgram("brightness"),{{"brightness", GetServices().runtimeCfg.brightness}},drawCall);
     root.OnDraw();
 }

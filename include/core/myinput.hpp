@@ -12,8 +12,14 @@ public:
     std::vector<MyEvent> pollEvents();
     //Can be called after call. Retrieves all events between frames
     std::vector<MyEvent> getEvents(){return m_events;}
+
+    bool IsKeyDown(InputKey key) const {
+        return m_keyDown[key];
+    }
+
 private:
     std::vector<MyEvent> m_events;
+    std::array<bool, InputKey::KEY_KB_MENU + 1> m_keyDown{};
     bool cursorOnScreen = true;
 };
 

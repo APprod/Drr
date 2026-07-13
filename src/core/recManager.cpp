@@ -28,6 +28,19 @@ void RecourceManager::init()
     FontMap defFonts;
     defFonts[10] = ::GetFontDefault();
     m_fonts["default"] = defFonts;
+    loadShader("brightness","assets/shaders/brightness.fs",{{"brightness",{(float)1.0f}}});
+    loadShader(
+    "processing",
+    "assets/shaders/processing.fs",
+    {
+        {"brightness", 1.0f},
+        {"contrast",   1.0f},
+        {"saturation", 1.0f},
+        {"gamma",      1.0f},
+        {"tint",       Vector3{1.0f, 1.0f, 1.0f}},
+        {"alpha",      1.0f}
+    }
+);
 }
 
 void RecourceManager::load()
@@ -184,4 +197,72 @@ void RecourceManager::loadTextures()
     loadTexture("button_default");
     loadTexture("button_wide");
     loadTexture("menu");
+}
+
+void SetUniform(const Shader& shader, int location, const UniformValue& value) {
+    std::visit([&](auto&& v) {
+        using T = std::decay_t<decltype(v)>;
+        if constexpr (std::is_same_v<T, float>)
+            ::SetShaderValue(shader, location, &v, SHADER_UNIFORM_FLOAT);
+        else if constexpr (std::is_same_v<T, int>)
+            ::SetShaderValue(shader, location, &v, SHADER_UNIFORM_INT);
+        else if constexpr (std::is_same_v<T, Vector2>)
+            ::SetShaderValue(shader, location, &v, SHADER_UNIFORM_VEC2);
+            else if constexpr (std::is_same_v<T, Vector3>)
+            ::SetShaderValue(shader, location, &v, SHADER_UNIFORM_VEC3);
+        else if constexpr (std::is_same_v<T, Vector4>)
+            ::SetShaderValue(shader, location, &v, SHADER_UNIFORM_VEC4);
+    }, value);
+}
+
+
+//Pass Function throug lambda drawCall
+void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall){
+    auto& shader = program.shader;
+    auto& locs = program.locations;
+    
+    
+    ::BeginShaderMode(shader);
+
+    for (auto& [name, loc]: locs){
+        auto it = uniforms.find(name);
+        if (it != uniforms.end()){
+            SetUniform(shader, loc, it->second);
+        } else{
+            SetUniform(shader, loc, program.defaults.at(name));
+        }
+    }
+
+    drawCall();
+    ::EndShaderMode();
+}
+
+void RecourceManager::loadShader(std::string name, std::string filepath, 
+    const Uniforms& uniforms)
+{
+    ShaderProgram program;
+    program.defaults = uniforms;
+    auto shader = ::LoadShader(nullptr,filepath.c_str());
+    if (!::IsShaderValid(shader)){
+        dbg::GetLogger().Fatal("Failder to load shader, can't execute future shader draw calls");
+        throw std::runtime_error("Failder to load shader, can't execute future shader draw calls");
+    }
+    program.shader = shader;
+    for (auto& [name, val]: uniforms){
+        auto loc = ::GetShaderLocation(shader, name.c_str());
+        if (loc == -1){
+            dbg::GetLogger().Warn("Shader uniform not found: ", name);
+        }else{
+            program.locations.emplace(name, loc);
+        }
+    }
+    m_shaders[name] = program;
+}
+ShaderProgram& RecourceManager::getShaderProgram(std::string name){
+    auto iter = m_shaders.find(name);
+    if (iter == m_shaders.end()){
+        dbg::GetLogger().Fatal("Couldn't find shader, can't execute future shader draw calls");
+        throw std::runtime_error("Couldn't find shader   , can't execute future shader draw calls");
+    }
+    return iter->second;
 }

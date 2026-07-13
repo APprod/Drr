@@ -42,10 +42,16 @@ std::vector<MyEvent> MyInput::pollEvents(){
         
     }
     {//Keyboard events
-        while (int key = GetKeyPressed()){
-            m_events.push_back(InputKeyEvent{static_cast<KeyboardKey>(key), true});
+        while (int key = GetKeyPressed()) {
+            m_keyDown[key] = true;
+            m_events.push_back(InputKeyEvent{static_cast<InputKey>(key), true});
         }
-        
+        for (int key = KEY_NULL; key <= KEY_KB_MENU; ++key) {
+            if (IsKeyReleased((KeyboardKey)key)) {
+                m_keyDown[key] = false;
+                m_events.push_back(InputKeyEvent{(InputKey)key, false});
+            }
+        }
     }
     return m_events;
 }

@@ -10,4 +10,5 @@ struct RuntimeConfig {
     bool showDebugOverlay{false};
     bool debugFeaturesAllowed{true};
     int debugMessagesCount{20};
+    float brightness{1.0f};
 };

@@ -46,6 +46,11 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     AddChild(std::move(temp));
 }
 
+bool DebugOverlay::OnUpdate(){
+    visible = GetServices().runtimeCfg.showDebugOverlay;
+    interactive = visible;
+    return Stack::OnUpdate();
+}
 
 bool FPSDraw::OnUpdate(){
     if (GetServices().runtimeCfg.showFPS)

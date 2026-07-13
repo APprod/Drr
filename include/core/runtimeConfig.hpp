@@ -7,5 +7,6 @@ struct RuntimeConfig {
     bool showCursorPos{true};
     bool showPerformance{true};
     bool showDebugLog{true};
+    bool showDebugOverlay{true};
     int debugMessagesCount{20};
 };

@@ -41,5 +41,11 @@ std::vector<MyEvent> MyInput::pollEvents(){
         }
         
     }
+    {//Keyboard events
+        while (int key = GetKeyPressed()){
+            m_events.push_back(InputKeyEvent{static_cast<KeyboardKey>(key), true});
+        }
+        
+    }
     return m_events;
 }

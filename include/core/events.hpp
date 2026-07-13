@@ -23,10 +23,13 @@ struct CursorActionEvent{
     CursorAction button{};
     bool pressed{};
 };
+
+using InputKey = KeyboardKey;
 struct InputKeyEvent{ //only for typying
-    KeyboardKey key{};
+    InputKey key{};
     bool pressed{};
 };
+
 struct Action{}; // Shortcuts, etc
 struct ActionEvent{
     Action key{};

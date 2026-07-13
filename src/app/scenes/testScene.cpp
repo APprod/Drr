@@ -1,5 +1,6 @@
 #include "app/scenes/testScene.hpp"
 #include "app/scenes/customUIComps.hpp"
+#include "app/overlay.hpp"
 #include "core/util.hpp"
 #include "core/debugOverlay.hpp"
 
@@ -25,6 +26,7 @@ void TestScene::OnEnter(){
         column->AddChild(std::move(row));    
     }
     root.AddChild(std::move(column));
+    root.AddChild(std::make_unique<Overlay>());
     root.AddChild(std::make_unique<DebugOverlay>());
     OnResize();
 }

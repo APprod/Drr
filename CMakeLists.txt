@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 cmake_policy(SET CMP0135 NEW)
+cmake_policy(SET CMP0091 NEW)
 project(app)
 
 option(IS_STATIC "option static" OFF)
@@ -14,6 +15,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+
+if(IS_STATIC AND NOT EMSCRIPTEN)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "" FORCE)
+    endif()
+    message("building static")
 endif()
 
 FILE(GLOB_RECURSE MyCPPSources ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/include/*.hpp)
@@ -51,6 +59,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     -Wlogical-op
     -Wnull-dereference
     -Wdouble-promotion
+    -Wfloat-conversion
     -Wuseless-cast
     -Werror>
   $<$<CONFIG:Release>:-O3 -Os
@@ -67,9 +76,13 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     -Wlogical-op
     -Wnull-dereference
     -Wdouble-promotion
+    -Wfloat-conversion
     -Wuseless-cast
     >
   )
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(app PRIVATE -Wchanges-meaning)
+  endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_compile_options(app PRIVATE
   $<$<CONFIG:Debug>:/W4
@@ -84,11 +97,8 @@ endif()
 
 if(IS_STATIC AND NOT EMSCRIPTEN)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_link_options(app PRIVATE -static)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        set_property(TARGET app PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        target_link_options(app PRIVATE -static-libgcc -static-libstdc++)
     endif()
-    message("building static")
 endif()
 
 if (EMSCRIPTEN)
@@ -112,19 +122,22 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
 set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # don't build the supplied example games
 FetchContent_MakeAvailable(raylibLib)
 
-if (EMSCRIPTEN)
-    target_compile_options(raylib PRIVATE -w)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(raylib PRIVATE -w)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(raylib PRIVATE -w)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(raylib PRIVATE /W0)
+if(TARGET raylib)
+    if (EMSCRIPTEN)
+        target_compile_options(raylib PRIVATE -w)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(raylib PRIVATE -w)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(raylib PRIVATE -w)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_options(raylib PRIVATE /W0)
+    endif()
 endif()
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
 target_include_directories(app PUBLIC include/)
+target_include_directories(app PRIVATE "${CMAKE_SOURCE_DIR}/third-party/raylib")
 
 target_link_libraries(app PRIVATE nlohmann_json::nlohmann_json raylib)
 

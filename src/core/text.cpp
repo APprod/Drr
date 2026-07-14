@@ -1,7 +1,7 @@
 #include "core/text.hpp"
 #include "core/services.hpp"
 
-Text::Text(std::string text, std::string fontName, float fontSize, float fontSpacing, Color color)
+Text::Text(std::string text, std::string fontName, int fontSize, float fontSpacing, Color color)
     : m_text{std::move(text)}, m_fontName{std::move(fontName)}, m_fontSize{fontSize}, m_fontSpacing{fontSpacing}, m_color{color}
 {
     m_dirtyText = true;
@@ -31,13 +31,13 @@ std::vector<Line> splitLines(std::string& text){
 
 //Measures the m_lines words sizes
 void Text::measureLines(){
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    float spaceSize = MeasureTextEx(font, " ", m_fontSize, m_fontSpacing).x;
+    auto font = GetServices().recManager.getFont(m_fontName, static_cast<int>(m_fontSize));
+    float spaceSize = MeasureTextEx(font, " ", static_cast<float>(m_fontSize), m_fontSpacing).x;
     for (auto& line: m_lines ){
         Vector2 linesize{0,0};
         bool first = true;
         for (auto& word: line.words){
-            auto size = MeasureTextEx(font, word.word.c_str(),m_fontSize,m_fontSpacing);
+            auto size = MeasureTextEx(font, word.word.c_str(), static_cast<float>(m_fontSize), m_fontSpacing);
             word.size = size;
             linesize.x += size.x;
             if (!first) linesize.x += spaceSize;
@@ -49,8 +49,8 @@ void Text::measureLines(){
 }
 
 std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vector2 borders){
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
-    float spaceSize = MeasureTextEx(font, " ", m_fontSize, m_fontSpacing).x;
+    auto font = GetServices().recManager.getFont(m_fontName, static_cast<int>(m_fontSize));
+    float spaceSize = MeasureTextEx(font, " ", static_cast<float>(m_fontSize), m_fontSpacing).x;
     std::vector<Line> resLines;
     for (auto& line: lines){
         Line newLine;
@@ -127,11 +127,11 @@ Vector2 Text::ReMeasure(Vector2 borders)
 
 void Text::Draw(Vector2 position)
 {
-    auto font = GetServices().recManager.getFont(m_fontName, m_fontSize);
+    auto font = GetServices().recManager.getFont(m_fontName, static_cast<int>(m_fontSize));
     auto pos = position;
     for (auto& line: m_linesConstrained){
         
-        ::DrawTextEx(font, line.lineView.c_str(), pos, m_fontSize, m_fontSpacing, m_color);
+        ::DrawTextEx(font, line.lineView.c_str(), pos, static_cast<float>(m_fontSize), m_fontSpacing, m_color);
         pos.y += line.size.y;
     }
     

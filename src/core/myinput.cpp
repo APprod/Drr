@@ -46,9 +46,9 @@ std::vector<MyEvent> MyInput::pollEvents(){
             m_events.push_back(InputKeyEvent{static_cast<InputKey>(key), true});
         }
         for (int key = KEY_NULL; key <= KEY_KB_MENU; ++key) {
-            if (IsKeyReleased((KeyboardKey)key)) {
+            if (IsKeyReleased(static_cast<KeyboardKey>(key))) {
                 m_keyDown[key] = false;
-                m_events.push_back(InputKeyEvent{(InputKey)key, false});
+                m_events.push_back(InputKeyEvent{static_cast<InputKey>(key), false});
             }
         }
     }

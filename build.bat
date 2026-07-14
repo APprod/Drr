@@ -11,12 +11,12 @@ set "START_TIME=%TIME%"
 
 :parse
 if "%1"=="" goto :endparse
-if "%1"=="release" set "BUILD_TYPE=Release" & set "BUILD_DIR=Release" & shift & goto :parse
-if "%1"=="debug" set "BUILD_TYPE=Debug" & set "BUILD_DIR=Debug" & shift & goto :parse
-if "%1"=="static" set "STATIC_LINKING=ON" & shift & goto :parse
-if "%1"=="dynamic" set "STATIC_LINKING=OFF" & shift & goto :parse
-if "%1"=="web" set "WEB=True" & set "BUILD_DIR_BASE=_build\Web\" & shift & goto :parse
-if "%1"=="msvc" set "MSVC=True" & shift & goto :parse
+if /I "%1"=="release" set "BUILD_TYPE=Release" & set "BUILD_DIR=Release" & shift & goto :parse
+if /I "%1"=="debug" set "BUILD_TYPE=Debug" & set "BUILD_DIR=Debug" & shift & goto :parse
+if /I "%1"=="static" set "STATIC_LINKING=ON" & shift & goto :parse
+if /I "%1"=="dynamic" set "STATIC_LINKING=OFF" & shift & goto :parse
+if /I "%1"=="web" set "WEB=True" & set "BUILD_DIR_BASE=_build\Web\" & shift & goto :parse
+if /I "%1"=="msvc" set "MSVC=True" & shift & goto :parse
 :endparse
 
 if "%MSVC%"=="True" set "BUILD_DIR=msvc-%BUILD_DIR%"
@@ -27,17 +27,24 @@ goto :desktop
 :webBuild
 
 echo Building %BUILD_TYPE% configuration... For Web
-emcmake cmake -S . -B %BUILD_DIR_BASE%%BUILD_DIR% -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DPLATFORM=Web
-if %errorlevel% neq 0 exit /b 
+set "PATH=C:\msys64\ucrt64\bin;%PATH%"
+if defined EMSDK (
+    cmake -S . -B %BUILD_DIR_BASE%%BUILD_DIR% -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DPLATFORM=Web "-DCMAKE_TOOLCHAIN_FILE=%EMSDK%\upstream\emscripten\cmake\Modules\Platform\Emscripten.cmake"
+) else (
+    emcmake cmake -S . -B %BUILD_DIR_BASE%%BUILD_DIR% -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DPLATFORM=Web
+)
+if %errorlevel% neq 0 exit /b %errorlevel%
 cmake --build %BUILD_DIR_BASE%%BUILD_DIR% --target app --parallel
+if %errorlevel% neq 0 exit /b %errorlevel%
 goto :endBuild
 
 :msvcBuild
 
 echo Building %BUILD_TYPE% configuration... MSVC
 cmake -S . -B %BUILD_DIR_BASE%%BUILD_DIR% -G "Visual Studio 17 2022" -A x64 -DIS_STATIC=%STATIC_LINKING%
-if %errorlevel% neq 0 exit /b 
+if %errorlevel% neq 0 exit /b %errorlevel%
 cmake --build %BUILD_DIR_BASE%%BUILD_DIR% --config %BUILD_TYPE% --parallel
+if %errorlevel% neq 0 exit /b %errorlevel%
 goto :endBuild
 
 :desktop
@@ -45,16 +52,16 @@ goto :endBuild
 echo Building %BUILD_TYPE% configuration...
 
 cmake -S . -B%BUILD_DIR_BASE%%BUILD_DIR% -G "MinGW Makefiles" -DIS_STATIC=%STATIC_LINKING%  -DCMAKE_BUILD_TYPE=%BUILD_TYPE% 
-if %errorlevel% neq 0 exit /b 
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 cmake --build %BUILD_DIR_BASE%%BUILD_DIR% --config %BUILD_TYPE% --parallel
-if %errorlevel% neq 0 exit /b 
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 :endBuild
 
 set "END_TIME=%TIME%"
 call :ElapsedTime "%START_TIME%" "%END_TIME%"
-exit /b
+exit /b 0
 
 :ElapsedTime
 setlocal

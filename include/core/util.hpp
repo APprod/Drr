@@ -15,6 +15,14 @@ struct Ivec2
     int32_t y;
 };
 
+struct IRect
+{
+    int x;
+    int y;
+    int width;
+    int height;
+};
+
 struct MyRectangle {
     Rectangle rect;
 
@@ -80,6 +88,7 @@ struct Ivec2Hasher
 };
 
 Ivec2 ivec(Vector2 vec);
+IRect irect(Rectangle r);
 
 bool operator==(const Ivec2 &vec1, const Ivec2 &vec2);
 
@@ -111,10 +120,10 @@ void myClamp(T &val, T min, T max)
 
 class Tester
 {
-    std::chrono::steady_clock::time_point start;
-    std::string name;
-    float thresholdMs;
-    bool active;
+    std::chrono::steady_clock::time_point m_start;
+    std::string m_name;
+    float m_thresholdMs;
+    bool m_active;
 public:
 
     Tester(std::string name, float thresholdMs, bool active);

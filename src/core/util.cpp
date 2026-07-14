@@ -110,6 +110,12 @@ Ivec2 ivec(Vector2 vec)
     return {static_cast<int32_t>(vec.x), static_cast<int32_t>(vec.y)};
 }
 
+IRect irect(Rectangle r)
+{
+    return {static_cast<int>(r.x), static_cast<int>(r.y),
+            static_cast<int>(r.width), static_cast<int>(r.height)};
+}
+
 bool operator==(const Ivec2 &vec1, const Ivec2 &vec2)
 {
     return vec1.x == vec2.x && vec1.y == vec2.y;
@@ -133,24 +139,24 @@ std::string toString(Rectangle vec)
             + std::to_string(vec.width) + " "+std::to_string(vec.height);
 }
 Tester::Tester(std::string name, float thresholdMs, bool active): 
-        start(std::chrono::steady_clock::now()), 
-        name(name), 
-        thresholdMs(thresholdMs),
-        active(active)
+        m_start(std::chrono::steady_clock::now()), 
+        m_name(name), 
+        m_thresholdMs(thresholdMs),
+        m_active(active)
 {
 }
 
 Tester::~Tester()
 {
-    if (!active) return;
+    if (!m_active) return;
     auto end = std::chrono::steady_clock::now();
-    auto ms = std::chrono::duration<float, std::milli>(end - start).count();
-    if (ms > thresholdMs * 2) dbg::GetLogger().DebugInfo("!!!!!! Tester " + name + " , ms:", ms);
-    else if (ms > thresholdMs) dbg::GetLogger().DebugInfo("Tester: " + name + " , ms:", ms);
+    auto ms = std::chrono::duration<float, std::milli>(end - m_start).count();
+    if (ms > m_thresholdMs * 2) dbg::GetLogger().DebugInfo("!!!!!! Tester " + m_name + " , ms:", ms);
+    else if (ms > m_thresholdMs) dbg::GetLogger().DebugInfo("Tester: " + m_name + " , ms:", ms);
 }
 
 PerfTester PerformanceLog::log(std::string name){
-    auto callback = [this](std::string name, float delta){getData(name, delta);};
+    auto callback = [this](std::string testerName, float delta){getData(testerName, delta);};
     return PerfTester(name, callback);
 }
 void PerformanceLog::getData(std::string name, float delta){

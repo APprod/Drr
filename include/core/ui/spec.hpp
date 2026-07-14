@@ -43,7 +43,7 @@ struct UIComponentSpec {
     UIComponentSpec& SetFlex(Flex iflex){flex = iflex; return *this;}
     UIComponentSpec& MinSize(Vector2 size){minSize = size; return *this;}
     UIComponentSpec& MaxSize(Vector2 size){maxSize = size; return *this;}
-    UIComponentSpec& FillMode(FillMode mode){fillMode = mode; return *this;}
+    UIComponentSpec& SetFillMode(FillMode mode){fillMode = mode; return *this;}
     UIComponentSpec& FillMaxWidth(){fillMode = FillMode::FillMaxWidth; return *this;}
     UIComponentSpec& FillMaxHeight(){fillMode = FillMode::FillMaxHeight; return *this;}
     UIComponentSpec& FillMaxSize(){fillMode = FillMode::FillMaxSize; return *this;}

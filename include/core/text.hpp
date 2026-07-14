@@ -22,7 +22,7 @@ class Text {
 public:
     Text() = default;
     Text(std::string text, std::string fontName = "default",
-         float fontSize = 20, float fontSpacing = 2, Color color = RAYWHITE);
+         int fontSize = 20, float fontSpacing = 2, Color color = RAYWHITE);
 
     void SetText(std::string t) { 
         m_text = std::move(t); 
@@ -43,7 +43,7 @@ public:
 private:
     std::string m_text;
     std::string m_fontName = "default";
-    float m_fontSize = 20;
+    int m_fontSize = 20;
     float m_fontSpacing = 2;
     Color m_color = RAYWHITE;
 

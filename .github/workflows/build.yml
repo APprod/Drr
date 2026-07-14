@@ -36,10 +36,6 @@ jobs:
         with:
           name: windows-msvc
           path: release/windows-msvc
-      - uses: actions/download-artifact@v4
-        with:
-          name: windows-web
-          path: release/windows-web
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -54,9 +50,5 @@ jobs:
             release/linux-web/app.data
             release/windows-mingw/app.exe
             release/windows-msvc/app.exe
-            release/windows-web/app.html
-            release/windows-web/app.js
-            release/windows-web/app.wasm
-            release/windows-web/app.data
           draft: false
           prerelease: false

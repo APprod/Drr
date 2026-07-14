@@ -33,7 +33,7 @@ struct LayoutSpec{
     LayoutSpec& CrossShrink(bool a) { crossShrink = a; return *this; }
     LayoutSpec& ShrinkOn() { crossShrink = true; return *this; }
     LayoutSpec& ShrinkOff() { crossShrink = false; return *this; }
-    LayoutSpec& JustifyContent(JustifyContent j) { justifyContent = j; return *this; }
+    LayoutSpec& SetJustifyContent(JustifyContent j) { justifyContent = j; return *this; }
     LayoutSpec& JustifyEvenly() { justifyContent = JustifyContent::SpaceEvenly; return *this; }
     LayoutSpec& JustifyNone() { justifyContent = JustifyContent::None; return *this; }
     LayoutSpec& Spacing(int s) { spacing = s; return *this; }
@@ -47,19 +47,19 @@ public:
     virtual ~Layout() = default;
 
     template<typename... Ts>
-    Layout& Add(Ts&&... children) {
-        (AddChild(std::make_unique<std::decay_t<Ts>>(std::forward<Ts>(children))), ...);
+    Layout& Add(Ts&&... iChildren) {
+        (AddChild(std::make_unique<std::decay_t<Ts>>(std::forward<Ts>(iChildren))), ...);
         return *this;
     }
     void AddChild(std::unique_ptr<UIComponent>&& child);
     void OnDrawContent() override;
     bool OnUpdate() override;
     EventResult OnEvent(const MyEvent& event) override;
-    const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return children;}
+    const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return m_children;}
     virtual UIComponent* FindTarget(Vector2 point) override;
 protected:
-    LayoutSpec layoutSpec;
-    std::vector<std::unique_ptr<UIComponent>> children;
+    LayoutSpec m_layoutSpec;
+    std::vector<std::unique_ptr<UIComponent>> m_children;
 
     using Axis = float Vector2::*;
     void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis);

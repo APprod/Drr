@@ -1,6 +1,7 @@
 #include "core/ui/debugOverlay.hpp"
 #include "core/services.hpp"
 #include "core/debug.hpp"
+#include "core/util.hpp"
 #include <format>
 
 DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
@@ -112,12 +113,12 @@ bool DebugLogDisplay::OnUpdate(){
 
 void DebugVerticalLayout::OnDrawContent(){
     if (GetServices().runtimeCfg.showOverlayGradient) {
-        auto r = actual;
+        auto r = m_actual;
         ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
-        ::DrawRectangleGradientV(r.x,r.y,r.width,r.height, {0,0,50,255}, {0,0,0,0});
+        auto ir = irect(r); ::DrawRectangleGradientV(ir.x,ir.y,ir.width,ir.height, {0,0,50,255}, {0,0,0,0});
         ::EndBlendMode();
     }
-    for(auto& child : children){
+    for(auto& child : m_children){
         if (!child->visible) continue;
         child->OnDraw();
     }
@@ -135,9 +136,9 @@ bool CfgDisplay::OnUpdate(){
 void DebugHorizontalLayout::OnDrawContent(){
     if (GetServices().runtimeCfg.showOverlayGradient) {
         auto r = GetDrawRect();
-        ::DrawRectangleGradientV(r.x,r.y,r.width,r.height, {0,255,0,255}, {0,0,255,0});
+        auto ir2 = irect(r); ::DrawRectangleGradientV(ir2.x,ir2.y,ir2.width,ir2.height, {0,255,0,255}, {0,0,255,0});
     }
-    for(auto& child : children){
+    for(auto& child : m_children){
         if (!child->visible) continue;
         child->OnDraw();
     }

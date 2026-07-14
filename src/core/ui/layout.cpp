@@ -6,16 +6,16 @@
 #include <cmath>
 
 Layout::Layout(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
-        : UIComponent(uiSpec), layoutSpec(layoutSpec) {}
+        : UIComponent(uiSpec), m_layoutSpec(layoutSpec) {}
 
 void Layout::AddChild(std::unique_ptr<UIComponent>&& child)
 {
-    children.push_back(std::move(child));
+    m_children.push_back(std::move(child));
 }
 
 void Layout::OnDrawContent()
 {
-    for(auto& child : children){
+    for(auto& child : m_children){
         if (!child->visible) continue;
         child->OnDraw();
     }
@@ -24,14 +24,14 @@ void Layout::OnDrawContent()
 bool Layout::OnUpdate()
 {
     bool dirty = false;
-    for(auto& child : children){
+    for(auto& child : m_children){
         dirty = child->OnUpdate() || dirty;
     }
     return dirty;
 }
 
 UIComponent* Layout::FindTarget(Vector2 point){
-    for (auto it = children.rbegin(); it != children.rend(); ++it){
+    for (auto it = m_children.rbegin(); it != m_children.rend(); ++it){
         auto& child = (*it);
         if (!child->interactive) continue;
         UIComponent* comp = child->FindTarget(point);
@@ -43,7 +43,7 @@ UIComponent* Layout::FindTarget(Vector2 point){
 }
 
 EventResult Layout::OnEvent(const MyEvent& event){
-    for (auto it = children.rbegin(); it != children.rend(); ++it){
+    for (auto it = m_children.rbegin(); it != m_children.rend(); ++it){
         auto& child = (*it);
         EventResult result = child->OnEvent(event);
         if (result == EventResult::NotHandled) continue;
@@ -53,42 +53,42 @@ EventResult Layout::OnEvent(const MyEvent& event){
 }
 
 void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis) {
-    contentDesiredSize = {0, 0};
-    for (auto& child : children) {
+    m_contentDesiredSize = {0, 0};
+    for (auto& child : m_children) {
         child->OnMeasure(available);
 
-        contentDesiredSize.*crossAxis = std::max(
-            contentDesiredSize.*crossAxis,
+        m_contentDesiredSize.*crossAxis = std::max(
+            m_contentDesiredSize.*crossAxis,
             child->DesiredSize().*crossAxis
         );
-        contentDesiredSize.*mainAxis += child->DesiredSize().*mainAxis + layoutSpec.spacing;
+        m_contentDesiredSize.*mainAxis += child->DesiredSize().*mainAxis + m_layoutSpec.spacing;
     }
-    if (!children.empty()){
-        contentDesiredSize.*mainAxis -= layoutSpec.spacing;
+    if (!m_children.empty()){
+        m_contentDesiredSize.*mainAxis -= m_layoutSpec.spacing;
     }
 }
 
 void Layout::ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
     float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance){
 
-    std::vector<bool> frozen(children.size());
-    for (size_t i = 0; i < children.size(); ++i)
-        frozen[i] = children[i]->Spec().flex.*flexField == 0;
+    std::vector<bool> frozen(m_children.size());
+    for (size_t i = 0; i < m_children.size(); ++i)
+        frozen[i] = m_children[i]->Spec().flex.*flexField == 0;
 
     while ((spare > 0 && spare > tolerance) || (spare < 0 && spare < -tolerance))
     {
         float total = 0;
-        for (size_t i = 0; i < children.size(); ++i)
-            if (!frozen[i]) total += children[i]->Spec().flex.*flexField;
+        for (size_t i = 0; i < m_children.size(); ++i)
+            if (!frozen[i]) total += m_children[i]->Spec().flex.*flexField;
         if (total == 0) break;
 
         bool changed = false;
-        for (size_t i = 0; i < children.size(); ++i)
+        for (size_t i = 0; i < m_children.size(); ++i)
         {
             if (frozen[i]) continue;
-            sizes[i].*mainAxis += spare * children[i]->Spec().flex.*flexField / total;
+            sizes[i].*mainAxis += spare * m_children[i]->Spec().flex.*flexField / total;
 
-            float limit = (children[i]->Spec().*limitField).*mainAxis;
+            float limit = (m_children[i]->Spec().*limitField).*mainAxis;
             if ((spare > 0 && sizes[i].*mainAxis >= limit) ||
                 (spare < 0 && sizes[i].*mainAxis <= limit))
             {
@@ -98,7 +98,7 @@ void Layout::ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mai
             changed = true;
         }
 
-        float used = layoutSpec.spacing * std::max<int>(0, children.size() - 1);
+        float used = static_cast<float>(m_layoutSpec.spacing * std::max(0, static_cast<int>(m_children.size()) - 1));
         for (auto& s : sizes) used += s.*mainAxis;
         spare = innerDim.*mainAxis - used;
         if (!changed) break;
@@ -106,20 +106,20 @@ void Layout::ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mai
 }
 
 std::vector<Vector2> Layout::CalculateFlex(Vector2 innerDim, Axis mainAxis, Axis crossAxis, float& spare){
-    std::vector<Vector2> res; res.reserve(children.size());
+    std::vector<Vector2> res; res.reserve(m_children.size());
     Flex totalFlex{0,0};
     float totalDesiredSize{0};
-    for (auto& child : children) {
-        totalDesiredSize += child->DesiredSize().*mainAxis + layoutSpec.spacing;
+    for (auto& child : m_children) {
+        totalDesiredSize += child->DesiredSize().*mainAxis + m_layoutSpec.spacing;
         totalFlex.growth += child->Spec().flex.growth;
         totalFlex.shrink += child->Spec().flex.shrink;
     }
-    if (!children.empty())
-        totalDesiredSize -= layoutSpec.spacing;
+    if (!m_children.empty())
+        totalDesiredSize -= m_layoutSpec.spacing;
 
     spare = innerDim.*mainAxis - totalDesiredSize;
 
-    for (auto& child : children)
+    for (auto& child : m_children)
         res.push_back(child->DesiredSize());
 
     if (spare > 0.01f)
@@ -127,14 +127,14 @@ std::vector<Vector2> Layout::CalculateFlex(Vector2 innerDim, Axis mainAxis, Axis
     else if (spare < -0.01f)
         ResolveFlex(res, innerDim, mainAxis, spare, &Flex::shrink, &UIComponentSpec::minSize, 0.01f);
 
-    for (size_t i = 0; i < children.size(); ++i){
-        if (layoutSpec.crossShrink)
+    for (size_t i = 0; i < m_children.size(); ++i){
+        if (m_layoutSpec.crossShrink)
             res[i].*crossAxis = std::min(res[i].*crossAxis, innerDim.*crossAxis);
 
         res[i].x = std::clamp(res[i].x,
-            children[i]->Spec().minSize.x, children[i]->Spec().maxSize.x);
+            m_children[i]->Spec().minSize.x, m_children[i]->Spec().maxSize.x);
         res[i].y = std::clamp(res[i].y,
-            children[i]->Spec().minSize.y, children[i]->Spec().maxSize.y);
+            m_children[i]->Spec().minSize.y, m_children[i]->Spec().maxSize.y);
     }
     return res;
 }
@@ -155,9 +155,9 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         s.*crossAxis = std::round(s.*crossAxis);
     }
 
-    for (size_t i = 0; i < children.size(); ++i)
+    for (size_t i = 0; i < m_children.size(); ++i)
     {
-        children[i]->OnMeasure(sizes[i]);
+        m_children[i]->OnMeasure(sizes[i]);
     }
 
     spare = {0};
@@ -171,25 +171,25 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         s.*crossAxis = std::round(s.*crossAxis);
     }
 
-    float spacing = layoutSpec.spacing;
+    float spacing = static_cast<float>(m_layoutSpec.spacing);
 
-    if (layoutSpec.justifyContent == JustifyContent::SpaceEvenly){
+    if (m_layoutSpec.justifyContent == JustifyContent::SpaceEvenly){
         if (sizes.size() > 1)
         {
             float total = std::accumulate(sizes.begin(),sizes.end(),0.0f,
             [mainAxis](float a, const Vector2& v){return a + v.*mainAxis;});
 
-            float occupied = total + layoutSpec.spacing * (sizes.size() - 1);
+            float occupied = total + m_layoutSpec.spacing * (sizes.size() - 1);
             float missed = innerDim.*mainAxis - occupied;
             missed = std::max(0.0f, missed);
 
-            spacing = layoutSpec.spacing + missed / (sizes.size() - 1);
+            spacing = m_layoutSpec.spacing + missed / (sizes.size() - 1);
             spacing = std::round(spacing);
         }
-    }else if (layoutSpec.justifyContent == JustifyContent::None){
+    }else if (m_layoutSpec.justifyContent == JustifyContent::None){
         Vector2 offset{0,0};
         if (std::abs(spare) > 0.01f){
-            switch (layoutSpec.align)
+            switch (m_layoutSpec.align)
             {
             case Alignment::Center:{
                 offset.*mainAxis = std::round(spare / 2); break;
@@ -204,10 +204,10 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         innerPos.*mainAxis = std::round(innerPos.*mainAxis + offset.*mainAxis);
     }
 
-    for (size_t i = 0; i < children.size(); ++i) {
+    for (size_t i = 0; i < m_children.size(); ++i) {
         auto finalSize = sizes[i];
 
-        switch (layoutSpec.crossAlign)
+        switch (m_layoutSpec.crossAlign)
         {
         case Alignment::Beginning: innerPos.*crossAxis = innerPosStart.*crossAxis; break;
         case Alignment::Center: innerPos.*crossAxis = std::round((innerPosStart + (innerDim - finalSize)/2).*crossAxis); break;
@@ -216,7 +216,7 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         }
 
         Rectangle r = rect(innerPos, finalSize);
-        children[i]->OnArrange(r);
+        m_children[i]->OnArrange(r);
         innerPos.*mainAxis += finalSize.*mainAxis + spacing;
         innerPos.*mainAxis = std::round(innerPos.*mainAxis);
     }
@@ -243,13 +243,13 @@ void HorizontalLayout::ArrangeContent(Rectangle actualRect)
 }
 
 void Stack::MeasureContent(Vector2 available){
-    contentDesiredSize = available;
-    for (auto&child: children){
+    m_contentDesiredSize = available;
+    for (auto&child: m_children){
         child->OnMeasure(available);
     }
 }
 void Stack::ArrangeContent(Rectangle rect){
-    for (auto&child: children){
+    for (auto&child: m_children){
         child->OnArrange(rect);
     }
 }

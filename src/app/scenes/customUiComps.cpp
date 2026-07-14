@@ -2,13 +2,13 @@
 
 TestComp::TestComp(Vector2 targetSize)
 {
-    this->targetSize = targetSize;
+    this->m_targetSize = targetSize;
 }
 bool TestComp::OnUpdate() { return false; }
 
 void TestComp::OnDrawContent()
 {
-    ::DrawRectangleRec(actual, RAYWHITE);
+    ::DrawRectangleRec(m_actual, RAYWHITE);
 }
 
 void TestComp::MeasureContent(Vector2 available)

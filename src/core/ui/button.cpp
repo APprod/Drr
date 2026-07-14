@@ -8,7 +8,7 @@ Button::Button(
     Vector2 targetSize,
     UIComponentSpec spec
 ): UIComponent{spec}, m_text{std::move(text)}, m_onClick{onClick}, m_textureName{textureName} {
-    this->targetSize = targetSize;
+    this->m_targetSize = targetSize;
 }
 
 void Button::OnDrawContent(){

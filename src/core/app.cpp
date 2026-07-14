@@ -7,12 +7,27 @@
 
 #include <memory>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
+
 void setupDebugConfig() {
 #ifndef NDEBUG
     GetServices().runtimeCfg = kDebugConfig;
+    dbg::GetLogger().SetMinSeverity(dbg::Severity::INFO);
 #else
     GetServices().runtimeCfg = kReleaseConfig;
-    dbg::GetLogger().SetMinSeverity(dbg::Severity::INFO);
+#endif
+}
+
+static void initPlatform()
+{
+#ifndef __EMSCRIPTEN__
+    dbg::GetLogger().AddSink(
+        std::make_unique<dbg::FileSink>(dbg::FileSink("log.txt")));
+    auto path = GetApplicationDirectory();
+    ChangeDirectory(path);
 #endif
 }
 
@@ -20,26 +35,22 @@ App::App(int screenWidth, int screenHeight): m_screenHeight(screenHeight), m_scr
 { 
 }
 
-
-void App::run()
-{
+void App::init(){
     setupDebugConfig();
     dbg::GetLogger().AddSink(
         std::make_unique<dbg::ConsoleSink>(dbg::ConsoleSink()));
-    dbg::GetLogger().AddSink(
-        std::make_unique<dbg::FileSink>(dbg::FileSink("log.txt")));
-
+    initPlatform();
     dbg::GetLogger().Info("app:run \n");
     dbg::GetLogger().Info("Running direcotry: ", GetWorkingDirectory());
-    auto path = GetApplicationDirectory();
-    ChangeDirectory(path);
-    {//temp, initislization
+    {
         InitWindow(m_screenWidth, m_screenHeight, "Raylib app");
                 SetWindowPosition(5,20);
                 SetWindowState(::FLAG_WINDOW_RESIZABLE);
 
                 auto m = GetCurrentMonitor();  
-                SetTargetFPS(GetMonitorRefreshRate(m));
+                auto fps = GetMonitorRefreshRate(m);
+                if (!fps)  fps = 60;
+                SetTargetFPS(fps);
                 SetWindowState(::FLAG_WINDOW_MAXIMIZED); 
     }
     auto& recManager = GetServices().recManager;
@@ -47,28 +58,52 @@ void App::run()
     recManager.load();
     SetExitKey(0);
     
-    // float dt = 0.016f;
     m_sceneManager.QueTransit<TestScene>(recManager);
-    
-    while(!WindowShouldClose())
+}
+
+void App::frame(){
     {
-        {
-            PerfTester tester = GetServices().perfLog.log("Scene Update");
-            m_sceneManager.Update();
-        }
-        {
-            PerfTester tester = GetServices().perfLog.log("Scene Render");
-            m_sceneManager.Draw();
-        }            
-        GetServices().perfLog.update();
-        // dt = 1000.0f/GetFPS();
+        PerfTester tester = GetServices().perfLog.log("Scene Update");
+        m_sceneManager.Update();
     }
+    {
+        PerfTester tester = GetServices().perfLog.log("Scene Render");
+        m_sceneManager.Draw();
+    }            
+    GetServices().perfLog.update();
+    // dt = 1000.0f/GetFPS();
+}
+
+static void runPlatform(App* app)
+{
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop_arg(
+        [](void* arg)
+        {
+            static_cast<App*>(arg)->frame();
+        },
+        app,
+        0,
+        true
+    );
+#else
+    while (!WindowShouldClose())
+    {
+        app->frame();
+    }
+#endif
+}
+
+void App::run()
+{
+    runPlatform(this);
 }
 void App::close()
 {
+    
 }
 
 App::~App()
 {
-   CloseWindow();
+    CloseWindow();
 }

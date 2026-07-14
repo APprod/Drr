@@ -20,7 +20,7 @@ inline const char* SeverityColor(dbg::Severity s)
     }
 }
 
-inline const char* ToString(Severity s) {
+const char* ToString(Severity s) {
     switch (s) {
         case Severity::DBGINFO: return "DBGINFO";
         case Severity::INFO:   return "MYINFO";
@@ -37,7 +37,7 @@ FileSink::FileSink(const std::string& path, size_t maxBytes)
     std::error_code ec;
     if (std::filesystem::exists(path, ec)) {
         auto size = std::filesystem::file_size(path, ec);
-        if (!ec && size > maxBytes) {
+        if (!ec && size > m_maxBytes) {
             auto backup = std::filesystem::path(path);
             backup += ".old";
             std::filesystem::rename(path, backup, ec);

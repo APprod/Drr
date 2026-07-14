@@ -26,4 +26,17 @@ std::string CurrentDateTime()
     return oss.str();
 }
 
+std::string getShaderPath(std::string shaderName){
+    std::string result{"assets/shaders"};
+    #ifdef PLATFORM_WEB
+        result.append("/web/");
+    #else
+        result.append("/desktop/");
+    #endif
+    result.append(shaderName);
+    return result;
 }
+
+
+}
+

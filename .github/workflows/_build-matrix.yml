@@ -1,0 +1,150 @@
+name: Build Matrix
+
+on:
+  workflow_call:
+    inputs:
+      build_type:
+        required: true
+        type: string
+
+jobs:
+  linux-desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev \
+            libxinerama-dev libxi-dev libxext-dev libxfixes-dev \
+            libwayland-dev libxkbcommon-dev
+      - name: Cache FetchContent
+        uses: actions/cache@v4
+        with:
+          path: _deps-cache
+          key: deps-linux-desktop-${{ hashFiles('CMakeLists.txt') }}
+      - run: chmod +x build.sh && ./build.sh ${{ inputs.build_type }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-desktop
+          path: _build/${{ inputs.build_type }}/app
+          retention-days: 1
+
+  linux-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Emsdk
+        uses: actions/cache@v4
+        with:
+          path: emsdk-cache
+          key: emsdk-linux-4.0.15
+      - uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 4.0.15
+          actions-cache-folder: emsdk-cache
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev \
+            libxinerama-dev libxi-dev libxext-dev libxfixes-dev \
+            libwayland-dev libxkbcommon-dev
+      - name: Cache FetchContent
+        uses: actions/cache@v4
+        with:
+          path: _deps-cache
+          key: deps-linux-web-${{ hashFiles('CMakeLists.txt') }}
+      - run: chmod +x build.sh && ./build.sh web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-web
+          path: |
+            _build/Web/app.html
+            _build/Web/app.js
+            _build/Web/app.wasm
+            _build/Web/app.data
+          retention-days: 1
+
+  windows-mingw:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: >-
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-make
+      - name: Cache FetchContent
+        uses: actions/cache@v4
+        with:
+          path: _deps-cache
+          key: deps-windows-mingw-${{ hashFiles('CMakeLists.txt') }}
+      - run: ./build.bat ${{ inputs.build_type }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-mingw
+          path: _build/${{ inputs.build_type }}/app.exe
+          retention-days: 1
+
+  windows-msvc:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Cache FetchContent
+        uses: actions/cache@v4
+        with:
+          path: _deps-cache
+          key: deps-windows-msvc-${{ hashFiles('CMakeLists.txt') }}
+      - run: ./build.bat msvc ${{ inputs.build_type }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-msvc
+          path: _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/app.exe
+          retention-days: 1
+
+  windows-web:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: >-
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-make
+      - name: Cache Emsdk
+        uses: actions/cache@v4
+        with:
+          path: emsdk-cache
+          key: emsdk-win-4.0.15
+      - uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 4.0.15
+          actions-cache-folder: emsdk-cache
+      - name: Cache FetchContent
+        uses: actions/cache@v4
+        with:
+          path: _deps-cache
+          key: deps-windows-web-${{ hashFiles('CMakeLists.txt') }}
+      - run: ./build.bat web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-web
+          path: |
+            _build/Web/app.html
+            _build/Web/app.js
+            _build/Web/app.wasm
+            _build/Web/app.data
+          retention-days: 1

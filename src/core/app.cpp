@@ -21,26 +21,28 @@ void setupDebugConfig() {
 #endif
 }
 
+static void initPlatform()
+{
+#ifndef __EMSCRIPTEN__
+    dbg::GetLogger().AddSink(
+        std::make_unique<dbg::FileSink>(dbg::FileSink("log.txt")));
+    auto path = GetApplicationDirectory();
+    ChangeDirectory(path);
+#endif
+}
+
 App::App(int screenWidth, int screenHeight): m_screenHeight(screenHeight), m_screenWidth(screenWidth)
 { 
 }
-
 
 void App::init(){
     setupDebugConfig();
     dbg::GetLogger().AddSink(
         std::make_unique<dbg::ConsoleSink>(dbg::ConsoleSink()));
-    #ifndef __EMSCRIPTEN__
-    dbg::GetLogger().AddSink(
-        std::make_unique<dbg::FileSink>(dbg::FileSink("log.txt")));
-    #endif
+    initPlatform();
     dbg::GetLogger().Info("app:run \n");
     dbg::GetLogger().Info("Running direcotry: ", GetWorkingDirectory());
-    #ifndef __EMSCRIPTEN__
-    auto path = GetApplicationDirectory();
-    ChangeDirectory(path);
-    #endif
-    {//temp, initislization
+    {
         InitWindow(m_screenWidth, m_screenHeight, "Raylib app");
                 SetWindowPosition(5,20);
                 SetWindowState(::FLAG_WINDOW_RESIZABLE);
@@ -56,7 +58,6 @@ void App::init(){
     recManager.load();
     SetExitKey(0);
     
-    // float dt = 0.016f;
     m_sceneManager.QueTransit<TestScene>(recManager);
 }
 
@@ -73,24 +74,29 @@ void App::frame(){
     // dt = 1000.0f/GetFPS();
 }
 
-void App::run()
+static void runPlatform(App* app)
 {
-    #ifdef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
     emscripten_set_main_loop_arg(
         [](void* arg)
         {
             static_cast<App*>(arg)->frame();
         },
-        this,
+        app,
         0,
         true
     );
-    #else
+#else
     while (!WindowShouldClose())
     {
-        frame();
+        app->frame();
     }
-    #endif
+#endif
+}
+
+void App::run()
+{
+    runPlatform(this);
 }
 void App::close()
 {

@@ -49,7 +49,7 @@ inline const RuntimeConfig kReleaseConfig{
     .showPerformance = false,
     .showDebugLog = false,
     .showDebugOverlay = false,
-    .debugFeaturesAllowed = false,
+    .debugFeaturesAllowed = true,
     .debugMessagesCount = 20,
     .useProcessingShader = true,
     .showOverlayGradient = false,

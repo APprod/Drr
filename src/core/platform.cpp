@@ -28,11 +28,10 @@ std::string CurrentDateTime()
 
 std::string getShaderPath(std::string shaderName){
     std::string result{"assets/shaders"};
-    #ifdef _WIN32
-        result.append("/desktop/");
-    #endif
-    #ifdef PLATFORM_WEB 
+    #ifdef PLATFORM_WEB
         result.append("/web/");
+    #else
+        result.append("/desktop/");
     #endif
     result.append(shaderName);
     return result;

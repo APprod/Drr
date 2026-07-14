@@ -1,6 +1,7 @@
 #include "core/recManager.hpp"
 #include "core/util.hpp"
 #include "core/debug.hpp"
+#include "core/platform.hpp"
 
 
 RecourceManager::RecourceManager()
@@ -23,15 +24,21 @@ RecourceManager::~RecourceManager()
     }
 }
 
+
+
 void RecourceManager::init()
 {
     FontMap defFonts;
     defFonts[10] = ::GetFontDefault();
     m_fonts["default"] = defFonts;
-    loadShader("brightness","assets/shaders/brightness.fs",{{"brightness",{(float)1.0f}}});
+
+    
+
+    loadShader("brightness", platform::getShaderPath("brightness.fs"),
+                            {{"brightness",{(float)1.0f}}});
     loadShader(
     "processing",
-    "assets/shaders/processing.fs",
+    platform::getShaderPath("processing.fs"),
     {
         {"brightness", 1.0f},
         {"contrast",   1.0f},

@@ -23,6 +23,3 @@ if %errorlevel% neq 0 exit /b
 cmake --build %BUILD_DIR% --config %BUILD_TYPE% --parallel
 if %errorlevel% neq 0 exit /b 
 
-xcopy "assets" "%BUILD_DIR%/assets/" /s /e /h /I /Y
-if %errorlevel% neq 0 exit /b 
-

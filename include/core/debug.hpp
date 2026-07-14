@@ -39,7 +39,7 @@ public:
 class FileSink : public ISink
 {
 public:
-    FileSink(const std::string& path, size_t maxBytes = {1024*1024*1/4});
+    FileSink(const std::string& path, size_t maxBytes = 1024*1024*1/4);
     void Write(const MyMessage& message) override;
 
 private:

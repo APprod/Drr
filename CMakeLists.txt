@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -20,6 +21,20 @@ FILE(GLOB_RECURSE MyCPPSources ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_
 add_executable(app ${MyCPPSources})
 
 
+if (EMSCRIPTEN)
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
+    )
+    #DEPENDS ${PROJECT_NAME}
+else()
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
+    )
+    #DEPENDS ${PROJECT_NAME}
+endif()
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   target_compile_options(app PRIVATE
   $<$<CONFIG:Debug>:-g
@@ -27,7 +42,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
     -Wextra
     -Wpedantic
     -Werror>
-  $<$<CONFIG:Release>:-O3 -Os -s
+  $<$<CONFIG:Release>:-O3 -Os
     -Wall
     -Wextra
     -Wpedantic>
@@ -44,13 +59,17 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   )
 endif()
 
-if(IS_STATIC)
+if(IS_STATIC AND NOT EMSCRIPTEN)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_link_options(app PRIVATE -static)
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         set_property(TARGET app PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endif()
     message("building static")
+endif()
+
+if (EMSCRIPTEN)
+    set(GRAPHICS GRAPHICS_API_OPENGL_ES3 CACHE STRING "" FORCE)
 endif()
 
 #get Raylib
@@ -67,12 +86,15 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
 set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # don't build the supplied example games
 FetchContent_MakeAvailable(raylibLib)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if (EMSCRIPTEN)
+    target_compile_options(raylib PRIVATE -w)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(raylib PRIVATE -w)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(raylib PRIVATE -w)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(raylib PRIVATE /W0)
 endif()
-
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
@@ -80,4 +102,23 @@ target_include_directories(app PUBLIC include/)
 
 target_link_libraries(app PRIVATE nlohmann_json::nlohmann_json raylib)
 
+# Web Configurations
+if (EMSCRIPTEN)
+    # Tell Emscripten to build an example.html file.
+    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
+    target_link_options(${PROJECT_NAME} 
+    PRIVATE -sUSE_GLFW=3 
+    PRIVATE --preload-file assets
+    PRIVATE -sGL_ENABLE_GET_PROC_ADDRESS=1
+    PRIVATE -sWASM=1
+    PRIVATE -sMAX_WEBGL_VERSION=2
+    PRIVATE -sALLOW_MEMORY_GROWTH=1
+    PRIVATE --shell-file ${CMAKE_SOURCE_DIR}/web/minshell.html)
+endif()
 
+# Checks if OSX and links appropriate frameworks (Only required on MacOS)
+if (APPLE)
+    target_link_libraries(${PROJECT_NAME} "-framework IOKit")
+    target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
+    target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
+endif()

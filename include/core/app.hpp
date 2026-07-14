@@ -13,7 +13,9 @@ private:
 
 public:
     App(int screenWidth = 800, int screenHeight = 450);
+    void init();
     void run();
+    void frame();
     void close();
     ~App();
 };

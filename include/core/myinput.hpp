@@ -1,5 +1,6 @@
 /* used only for different types of input devices potentialy. just abstraction above inputs */
 #pragma once
+#include <array>
 #include <vector>
 #include "raylib.h"
 #include "events.hpp"

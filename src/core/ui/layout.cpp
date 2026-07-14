@@ -1,6 +1,7 @@
 #include "core/ui/layout.hpp"
 #include "core/util.hpp"
 
+#include <algorithm>
 #include <numeric>
 #include <cmath>
 

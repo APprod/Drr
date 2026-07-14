@@ -35,17 +35,41 @@ else()
     #DEPENDS ${PROJECT_NAME}
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND NOT EMSCRIPTEN)
   target_compile_options(app PRIVATE
   $<$<CONFIG:Debug>:-g
-    -Wall
-    -Wextra
-    -Wpedantic>
+    -Wall -Wextra -Wpedantic
+    -Wshadow
+    -Wnon-virtual-dtor
+    -Wold-style-cast
+    -Wcast-align
+    -Woverloaded-virtual
+    -Wformat=2
+    -Wmisleading-indentation
+    -Wduplicated-cond
+    -Wduplicated-branches
+    -Wlogical-op
+    -Wnull-dereference
+    -Wdouble-promotion
+    -Wuseless-cast
+    -Werror>
   $<$<CONFIG:Release>:-O3 -Os
-    -Wall
-    -Wextra
+    -Wall -Wextra -Wpedantic
+    -Wshadow
+    -Wnon-virtual-dtor
+    -Wold-style-cast
+    -Wcast-align
+    -Woverloaded-virtual
+    -Wformat=2
+    -Wmisleading-indentation
+    -Wduplicated-cond
+    -Wduplicated-branches
+    -Wlogical-op
+    -Wnull-dereference
+    -Wdouble-promotion
+    -Wuseless-cast
     >
-)
+  )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_compile_options(app PRIVATE
   $<$<CONFIG:Debug>:/W4

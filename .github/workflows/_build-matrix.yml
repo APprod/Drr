@@ -28,7 +28,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: linux-desktop
-          path: _build/${{ inputs.build_type }}/app
+          path: |
+            _build/${{ inputs.build_type }}/app
+            _build/${{ inputs.build_type }}/assets/
           retention-days: 1
 
   linux-web:
@@ -90,7 +92,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-mingw
-          path: _build/${{ inputs.build_type }}/app.exe
+          path: |
+            _build/${{ inputs.build_type }}/app.exe
+            _build/${{ inputs.build_type }}/assets/
           retention-days: 1
 
   windows-msvc:
@@ -107,14 +111,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-msvc
-          path: _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/app.exe
+          path: |
+            _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/app.exe
+            _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/assets/
           retention-days: 1
 
   windows-web:
     runs-on: windows-2022
-    defaults:
-      run:
-        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
@@ -124,6 +127,8 @@ jobs:
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-make
+      - name: Add MSYS2 to PATH
+        run: echo "C:\msys64\ucrt64\bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
       - name: Cache Emsdk
         uses: actions/cache@v4
         with:

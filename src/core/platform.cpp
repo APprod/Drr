@@ -30,7 +30,8 @@ std::string getShaderPath(std::string shaderName){
     std::string result{"assets/shaders"};
     #ifdef _WIN32
         result.append("/desktop/");
-    #else
+    #endif
+    #ifdef PLATFORM_WEB 
         result.append("/web/");
     #endif
     result.append(shaderName);

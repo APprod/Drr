@@ -73,12 +73,13 @@ if (EMSCRIPTEN)
 endif()
 
 #get Raylib
+set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/_deps-cache" CACHE PATH "" FORCE)
 include(FetchContent)
-
+set(FETCHCONTENT_QUIET OFF CACHE BOOL "" FORCE)
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     raylibLib
-    URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz
+    URL https://github.com/raysan5/raylib/archive/refs/tags/6.0.tar.gz
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/third-party/raylib"
 )
 
@@ -113,7 +114,8 @@ if (EMSCRIPTEN)
     PRIVATE -sWASM=1
     PRIVATE -sMAX_WEBGL_VERSION=2
     PRIVATE -sALLOW_MEMORY_GROWTH=1
-    PRIVATE --shell-file ${CMAKE_SOURCE_DIR}/web/minshell.html)
+    PRIVATE --shell-file ${CMAKE_SOURCE_DIR}/web/minshell.html
+    )
 endif()
 
 # Checks if OSX and links appropriate frameworks (Only required on MacOS)

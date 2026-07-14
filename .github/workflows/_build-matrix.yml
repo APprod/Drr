@@ -57,7 +57,7 @@ jobs:
             _deps-cache
             third-party/raylib
           key: deps-linux-web-${{ hashFiles('CMakeLists.txt') }}
-      - run: chmod +x build.sh && ./build.sh web
+      - run: chmod +x build.sh && ./build.sh ${{ inputs.build_type }} web
       - uses: actions/upload-artifact@v4
         with:
           name: linux-web

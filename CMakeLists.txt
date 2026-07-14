@@ -62,7 +62,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     -Wfloat-conversion
     -Wuseless-cast
     -Werror>
-  $<$<CONFIG:Release>:-O3 -Os
+  $<$<CONFIG:Release>:-O3
     -Wall -Wextra -Wpedantic
     -Wshadow
     -Wnon-virtual-dtor
@@ -97,7 +97,11 @@ endif()
 
 if(IS_STATIC AND NOT EMSCRIPTEN)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_link_options(app PRIVATE -static-libgcc -static-libstdc++)
+        if(MINGW)
+            target_link_options(app PRIVATE -static)
+        else()
+            target_link_options(app PRIVATE -static-libgcc -static-libstdc++)
+        endif()
     endif()
 endif()
 
@@ -137,7 +141,6 @@ FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download
 FetchContent_MakeAvailable(json)
 
 target_include_directories(app PUBLIC include/)
-target_include_directories(app PRIVATE "${CMAKE_SOURCE_DIR}/third-party/raylib")
 
 target_link_libraries(app PRIVATE nlohmann_json::nlohmann_json raylib)
 

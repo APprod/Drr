@@ -5,6 +5,7 @@ permissions:
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
     tags: ['v*']
@@ -36,6 +37,34 @@ jobs:
         with:
           name: windows-msvc
           path: release/windows-msvc
+
+      - name: Make binaries executable
+        run: chmod +x release/linux-desktop/app
+
+      - name: Package linux-desktop
+        run: |
+          cd release/linux-desktop
+          zip -r ../../linux-desktop.zip .
+          cd -
+
+      - name: Package linux-web
+        run: |
+          cd release/linux-web
+          zip -r ../../linux-web.zip .
+          cd -
+
+      - name: Package windows-mingw
+        run: |
+          cd release/windows-mingw
+          zip -r ../../windows-mingw.zip .
+          cd -
+
+      - name: Package windows-msvc
+        run: |
+          cd release/windows-msvc
+          zip -r ../../windows-msvc.zip .
+          cd -
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -43,12 +72,9 @@ jobs:
           name: Release ${{ github.ref_name }}
           body: "Automated release with built executables."
           files: |
-            release/linux-desktop/app
-            release/linux-web/app.html
-            release/linux-web/app.js
-            release/linux-web/app.wasm
-            release/linux-web/app.data
-            release/windows-mingw/app.exe
-            release/windows-msvc/app.exe
+            linux-desktop.zip
+            linux-web.zip
+            windows-mingw.zip
+            windows-msvc.zip
           draft: false
           prerelease: false

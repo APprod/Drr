@@ -1,0 +1,80 @@
+name: Build
+
+permissions:
+  contents: write
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  matrix:
+    uses: ./.github/workflows/_build-matrix.yml
+    with:
+      build_type: Release
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [matrix]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-desktop
+          path: release/linux-desktop
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-web
+          path: release/linux-web
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-mingw
+          path: release/windows-mingw
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-msvc
+          path: release/windows-msvc
+
+      - name: Make binaries executable
+        run: chmod +x release/linux-desktop/app
+
+      - name: Package linux-desktop
+        run: |
+          cd release/linux-desktop
+          zip -r ../../linux-desktop.zip .
+          cd -
+
+      - name: Package linux-web
+        run: |
+          cd release/linux-web
+          zip -r ../../linux-web.zip .
+          cd -
+
+      - name: Package windows-mingw
+        run: |
+          cd release/windows-mingw
+          zip -r ../../windows-mingw.zip .
+          cd -
+
+      - name: Package windows-msvc
+        run: |
+          cd release/windows-msvc
+          zip -r ../../windows-msvc.zip .
+          cd -
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: "Automated release with built executables."
+          files: |
+            linux-desktop.zip
+            linux-web.zip
+            windows-mingw.zip
+            windows-msvc.zip
+          draft: false
+          prerelease: false

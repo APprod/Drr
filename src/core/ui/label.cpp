@@ -24,7 +24,7 @@ bool Label::OnUpdate()
 
 void Label::MeasureContent(Vector2 available){
     auto textSize = m_text.ReMeasure(available);
-    contentDesiredSize = {
+    m_contentDesiredSize = {
         std::min(available.x, textSize.x),
         textSize.y
     };
@@ -32,7 +32,8 @@ void Label::MeasureContent(Vector2 available){
 
 void Label::OnDrawContent(){
     auto rect = GetDrawRect();
-    BeginScissorMode(rect.x, rect.y, rect.width, rect.height);
+    auto ir = irect(rect);
+    BeginScissorMode(ir.x, ir.y, ir.width, ir.height);
     m_text.Draw({rect.x, rect.y - m_scrollOffset});
     EndScissorMode();
 }

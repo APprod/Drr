@@ -20,7 +20,7 @@ void TestScene::OnEnter(){
             row->Add(
                 Button(Text("Test", "TNR", 32, 0, RAYWHITE),
                     [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
-                    "button_default",{(float)200,(float)100}, 
+                    "button_default",{200.f,100.f}, 
                     UICSpec().SetFlex({.growth = 1, .shrink = 1})
                     .MinSize({100,50}))
             );

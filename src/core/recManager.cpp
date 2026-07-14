@@ -35,7 +35,7 @@ void RecourceManager::init()
     
 
     loadShader("brightness", platform::getShaderPath("brightness.fs"),
-                            {{"brightness",{(float)1.0f}}});
+                            {{"brightness",{1.0f}}});
     loadShader(
     "processing",
     platform::getShaderPath("processing.fs"),
@@ -206,7 +206,7 @@ void RecourceManager::loadTextures()
     loadTexture("menu");
 }
 
-void RecourceManager::loadShader(std::string name, std::string filepath, 
+void RecourceManager::loadShader(std::string shaderName, std::string filepath, 
     const Uniforms& uniforms)
 {
     ShaderProgram program;
@@ -225,7 +225,7 @@ void RecourceManager::loadShader(std::string name, std::string filepath,
             program.locations.emplace(name, loc);
         }
     }
-    m_shaders[name] = program;
+    m_shaders[shaderName] = program;
 }
 ShaderProgram& RecourceManager::getShaderProgram(std::string name){
     auto iter = m_shaders.find(name);

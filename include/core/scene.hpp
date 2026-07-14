@@ -93,7 +93,7 @@ public:
         PerfTester tester = GetServices().perfLog.log("Scene OnUpdate Full");
         auto& input = GetServices().input;
         {
-            PerfTester tester = GetServices().perfLog.log("Scene input.pollEvents");
+            PerfTester innerTester = GetServices().perfLog.log("Scene input.pollEvents");
             input.pollEvents();
         }
         auto events = input.getEvents();

@@ -93,6 +93,13 @@
                 })()
             };
         </script>
+        <script>
+            // Prevent browser default actions for F1-F9 so the app can handle them
+            document.addEventListener('keydown', function(e) {
+                var m = e.key.match(/^F([1-9])$/);
+                if (m && m[1] !== '5') e.preventDefault();
+            });
+        </script>
         {{{ SCRIPT }}}
     </body>
 </html>

@@ -20,7 +20,7 @@ inline const char* SeverityColor(dbg::Severity s)
     }
 }
 
-inline const char* ToString(Severity s) {
+const char* ToString(Severity s) {
     switch (s) {
         case Severity::DBGINFO: return "DBGINFO";
         case Severity::INFO:   return "MYINFO";

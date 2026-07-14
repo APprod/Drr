@@ -7,6 +7,8 @@ set "BUILD_DIR=Debug"
 set "WEB=False"
 set "MSVC=False"
 
+set "START_TIME=%TIME%"
+
 :parse
 if "%1"=="" goto :endparse
 if "%1"=="release" set "BUILD_TYPE=Release" & set "BUILD_DIR=Release" & shift & goto :parse
@@ -49,3 +51,34 @@ cmake --build %BUILD_DIR_BASE%%BUILD_DIR% --config %BUILD_TYPE% --parallel
 if %errorlevel% neq 0 exit /b 
 
 :endBuild
+
+set "END_TIME=%TIME%"
+call :ElapsedTime "%START_TIME%" "%END_TIME%"
+exit /b
+
+:ElapsedTime
+setlocal
+set "start=%~1"
+set "end=%~2"
+
+for /f "tokens=1-4 delims=:.," %%a in ("%start%") do (
+    set /a "start_secs=(((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100"
+)
+for /f "tokens=1-4 delims=:.," %%a in ("%end%") do (
+    set /a "end_secs=(((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100"
+)
+
+set /a elapsed=end_secs-start_secs
+if %elapsed% lss 0 set /a elapsed+=8640000
+
+set /a cs=elapsed %% 100
+set /a elapsed/=100
+set /a secs=elapsed %% 60
+set /a elapsed/=60
+set /a mins=elapsed %% 60
+set /a hours=elapsed/60
+
+echo.
+echo Total time: %hours%h %mins%m %secs%.%cs%s
+endlocal
+goto :eof

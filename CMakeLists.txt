@@ -40,12 +40,11 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
   $<$<CONFIG:Debug>:-g
     -Wall
     -Wextra
-    -Wpedantic
-    -Werror>
+    -Wpedantic>
   $<$<CONFIG:Release>:-O3 -Os
     -Wall
     -Wextra
-    -Wpedantic>
+    >
 )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_compile_options(app PRIVATE
@@ -73,7 +72,8 @@ if (EMSCRIPTEN)
 endif()
 
 #get Raylib
-set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/_deps-cache" CACHE PATH "" FORCE)
+
+set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/_deps-cache" CACHE PATH "" FORCE) # Source files wont be redownloaded
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF CACHE BOOL "" FORCE)
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
@@ -81,6 +81,7 @@ FetchContent_Declare(
     raylibLib
     URL https://github.com/raysan5/raylib/archive/refs/tags/6.0.tar.gz
     SOURCE_DIR "${CMAKE_SOURCE_DIR}/third-party/raylib"
+    BINARY_DIR "${CMAKE_BINARY_DIR}/_deps/raylib-build"
 )
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples

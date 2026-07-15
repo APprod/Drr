@@ -10,6 +10,7 @@ TestScene::TestScene(RecourceManager& manager): m_manager{manager}
 {}
 
 void TestScene::OnEnter(){
+    static int counter{0};
     auto column= std::make_unique<VerticalLayout>(UIComponentSpec{},LayoutSpec{Alignment::End});
     for(int i = 0; i < 1; i++){
         auto row = std::make_unique<HorizontalLayout>(
@@ -19,7 +20,7 @@ void TestScene::OnEnter(){
         for(int j = 0; j < 5; j++){
             row->Add(
                 Button(Text("Test", "TNR", 32, 0, RAYWHITE),
-                    [j](){ dbg::GetLogger().Info("Button"+ std::to_string(j) +" clicked!"); },
+                    [j](){ dbg::GetLogger().Info(std::to_string(++counter), " Button"+ std::to_string(j) +" clicked!"); },
                     "button_default",{200.f,100.f}, 
                     UICSpec().SetFlex({.growth = 1, .shrink = 1})
                     .MinSize({100,50}))

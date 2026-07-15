@@ -35,13 +35,15 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         LayoutSpec{}.AlignBegin().CrossEnd());
     right->Add(
             PerformanceDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1})),
-            Label(Text("W/S bright  E/D contrast\nR/F satur     T/G gamma\nY/H alpha\nF1 overlay  F2 layout\nF3 content F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "TNR", fontSize, 0))
+            Label(
+                Text("W/S bright  E/D contrast\nR/F satur     T/G gamma\nY/H alpha\nF1 overlay  F2 layout\nF3 content F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "TNR", fontSize, 0),
+                UICSpec{}.SetFlex({0,1}))
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));
 
     auto tempBottom = std::make_unique<HorizontalLayout>(
-        UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
+        UICSpec{}.SetPaddingPct(padBase).SetFlex({0.5,2}).FillMaxSize(),
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
     temp->AddChild(std::move(mainC));
@@ -111,11 +113,12 @@ bool DebugLogDisplay::OnUpdate(){
 }
 
 
+
 void DebugVerticalLayout::OnDrawContent(){
     if (GetServices().runtimeCfg.showOverlayGradient) {
         auto r = m_actual;
         ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
-        auto ir = irect(r); ::DrawRectangleGradientV(ir.x,ir.y,ir.width,ir.height, {0,0,50,255}, {0,0,0,0});
+        auto ir = irect(r); ::DrawRectangleGradientV(ir.x,ir.y,ir.width,ir.height, {0,0,50,100}, {25,0,0,50});
         ::EndBlendMode();
     }
     for(auto& child : m_children){

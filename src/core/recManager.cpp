@@ -48,6 +48,14 @@ void RecourceManager::init()
         {"alpha",      1.0f}
     }
 );
+    loadShader("vignette",
+        platform::getShaderPath("vignette.fs"),
+        {
+            {"vignetteIntensity", 0.5f},
+            {"vignetteRoundness", 0.5f},
+            {"vignetteSoftness",  0.5f},
+        }
+    );
 }
 
 void RecourceManager::load()
@@ -209,6 +217,7 @@ void RecourceManager::loadTextures()
 void RecourceManager::loadShader(std::string shaderName, std::string filepath, 
     const Uniforms& uniforms)
 {
+    dbg::GetLogger().DebugInfo("Loading shader: ", filepath);
     ShaderProgram program;
     program.defaults = uniforms;
     auto shader = ::LoadShader(nullptr,filepath.c_str());

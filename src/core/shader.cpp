@@ -1,4 +1,5 @@
 #include "core/shader.hpp"
+#include "core/debug.hpp"
 
 namespace {
 

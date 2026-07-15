@@ -37,12 +37,12 @@ inline const RuntimeConfig kDebugConfig{
     .debugFeaturesAllowed = true,
     .debugMessagesCount = 20,
     .useProcessingShader = true,
-    .showOverlayGradient = false,
+    .showOverlayGradient = true,
     .processing = {},
 };
 
 inline const RuntimeConfig kReleaseConfig{
-    .showFPS = false,
+    .showFPS = true,
     .showLayoutBounds = false,
     .showLayoutContentBounds = false,
     .showCursorPos = false,

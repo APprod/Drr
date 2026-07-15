@@ -17,9 +17,9 @@
 void setupDebugConfig() {
 #ifndef NDEBUG
     GetServices().runtimeCfg = kDebugConfig;
-    dbg::GetLogger().SetMinSeverity(dbg::Severity::INFO);
-#else
+    #else
     GetServices().runtimeCfg = kReleaseConfig;
+    dbg::GetLogger().SetMinSeverity(dbg::Severity::INFO);
 #endif
 }
 
@@ -38,6 +38,7 @@ App::App(int screenWidth, int screenHeight): m_screenHeight(screenHeight), m_scr
 }
 
 void App::init(){
+    dbg::GetLogger();// Will be initialized before services, destroyed after
     setupDebugConfig();
     dbg::GetLogger().AddSink(
         std::make_unique<dbg::ConsoleSink>(dbg::ConsoleSink()));
@@ -98,7 +99,7 @@ static void runPlatform(App* app)
         app->frame();
     }
 #endif
-}
+} 
 
 void App::run()
 {

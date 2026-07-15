@@ -16,11 +16,15 @@ public:
     bool OnUpdate() override;
     void MeasureContent(Vector2 available) override;
     void OnDrawContent() override;
-    virtual void OnHoverEnter()override{hovered = true;}
-    virtual void OnHoverExit()override{hovered = false;}
+    void CalculateOffset(float delta);
+    float getMaxOffset();
+    virtual void OnHoverEnter()override{m_hovered = true;}
+    virtual void OnHoverExit()override{m_hovered = false;}
 protected:
-    bool hovered{false};
     Text m_text;
     float m_scrollSpeed{10.f};
     float m_scrollOffset{0.0f};
+    bool m_hovered{false};
+    bool m_atBottom{false};
+
 };

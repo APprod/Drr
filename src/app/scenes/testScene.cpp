@@ -33,6 +33,9 @@ void TestScene::OnEnter(){
     root.AddChild(std::make_unique<DebugOverlay>());
     OnResize();
 }
+void TestScene::OnRestore(){
+    OnResize();
+}
 
 void TestScene::OnUpdateState(){
     constexpr float speed = 0.02f;
@@ -52,16 +55,6 @@ void TestScene::OnUpdateState(){
     myClamp(p.alpha,      0.0f, 1.0f);
 }
 
-void TestScene::OnResize(){
-    Tester tester("OnResize",1,true);
-    Vector2 dims = {
-        static_cast<float>(::GetScreenWidth()),
-        static_cast<float>(::GetScreenHeight())
-    };
-    MyRectangle rectangle = {{0,0}, dims};
-    root.OnMeasure(dims);
-    root.OnArrange(rectangle);
-}
 void TestScene::OnDrawContent(){
     PerfTester tester = GetServices().perfLog.log("OnDrawContent");
 

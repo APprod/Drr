@@ -7,7 +7,7 @@ class TestScene: public BaseScene{
 public:
     TestScene(RecourceManager& manager);
     void OnEnter() override;
-    void OnResize() override;
+    void OnRestore() override;
     void OnDrawContent() override;
     void OnUpdateState() override;
 private:

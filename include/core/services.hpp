@@ -7,7 +7,6 @@
 
 struct Services
 {
-    float dt = 16.7f;
     RecourceManager recManager;
     MyInput input;
     PerformanceLog perfLog{20};

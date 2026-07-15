@@ -108,6 +108,7 @@ public:
     };
 protected:
     virtual void OnResize(){
+        PerfTester tester = GetServices().perfLog.log("OnResize");
         auto dims = Vector2{
                 static_cast<float>(::GetScreenWidth()),
                 static_cast<float>(::GetScreenHeight())

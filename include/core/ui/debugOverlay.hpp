@@ -3,6 +3,8 @@
 #include "core/ui/layout.hpp"
 #include "core/ui/label.hpp"
 #include "core/ui/checkbox.hpp"
+#include "core/ui/slider.hpp"
+#include "core/ui/valueLabel.hpp"
 
 class DebugOverlay: public Stack{
     //Does not consume events

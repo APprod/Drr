@@ -36,11 +36,24 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     auto right = std::make_unique<DebugVerticalLayout>(
         UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
         LayoutSpec{}.AlignBegin().CrossEnd());
+    auto& p = cfg.user.processing;
     right->Add(
-            PerformanceDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1})),
-            Label(
-                Text("W/S bright  E/D contrast\nR/F satur     T/G gamma\nY/H alpha\nF1 overlay  F2 layout\nF3 content F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "TNR", fontSize, 0),
-                UICSpec{}.SetFlex({0,1}))
+        PerformanceDisplay(Text("", "TNR", fontSize, 0), UICSpec{}.SetFlex({0,1})),
+        ValueLabel<float>("Brightness: {:.2f}", &p.brightness, Text("", "TNR", fontSize, 0)),
+        Slider<float>(&p.brightness, 0.1f, 3.0f, nullptr, UICSpec{}, 4, 5, 10),
+        ValueLabel<float>("Contrast: {:.2f}", &p.contrast, Text("", "TNR", fontSize, 0)),
+        Slider<float>(&p.contrast, 0.0f, 5.0f, nullptr, UICSpec{}, 4, 5, 10),
+        ValueLabel<float>("Saturation: {:.2f}", &p.saturation, Text("", "TNR", fontSize, 0)),
+        Slider<float>(&p.saturation, 0.0f, 5.0f, nullptr, UICSpec{}, 4, 5, 10),
+        ValueLabel<float>("Gamma: {:.2f}", &p.gamma, Text("", "TNR", fontSize, 0)),
+        Slider<float>(&p.gamma, 0.1f, 5.0f, nullptr, UICSpec{}, 4, 5, 10),
+        ValueLabel<float>("Alpha: {:.2f}", &p.alpha, Text("", "TNR", fontSize, 0)),
+        Slider<float>(&p.alpha, 0.0f, 1.0f, nullptr, UICSpec{}, 4, 5, 10, {100,10}),
+        ValueLabel<int>("Log msgs: {}", &cfg.debug.debugMessagesCount, Text("", "TNR", fontSize, 0)),
+        Slider<int>(&cfg.debug.debugMessagesCount, 1, 5, nullptr, UICSpec{}, 4, 5, 10, {100,10}),
+        Label(
+            Text("F1 overlay  F2 layout\nF3 content  F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "TNR", fontSize, 0),
+            UICSpec{}.SetFlex({0,1}))
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));

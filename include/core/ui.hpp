@@ -8,3 +8,5 @@
 #include "ui/button.hpp"
 #include "ui/checkbox.hpp"
 #include "ui/label.hpp"
+#include "ui/slider.hpp"
+#include "ui/valueLabel.hpp"

@@ -1,7 +1,11 @@
 #include <memory>
 
-#include "core/debug.hpp"
 #include "core/scene.hpp"
+#include "core/sceneManager.hpp"
+#include "core/debug.hpp"
+
+Status::~Status() = default;
+SceneManager::~SceneManager() = default;
 
 SceneManager::SceneManager() {
 }
@@ -38,9 +42,8 @@ void SceneManager::ResolveTransitions(){
 }
 void SceneManager::PopScene(){
     if (m_scenes.size() == 1) {
-        auto& lastScene = *m_scenes.back();
         dbg::GetLogger()
-            .Error("No scene left when trying to pop scene", typeid(lastScene).name());
+            .Error("No scene left when trying to pop scene");
         return;
     }
     m_scenes.back()->OnExit();

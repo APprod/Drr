@@ -61,8 +61,8 @@ void App::init(){
     recManager.init();
     recManager.load();
     SetExitKey(0);
-    
-    m_sceneManager.QueTransit<TestScene>(recManager);
+    auto& manager = GetServices().sceneManager;
+    manager.QueTransit<TestScene>(recManager);
 }
 
 void App::frame(){
@@ -70,13 +70,14 @@ void App::frame(){
         FrameMark;
         ZoneScopedN("Frame"); 
     #endif
+    auto& manager = GetServices().sceneManager;
     {
         PerfTester tester = GetServices().perfLog.log("Scene Update");
-        m_sceneManager.Update();
+        manager.Update();
     }
     {
         PerfTester tester = GetServices().perfLog.log("Scene Render");
-        m_sceneManager.Draw();
+        manager.Draw();
     }            
     GetServices().perfLog.update();
     // dt = 1000.0f/GetFPS();

@@ -15,14 +15,15 @@ class UserSettings {
 public:
     ProcessingValues processing;
 
-    //not yet
     int targetFPS{60};
-    //not yet
     bool vsync{true};
+    bool showFPS{true};
+
     //not yet
     float userBrightness;
     //not yet
     enum class WindowMode { Windowed, Fullscreen, Borderless } windowMode{WindowMode::Windowed};
+    
     //not yet
     std::string activeFont{"TNR"};
     //not yet

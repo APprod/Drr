@@ -3,7 +3,7 @@
 #include "core/recManager.hpp"
 #include "core/myinput.hpp"
 #include "core/runtimeConfig.hpp"
-
+#include "core/sceneManager.hpp"
 
 struct Services
 {
@@ -11,6 +11,7 @@ struct Services
     MyInput input;
     PerformanceLog perfLog{20};
     RuntimeConfig runtimeCfg;
+    SceneManager sceneManager;
 
     static Services& Get(){
         static Services services;

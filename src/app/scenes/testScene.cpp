@@ -5,6 +5,7 @@
 #include "core/ui/debugOverlay.hpp"
 #include "core/ui/button.hpp"
 #include "core/ui/layout.hpp"
+#include "app/scenes/settingsScene.hpp"
 
 TestScene::TestScene(RecourceManager& manager): m_manager{manager}
 {}
@@ -13,19 +14,27 @@ void TestScene::OnEnter(){
     static int counter{0};
     auto column= std::make_unique<VerticalLayout>(UIComponentSpec{},LayoutSpec{Alignment::End});
     for(int i = 0; i < 1; i++){
+        auto buttonText = Text("Test", "TNR", 32, 0, RAYWHITE);
+        auto spec = UICSpec().SetFlex({.growth = 1, .shrink = 1})
+                    .MinSize({100,50});
         auto row = std::make_unique<HorizontalLayout>(
                     UICSpec{}.FillMaxWidth().SetPaddingPct({.left = 3, .right = 3}),
                     LayoutSpec{}.AlignCenter().CrossCenter().JustifyEvenly().Spacing(20)
                 );
-        for(int j = 0; j < 5; j++){
+        for(int j = 0; j < 4; j++){
             row->Add(
-                Button(Text("Test", "TNR", 32, 0, RAYWHITE),
+                Button(buttonText,
                     [j](){ dbg::GetLogger().Info(std::to_string(++counter), " Button"+ std::to_string(j) +" clicked!"); },
-                    "button_default",{200.f,100.f}, 
-                    UICSpec().SetFlex({.growth = 1, .shrink = 1})
-                    .MinSize({100,50}))
+                    "button_default",{200.f,100.f}, spec)
             );
         }
+        row->Add(
+            Button(Text("Settings", "TNR", 32, 0, RAYWHITE),
+                [](){ 
+                    GetServices().sceneManager.QueTransitSus<SettingsScene>();
+                },
+                "button_default",{200.f,100.f}, spec)
+        );
         column->AddChild(std::move(row));    
     }
     root.AddChild(std::move(column));

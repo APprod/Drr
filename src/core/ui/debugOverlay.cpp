@@ -28,7 +28,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     auto& p = cfg.user.processing;
     Text valText("", "TNR", fontSize, 0);
     UICSpec sliderSpec;
-    auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4, 5, 10, Vector2{100,10});
+    auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     left->Add(
         FPSDraw(Text("", "TNR", fontSize, 0)),
         CursorTrack(Text("", "TNR", fontSize, 0)),
@@ -42,7 +42,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
                 else {ClearWindowState(FLAG_VSYNC_HINT);}
             }
         ),
-        Slider<int>(&cfg.user.targetFPS, 0, 5000, 
+        Slider<int>(&cfg.user.targetFPS, 0, 240, 
             [](int value){
                 dbg::GetLogger().LogFormat(dbg::Severity::DBGINFO, "Switching FPS: {}. cfg.user.targetFPS: {}", value, GetServices().runtimeCfg.user.targetFPS);
                 SetTargetFPS(value);

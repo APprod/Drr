@@ -43,7 +43,15 @@ inline LayoutSpec base{Alignment::Beginning};
 
 class Layout: public UIComponent{
 public:
-    Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base);
+    template<typename... Ts>
+    Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base, Ts&&... children)
+    : UIComponent(uiSpec), m_layoutSpec(layoutSpec) {
+        (AddChild(std::make_unique<std::decay_t<Ts>>(std::forward<Ts>(children))), ...);
+    }
+    Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base)
+    : UIComponent(uiSpec), m_layoutSpec(layoutSpec){
+    }
+    
     Layout(Layout&&) = default;
     Layout& operator=(Layout&&) = default;
     virtual ~Layout() = default;

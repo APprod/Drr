@@ -22,3 +22,4 @@ struct ShaderProgram{
 };
 
 void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall);
+void useShader(std::string name, const Uniforms& uniforms, std::function<void()> drawCall);

@@ -5,6 +5,7 @@
 #include "core/ui/checkbox.hpp"
 #include "core/ui/slider.hpp"
 #include "core/ui/valueLabel.hpp"
+#include "core/ui/hotkeysListener.hpp"
 
 class DebugOverlay: public Stack{
     //Does not consume events
@@ -50,27 +51,4 @@ class DebugHorizontalLayout: public HorizontalLayout {
 class DebugVerticalLayout: public VerticalLayout {
     using VerticalLayout::VerticalLayout;
     void OnDrawContent() override;
-};
-
-class HotkeysListener : public UIComponent {
-public:
-    HotkeysListener(UIComponentSpec spec = {}) : UIComponent(spec) {
-        visible = false;     // не рисуется
-        interactive = true; // не участвует в hit-test
-    }
-    void Bind(InputKeyEvent event, std::function<void()> cb) {
-        m_bindings[event.key] = std::move(cb);
-    }
-    EventResult OnEvent(const MyEvent& event) override {
-        if (auto* e = std::get_if<InputKeyEvent>(&event)) {
-            if (e->pressed && m_bindings.contains(e->key)) {
-                if (GetServices().runtimeCfg.debug.debugFeaturesAllowed)
-                    m_bindings[e->key]();
-                return EventResult::Handled;
-            }
-        }
-        return EventResult::NotHandled;
-    }
-private:
-    std::unordered_map<InputKey, std::function<void()>> m_bindings;
 };

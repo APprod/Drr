@@ -5,8 +5,7 @@
 #include <numeric>
 #include <cmath>
 
-Layout::Layout(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
-        : UIComponent(uiSpec), m_layoutSpec(layoutSpec) {}
+
 
 void Layout::AddChild(std::unique_ptr<UIComponent>&& child)
 {

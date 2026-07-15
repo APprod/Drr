@@ -1,5 +1,6 @@
 #include "core/shader.hpp"
 #include "core/debug.hpp"
+#include "core/services.hpp"
 
 namespace {
 
@@ -38,4 +39,9 @@ void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::func
 
     drawCall();
     ::EndShaderMode();
+}
+
+void useShader(std::string name, const Uniforms& uniforms, std::function<void()> drawCall){
+    auto shaderProgram = GetServices().recManager.getShaderProgram(name);
+    useShader(shaderProgram, uniforms,drawCall);
 }

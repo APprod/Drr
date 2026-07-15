@@ -9,7 +9,6 @@ class App
 private:
     int m_screenHeight;
     int m_screenWidth;
-    SceneManager m_sceneManager;
 
 public:
     App(int screenWidth = 800, int screenHeight = 450);

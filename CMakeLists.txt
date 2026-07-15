@@ -5,6 +5,7 @@ cmake_policy(SET CMP0091 NEW)
 project(app)
 
 option(IS_STATIC "option static" OFF)
+option(PROFILE "option profiling with Tracy" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 17)
@@ -29,23 +30,23 @@ FILE(GLOB_RECURSE MyCPPSources ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_
 add_executable(app ${MyCPPSources})
 
 
-if (EMSCRIPTEN)
-    add_custom_command(
-        TARGET ${PROJECT_NAME} PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
-    )
-    #DEPENDS ${PROJECT_NAME}
+if(CMAKE_CONFIGURATION_TYPES)
+    set(ASSETS_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>/assets")
 else()
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
-    )
-    #DEPENDS ${PROJECT_NAME}
+    set(ASSETS_DIR "${CMAKE_BINARY_DIR}/assets")
 endif()
+
+add_custom_target(copy-assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets"
+        "${ASSETS_DIR}"
+    COMMENT "Copying assets to build directory"
+)
+add_dependencies(${PROJECT_NAME} copy-assets)
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND NOT EMSCRIPTEN)
   target_compile_options(app PRIVATE
-  $<$<CONFIG:Debug>:-g
+  $<$<CONFIG:Debug>:-g -gdwarf-4 
     -Wall -Wextra -Wpedantic
     -Wshadow
     -Wnon-virtual-dtor
@@ -142,7 +143,27 @@ FetchContent_MakeAvailable(json)
 
 target_include_directories(app PUBLIC include/)
 
-target_link_libraries(app PRIVATE nlohmann_json::nlohmann_json raylib)
+if (PROFILE)
+    message("adding profiling")
+    add_compile_definitions(TRACY_PROFILE=TRACY_PROFILE)
+    FetchContent_Declare(
+        tracy
+        GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+        GIT_TAG v0.13.1
+        BINARY_DIR "${CMAKE_BINARY_DIR}/_deps/tracy-build"
+        SOURCE_DIR "${CMAKE_SOURCE_DIR}/third-party/tracy"
+    )
+    set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
+    set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
+    set(TRACY_CALLSTACK ON CACHE BOOL "" FORCE)
+    target_compile_definitions(app PRIVATE TRACY_ENABLE)
+    FetchContent_MakeAvailable(tracy)
+    target_link_libraries(app PRIVATE nlohmann_json::nlohmann_json raylib TracyClient)
+else()
+    target_link_libraries(app PRIVATE nlohmann_json::nlohmann_json raylib)
+endif()
+
+
 
 # Web Configurations
 if (EMSCRIPTEN)

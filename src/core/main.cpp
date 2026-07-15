@@ -3,6 +3,10 @@
 
 #include <iostream>
 
+#ifdef TRACY_PROFILE
+#include <tracy/Tracy.hpp>
+#endif
+
 int main(void)
 {
     App myapp(800, 450);

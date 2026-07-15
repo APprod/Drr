@@ -10,7 +10,9 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-
+#ifdef TRACY_PROFILE
+#include <tracy/Tracy.hpp>
+#endif
 
 void setupDebugConfig() {
 #ifndef NDEBUG
@@ -62,6 +64,10 @@ void App::init(){
 }
 
 void App::frame(){
+    #ifdef TRACY_PROFILE
+        FrameMark;
+        ZoneScopedN("Frame"); 
+    #endif
     {
         PerfTester tester = GetServices().perfLog.log("Scene Update");
         m_sceneManager.Update();

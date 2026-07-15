@@ -1,5 +1,6 @@
 #include "core/ui/overlay.hpp"
 #include "core/services.hpp"
+#include "core/ui/label.hpp"
 
 Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
@@ -36,4 +37,5 @@ Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         GetServices().runtimeCfg.debug.showOverlayGradient ^= true;
     });
     AddChild(std::move(listener));
+    Add(FPSDraw(Text("FPS: ", "TNR", 32, 0)));
 }

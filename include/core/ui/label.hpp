@@ -28,3 +28,9 @@ protected:
     bool m_atBottom{false};
 
 };
+
+class FPSDraw: public Label{
+public:
+    using Label::Label;
+    bool OnUpdate() override;
+};

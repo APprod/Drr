@@ -73,3 +73,13 @@ EventResult Label::OnEvent(const MyEvent& event){
     }
     return EventResult::NotHandled;
 }
+
+
+
+bool FPSDraw::OnUpdate(){
+    if (GetServices().runtimeCfg.debug.showFPS)
+        SetText(std::to_string(GetFPS()) + " FPS");
+    else
+        SetText("");
+    return Label::OnUpdate();
+}

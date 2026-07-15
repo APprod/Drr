@@ -14,12 +14,6 @@ public:
     bool OnUpdate()override;
 };
 
-class FPSDraw: public Label{
-public:
-    using Label::Label;
-    bool OnUpdate() override;
-};
-
 class CursorTrack: public Label{
 public:
     using Label::Label;

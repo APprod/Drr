@@ -2,6 +2,7 @@
 #include "core/services.hpp"
 #include "core/debug.hpp"
 #include "core/util.hpp"
+#include "core/ui/label.hpp"
 #include <format>
 
 DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
@@ -91,13 +92,6 @@ bool DebugOverlay::OnUpdate(){
     return Stack::OnUpdate();
 }
 
-bool FPSDraw::OnUpdate(){
-    if (GetServices().runtimeCfg.debug.showFPS)
-        SetText(std::to_string(GetFPS()) + " FPS");
-    else
-        SetText("");
-    return Label::OnUpdate();
-}
 
 EventResult CursorTrack::OnEvent(const MyEvent& event){
     if (std::holds_alternative<CursorMoveEvent>(event)){

@@ -7,8 +7,18 @@ Button::Button(
     std::string textureName,
     Vector2 targetSize,
     UIComponentSpec spec
-): UIComponent{spec}, m_text{std::move(text)}, m_onClick{onClick}, m_textureName{textureName} {
+): Clickable(spec), m_onClick(std::move(onClick)), m_textureName(std::move(textureName)), m_text(std::move(text)) {
     this->m_targetSize = targetSize;
+}
+
+bool Button::OnUpdate(){
+    auto r = GetDrawRect();
+    m_text.ReMeasure({r.width, r.height});
+    if (m_text.IsDirty()) {
+        m_text.ClearDirty();
+        return true;
+    }
+    return false;
 }
 
 void Button::OnDrawContent(){
@@ -30,37 +40,4 @@ void Button::OnDrawContent(){
             }
     );
 
-}
-
-EventResult Button::OnEvent(const MyEvent& event){
-    if (std::holds_alternative<CursorActionEvent>(event)){
-        const auto& btn = std::get<CursorActionEvent>(event);
-        if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && btn.pressed){
-            if (HitTest(btn.pos)){
-                m_hold = true;
-                return EventResult::RequireCapture;
-            }
-        }
-        if (btn.button == CursorAction::MOUSE_BUTTON_LEFT && !btn.pressed){
-            if (m_hold){
-                if (HitTest(btn.pos)){
-                    m_onClick();
-                }
-                m_hold = false;
-                return EventResult::ReleaseCapture;
-            }
-
-        }
-    }
-    return EventResult::NotHandled;
-}
-
-void Button::OnHoverEnter()
-{
-    m_hover = true;
-}
-
-void Button::OnHoverExit()
-{
-    m_hover = false;
 }

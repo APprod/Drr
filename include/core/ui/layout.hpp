@@ -44,6 +44,8 @@ inline LayoutSpec base{Alignment::Beginning};
 class Layout: public UIComponent{
 public:
     Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base);
+    Layout(Layout&&) = default;
+    Layout& operator=(Layout&&) = default;
     virtual ~Layout() = default;
 
     template<typename... Ts>

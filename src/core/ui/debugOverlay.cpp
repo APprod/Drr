@@ -24,10 +24,13 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
+    auto& cfg = GetServices().runtimeCfg;
     left->Add(
         FPSDraw(Text("", "TNR", fontSize, 0)),
         CursorTrack(Text("", "TNR", fontSize, 0)),
         CfgDisplay(Text("", "TNR", fontSize, 0)),
+        Checkbox(Text("Layout bounds", "TNR", fontSize, 0), &cfg.debug.showLayoutBounds),
+        Checkbox(Text("Content bounds", "TNR", fontSize, 0), &cfg.debug.showLayoutContentBounds),
         DebugLogDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1}).FillMaxSize())
     );
     auto right = std::make_unique<DebugVerticalLayout>(
@@ -52,13 +55,13 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 }
 
 bool DebugOverlay::OnUpdate(){
-    visible = GetServices().runtimeCfg.showDebugOverlay;
+    visible = GetServices().runtimeCfg.debug.showDebugOverlay;
     interactive = visible;
     return Stack::OnUpdate();
 }
 
 bool FPSDraw::OnUpdate(){
-    if (GetServices().runtimeCfg.showFPS)
+    if (GetServices().runtimeCfg.debug.showFPS)
         SetText(std::to_string(GetFPS()) + " FPS");
     else
         SetText("");
@@ -75,7 +78,7 @@ EventResult CursorTrack::OnEvent(const MyEvent& event){
 
 
 bool CursorTrack::OnUpdate(){
-    if (GetServices().runtimeCfg.showCursorPos)
+    if (GetServices().runtimeCfg.debug.showCursorPos)
         SetText(std::format("Cursor pos: {:04d} {:04d}",
             static_cast<int>(m_pos.x), static_cast<int>(m_pos.y)));
     else
@@ -84,7 +87,7 @@ bool CursorTrack::OnUpdate(){
 }
 
 bool PerformanceDisplay::OnUpdate(){
-    if (!GetServices().runtimeCfg.showPerformance) {
+    if (!GetServices().runtimeCfg.debug.showPerformance) {
         SetText(""); return Label::OnUpdate();
     }
     std::string out;
@@ -96,10 +99,10 @@ bool PerformanceDisplay::OnUpdate(){
 }
 
 bool DebugLogDisplay::OnUpdate(){
-    if (!GetServices().runtimeCfg.showDebugLog) {
+    if (!GetServices().runtimeCfg.debug.showDebugLog) {
         SetText(""); return Label::OnUpdate();
     }
-    int count = GetServices().runtimeCfg.debugMessagesCount;
+    int count = GetServices().runtimeCfg.debug.debugMessagesCount;
     const auto& messages = dbg::GetLogger().GetMessages();
     std::string out;
     int shown = 0;
@@ -115,7 +118,7 @@ bool DebugLogDisplay::OnUpdate(){
 
 
 void DebugVerticalLayout::OnDrawContent(){
-    if (GetServices().runtimeCfg.showOverlayGradient) {
+    if (GetServices().runtimeCfg.debug.showOverlayGradient) {
         auto r = m_actual;
         ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
         auto ir = irect(r); ::DrawRectangleGradientV(ir.x,ir.y,ir.width,ir.height, {0,0,50,100}, {25,0,0,50});
@@ -128,16 +131,16 @@ void DebugVerticalLayout::OnDrawContent(){
 }
 bool CfgDisplay::OnUpdate(){
     auto& cfg = GetServices().runtimeCfg;
-    auto& p = cfg.processing;
+    auto& p = cfg.user.processing;
     SetText(std::format(
         "shader: {}\nbrightness: {:.2f}\ncontrast:   {:.2f}\nsaturation: {:.2f}\ngamma:      {:.2f}\nalpha:      {:.2f}",
-        cfg.useProcessingShader ? "PROCESSING" : "BRIGHTNESS",
+        cfg.debug.useProcessingShader ? "PROCESSING" : "BRIGHTNESS",
         p.brightness, p.contrast, p.saturation, p.gamma, p.alpha));
     return Label::OnUpdate();
 }
 
 void DebugHorizontalLayout::OnDrawContent(){
-    if (GetServices().runtimeCfg.showOverlayGradient) {
+    if (GetServices().runtimeCfg.debug.showOverlayGradient) {
         auto r = GetDrawRect();
         auto ir2 = irect(r); ::DrawRectangleGradientV(ir2.x,ir2.y,ir2.width,ir2.height, {0,255,0,255}, {0,0,255,0});
     }

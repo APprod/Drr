@@ -11,6 +11,8 @@ enum class EventResult { NotHandled, Handled, RequireCapture, ReleaseCapture};
 class UIComponent{
 public:
     UIComponent(UIComponentSpec spec = {}): m_compSpec{spec}{}
+    UIComponent(UIComponent&&) = default;
+    UIComponent& operator=(UIComponent&&) = default;
     virtual ~UIComponent() = default;
 
     const UIComponentSpec& Spec() const {

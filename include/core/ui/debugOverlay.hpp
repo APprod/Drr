@@ -2,6 +2,7 @@
 
 #include "core/ui/layout.hpp"
 #include "core/ui/label.hpp"
+#include "core/ui/checkbox.hpp"
 
 class DebugOverlay: public Stack{
     //Does not consume events

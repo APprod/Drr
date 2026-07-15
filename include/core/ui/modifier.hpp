@@ -68,7 +68,7 @@ public:
         );};
         if (m_style.processing) {
             auto& proc = m_style.processing.value();
-        useShader(
+        useShaderUnchecked(
             manager.getShaderProgram("processing"),
             {{"brightness", proc.brightness},
              {"contrast",   proc.contrast},

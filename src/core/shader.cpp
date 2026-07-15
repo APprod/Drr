@@ -22,7 +22,7 @@ void SetUniform(const Shader& shader, int location, const UniformValue& value) {
 
 }
 
-void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall){
+void useShaderUnchecked(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall){
     auto& shader = program.shader;
     auto& locs = program.locations;
 
@@ -40,6 +40,45 @@ void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::func
     drawCall();
     ::EndShaderMode();
 }
+
+void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall){
+    auto& shader = program.shader;
+    auto& locs = program.locations;
+
+    for (const auto& [name, _] : uniforms) {
+        if (!locs.contains(name)) { 
+            auto unisNames = getKeys(locs);
+            std::string all = "";
+            for (auto& thisName: unisNames){
+                all += ", " + thisName;
+            }
+            dbg::GetLogger().Error(std::format("INCORRECT UNIFORM LOCATION NAME, CHECK FOR TYPOS. Uniform name: {}, available: ", name));
+        }
+    }
+
+    ::BeginShaderMode(shader);
+
+    for (auto& [name, loc]: locs){
+        auto it = uniforms.find(name);
+        if (it != uniforms.end()){
+            SetUniform(shader, loc, it->second);
+        } else{
+            SetUniform(shader, loc, program.defaults.at(name));
+        }
+    }
+
+    drawCall();
+    ::EndShaderMode();
+}
+
+
+
+
+void useShaderUnchecked(std::string name, const Uniforms& uniforms, std::function<void()> drawCall){
+    auto shaderProgram = GetServices().recManager.getShaderProgram(name);
+    useShaderUnchecked(shaderProgram, uniforms,drawCall);
+}
+
 
 void useShader(std::string name, const Uniforms& uniforms, std::function<void()> drawCall){
     auto shaderProgram = GetServices().recManager.getShaderProgram(name);

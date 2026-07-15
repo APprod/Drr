@@ -73,7 +73,7 @@ void TestScene::OnDrawContent(){
         ::DrawTexture(m_manager.getTexture("menu"), 0, 0, RAYWHITE);
     };
     if (cfg.debug.useProcessingShader) {
-        useShader(m_manager.getShaderProgram("processing"),
+        useShaderUnchecked(m_manager.getShaderProgram("processing"),
             {{"brightness", p.brightness},
              {"contrast",   p.contrast},
              {"saturation", p.saturation},
@@ -81,7 +81,7 @@ void TestScene::OnDrawContent(){
              {"alpha",      p.alpha}},
             drawCall);
     } else {
-        useShader(m_manager.getShaderProgram("brightness"),
+        useShaderUnchecked(m_manager.getShaderProgram("brightness"),
             {{"brightness", p.brightness}},
             drawCall);
     }

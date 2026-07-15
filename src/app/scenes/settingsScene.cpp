@@ -51,7 +51,7 @@ void SettingsScene::OnDrawContent(){
     auto drawCall = [&manager](){
         ::DrawTexture(manager.getTexture("menu"), 0, 0, RAYWHITE);
     };
-    useShader(
+    useShaderUnchecked(
         manager.getShaderProgram("processing"),
         {{"brightness", 2.0f},
         {"saturation", 1.2f},

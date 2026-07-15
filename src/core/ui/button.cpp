@@ -33,7 +33,7 @@ void Button::OnDrawContent(){
     else if (m_hover && m_hold){
         brightness = 0.7f;
     }
-    useShader(shader,{{"brightness", brightness}},
+    useShaderUnchecked(shader,{{"brightness", brightness}},
             [this, texture, target](){
                 ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
                 m_text.DrawCentered(target);

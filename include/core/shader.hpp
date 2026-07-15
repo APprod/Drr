@@ -21,5 +21,8 @@ struct ShaderProgram{
     Uniforms defaults;
 };
 
+
 void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall);
 void useShader(std::string name, const Uniforms& uniforms, std::function<void()> drawCall);
+void useShaderUnchecked(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall);
+void useShaderUnchecked(std::string name, const Uniforms& uniforms, std::function<void()> drawCall);

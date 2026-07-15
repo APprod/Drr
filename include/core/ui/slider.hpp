@@ -17,11 +17,13 @@ public:
             float barHeight = 4.0f,
             float minThumbSize = 10.0f,
             float maxThumbSize = 30.0f,
-            Vector2 targetSize = {10,10})
+            Vector2 targetSize = {10,10},
+            T step = 0)
         : Clickable(spec)
         , m_value(value)
         , m_min(min)
         , m_max(max)
+        , m_step(step)
         , m_onChange(std::move(onChange))
         , m_barHeight(barHeight)
         , m_minThumbSize(minThumbSize)
@@ -84,7 +86,7 @@ public:
     }
 
 protected:
-    void OnClick() override {
+    void OnReleased() override {
         if (m_onChange && m_value) {
             m_onChange(*m_value);
         }
@@ -93,6 +95,7 @@ protected:
 private:
     T* m_value;
     T m_min, m_max;
+    T m_step;
     std::function<void(T)> m_onChange;
     float m_barHeight;
     float m_minThumbSize, m_maxThumbSize;
@@ -115,6 +118,10 @@ private:
             *m_value = static_cast<T>(m_min + norm * (m_max - m_min));
         } else {
             *m_value = static_cast<T>(std::round(m_min + norm * (m_max - m_min)));
+        }
+        if (m_step > 0) {
+            *m_value = static_cast<T>(std::round((*m_value - m_min) / m_step) * m_step + m_min);
+            *m_value = std::clamp(*m_value, m_min, m_max);
         }
     }
 };

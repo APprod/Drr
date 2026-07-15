@@ -25,32 +25,50 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
     auto& cfg = GetServices().runtimeCfg;
+    auto& p = cfg.user.processing;
+    Text valText("", "TNR", fontSize, 0);
+    UICSpec sliderSpec;
+    auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4, 5, 10, Vector2{100,10});
     left->Add(
         FPSDraw(Text("", "TNR", fontSize, 0)),
         CursorTrack(Text("", "TNR", fontSize, 0)),
         CfgDisplay(Text("", "TNR", fontSize, 0)),
         Checkbox(Text("Layout bounds", "TNR", fontSize, 0), &cfg.debug.showLayoutBounds),
         Checkbox(Text("Content bounds", "TNR", fontSize, 0), &cfg.debug.showLayoutContentBounds),
+        Checkbox(Text("VSYNC", "TNR", fontSize, 0), &cfg.user.vsync,
+            [](bool vsync){
+                dbg::GetLogger().LogFormat(dbg::Severity::DBGINFO, "Switching vsync: {}", vsync);
+                if (vsync) {SetWindowState(FLAG_VSYNC_HINT);}
+                else {ClearWindowState(FLAG_VSYNC_HINT);}
+            }
+        ),
+        Slider<int>(&cfg.user.targetFPS, 0, 5000, 
+            [](int value){
+                dbg::GetLogger().LogFormat(dbg::Severity::DBGINFO, "Switching FPS: {}. cfg.user.targetFPS: {}", value, GetServices().runtimeCfg.user.targetFPS);
+                SetTargetFPS(value);
+            }
+            , sliderSpec, sBarH, sMinTh, sMaxTh, sTarget, 5),
+        ValueLabel<int>("Target FPS: {}", &cfg.user.targetFPS, valText),
         DebugLogDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1}).FillMaxSize())
     );
     auto right = std::make_unique<DebugVerticalLayout>(
         UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
         LayoutSpec{}.AlignBegin().CrossEnd());
-    auto& p = cfg.user.processing;
+
     right->Add(
-        PerformanceDisplay(Text("", "TNR", fontSize, 0), UICSpec{}.SetFlex({0,1})),
-        ValueLabel<float>("Brightness: {:.2f}", &p.brightness, Text("", "TNR", fontSize, 0)),
-        Slider<float>(&p.brightness, 0.1f, 3.0f, nullptr, UICSpec{}, 4, 5, 10),
-        ValueLabel<float>("Contrast: {:.2f}", &p.contrast, Text("", "TNR", fontSize, 0)),
-        Slider<float>(&p.contrast, 0.0f, 5.0f, nullptr, UICSpec{}, 4, 5, 10),
-        ValueLabel<float>("Saturation: {:.2f}", &p.saturation, Text("", "TNR", fontSize, 0)),
-        Slider<float>(&p.saturation, 0.0f, 5.0f, nullptr, UICSpec{}, 4, 5, 10),
-        ValueLabel<float>("Gamma: {:.2f}", &p.gamma, Text("", "TNR", fontSize, 0)),
-        Slider<float>(&p.gamma, 0.1f, 5.0f, nullptr, UICSpec{}, 4, 5, 10),
-        ValueLabel<float>("Alpha: {:.2f}", &p.alpha, Text("", "TNR", fontSize, 0)),
-        Slider<float>(&p.alpha, 0.0f, 1.0f, nullptr, UICSpec{}, 4, 5, 10, {100,10}),
-        ValueLabel<int>("Log msgs: {}", &cfg.debug.debugMessagesCount, Text("", "TNR", fontSize, 0)),
-        Slider<int>(&cfg.debug.debugMessagesCount, 1, 5, nullptr, UICSpec{}, 4, 5, 10, {100,10}),
+        PerformanceDisplay(valText, UICSpec{}.SetFlex({0,1})),
+        ValueLabel<float>("Brightness: {:.2f}", &p.brightness, valText),
+        Slider<float>(&p.brightness, 0.1f, 3.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
+        ValueLabel<float>("Contrast: {:.2f}", &p.contrast, valText),
+        Slider<float>(&p.contrast, 0.0f, 5.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
+        ValueLabel<float>("Saturation: {:.2f}", &p.saturation, valText),
+        Slider<float>(&p.saturation, 0.0f, 5.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
+        ValueLabel<float>("Gamma: {:.2f}", &p.gamma, valText),
+        Slider<float>(&p.gamma, 0.1f, 5.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
+        ValueLabel<float>("Alpha: {:.2f}", &p.alpha, valText),
+        Slider<float>(&p.alpha, 0.0f, 1.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
+        ValueLabel<int>("Log msgs: {}", &cfg.debug.debugMessagesCount, valText),
+        Slider<int>(&cfg.debug.debugMessagesCount, 1, 50, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
         Label(
             Text("F1 overlay  F2 layout\nF3 content  F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "TNR", fontSize, 0),
             UICSpec{}.SetFlex({0,1}))

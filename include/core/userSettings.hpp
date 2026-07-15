@@ -15,9 +15,12 @@ class UserSettings {
 public:
     ProcessingValues processing;
 
+    //not yet
     int targetFPS{60};
-    bool vsync{false};
-
+    //not yet
+    bool vsync{true};
+    //not yet
+    float userBrightness;
     //not yet
     enum class WindowMode { Windowed, Fullscreen, Borderless } windowMode{WindowMode::Windowed};
     //not yet

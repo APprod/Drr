@@ -49,6 +49,7 @@ void App::init(){
         InitWindow(m_screenWidth, m_screenHeight, "Raylib app");
                 SetWindowPosition(5,20);
                 SetWindowState(::FLAG_WINDOW_RESIZABLE);
+                SetWindowState(::FLAG_VSYNC_HINT);
 
                 auto m = GetCurrentMonitor();  
                 auto fps = GetMonitorRefreshRate(m);

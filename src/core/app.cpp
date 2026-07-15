@@ -16,9 +16,9 @@
 
 void setupDebugConfig() {
 #ifndef NDEBUG
-    GetServices().runtimeCfg = kDebugConfig;
+    GetServices().runtimeCfg.debug = kDebugFlags;
     #else
-    GetServices().runtimeCfg = kReleaseConfig;
+    GetServices().runtimeCfg.debug = kReleaseFlags;
     dbg::GetLogger().SetMinSeverity(dbg::Severity::INFO);
 #endif
 }

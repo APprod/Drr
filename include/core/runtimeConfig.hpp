@@ -1,17 +1,8 @@
 #pragma once
 
-#include "raylib.h"
+#include "core/userSettings.hpp"
 
-struct ProcessingValues {
-    float brightness{1.0f};
-    float contrast{1.0f};
-    float saturation{1.0f};
-    float gamma{1.0f};
-    float alpha{1.0f};
-    Vector3 tint{1.0f, 1.0f, 1.0f};
-};
-
-struct RuntimeConfig {
+struct DebugFlags {
     bool showFPS{true};
     bool showLayoutBounds{false};
     bool showLayoutContentBounds{false};
@@ -23,10 +14,9 @@ struct RuntimeConfig {
     int debugMessagesCount{20};
     bool useProcessingShader{true};
     bool showOverlayGradient{true};
-    ProcessingValues processing;
 };
 
-inline const RuntimeConfig kDebugConfig{
+inline const DebugFlags kDebugFlags{
     .showFPS = true,
     .showLayoutBounds = false,
     .showLayoutContentBounds = false,
@@ -38,10 +28,9 @@ inline const RuntimeConfig kDebugConfig{
     .debugMessagesCount = 20,
     .useProcessingShader = true,
     .showOverlayGradient = true,
-    .processing = {},
 };
 
-inline const RuntimeConfig kReleaseConfig{
+inline const DebugFlags kReleaseFlags{
     .showFPS = true,
     .showLayoutBounds = false,
     .showLayoutContentBounds = false,
@@ -53,7 +42,11 @@ inline const RuntimeConfig kReleaseConfig{
     .debugMessagesCount = 20,
     .useProcessingShader = true,
     .showOverlayGradient = false,
-    .processing = {},
+};
+
+struct RuntimeConfig {
+    DebugFlags debug;
+    UserSettings user;
 };
 
 void setupDebugConfig();

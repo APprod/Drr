@@ -61,7 +61,7 @@ public:
     EventResult OnEvent(const MyEvent& event) override {
         if (auto* e = std::get_if<InputKeyEvent>(&event)) {
             if (e->pressed && m_bindings.contains(e->key)) {
-                if (GetServices().runtimeCfg.debugFeaturesAllowed)
+                if (GetServices().runtimeCfg.debug.debugFeaturesAllowed)
                     m_bindings[e->key]();
                 return EventResult::Handled;
             }

@@ -21,11 +21,11 @@ public:
     virtual EventResult OnEvent(const MyEvent& ){ return EventResult::NotHandled;}
     virtual void OnDraw() final{
         OnDrawContent();
-        if (GetServices().runtimeCfg.showLayoutContentBounds){
+        if (GetServices().runtimeCfg.debug.showLayoutContentBounds){
             auto rec = GetDrawRect();
             DrawRectangleLinesEx(rec,2,RED);
         }
-        if (GetServices().runtimeCfg.showLayoutBounds){
+        if (GetServices().runtimeCfg.debug.showLayoutBounds){
             DrawRectangleLinesEx(m_actual,2,RAYWHITE);
         }
     }

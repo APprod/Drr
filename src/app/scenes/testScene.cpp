@@ -40,7 +40,7 @@ void TestScene::OnRestore(){
 void TestScene::OnUpdateState(){
     constexpr float speed = 0.02f;
     auto& input = GetServices().input;
-    auto& p = GetServices().runtimeCfg.processing;
+    auto& p = GetServices().runtimeCfg.user.processing;
 
     p.brightness += input.GetAxis(KEY_W, KEY_S) * speed;
     p.contrast   += input.GetAxis(KEY_E, KEY_D) * speed;
@@ -59,11 +59,11 @@ void TestScene::OnDrawContent(){
     PerfTester tester = GetServices().perfLog.log("OnDrawContent");
 
     auto& cfg = GetServices().runtimeCfg;
-    auto& p = cfg.processing;
+    auto& p = cfg.user.processing;
     auto drawCall = [this](){
         ::DrawTexture(m_manager.getTexture("menu"), 0, 0, RAYWHITE);
     };
-    if (cfg.useProcessingShader) {
+    if (cfg.debug.useProcessingShader) {
         useShader(m_manager.getShaderProgram("processing"),
             {{"brightness", p.brightness},
              {"contrast",   p.contrast},

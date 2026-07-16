@@ -24,6 +24,7 @@ public:
 
     void loadFont(std::string name, std::string filepath, std::vector<int> fontSizes = {12,14,16,20,26,32,40,48,56,64,128});
     Font getFont(std::string name, int fontSize);
+    std::vector<std::string > getLoadedFonts();
 
     void loadShader(std::string name, std::string filepath, const Uniforms& uniforms);
     ShaderProgram& getShaderProgram(std::string name);

@@ -6,6 +6,7 @@
 #include "core/ui/overlay.hpp"
 #include "core/ui/debugOverlay.hpp"
 #include "core/ui/modifier.hpp"
+#include "core/ui/label.hpp"
 
 void SettingsScene::OnEnter(){
     
@@ -14,28 +15,60 @@ void SettingsScene::OnEnter(){
     auto& usrCfg = GetServices().runtimeCfg.user;
     auto fontSize = 20;
 
+    auto fonts = GetServices().recManager.getLoadedFonts();
+    std::vector<std::pair<std::string, std::string>> fontItems;
+    for (auto& f : fonts) fontItems.emplace_back(f, f);
+
     auto row = std::make_unique<HorizontalLayout>(
         UICSpec{}.SetPaddingPct({.top =  10.0, .bottom =  10.0, .left = 10.0, .right = 10.0}),
         LayoutSpec{}.AlignEnd().CrossBegin(),
-
-        HorizontalLayout( UICSpec{}.SetPaddingPct({1.0,1.0,1.0,1.0}), LayoutSpec{}.AlignBegin(),
-
-            Checkbox(Text("VSYNC", "TNR", fontSize, 0), &usrCfg.vsync,
-                [](bool vsync){
-                    if (vsync) {SetWindowState(FLAG_VSYNC_HINT);}
-                    else {ClearWindowState(FLAG_VSYNC_HINT);}
-                }
+        VerticalLayout( UICSpec{}.SetFlex({0,1}), LayoutSpec{}.AlignBegin().CrossEnd().UniformCross(),
+            
+            Background(
+                UICSpec{}.SetFlex({1,1}), 
+                BackgroundStyle{.texture = "button_default", .tint = WHITE, .processing = ProcessingValues{.saturation = 0} },
+                VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
+                    Checkbox(Text("VSYNC", "TNR", fontSize, 0), &usrCfg.vsync,
+                        [](bool vsync){
+                            if (vsync) {SetWindowState(FLAG_VSYNC_HINT);}
+                            else {ClearWindowState(FLAG_VSYNC_HINT);}
+                        }
+                    ),
+                    HorizontalLayout( UICSpec{}.SetFlex({1,1}), LayoutSpec{}.AlignEnd(),
+                        Slider<int>(&usrCfg.targetFPS, 0, 240, 
+                            [](int value){
+                                SetTargetFPS(value);
+                            }
+                            , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 5
+                        ),
+                        ValueLabel<int>("Target FPS: {:0>3}", &usrCfg.targetFPS, Text("", "TNR", fontSize, 0))
+                    )
+                )
             ),
-            Slider<int>(&usrCfg.targetFPS, 0, 240, 
-                [](int value){
-                    SetTargetFPS(value);
-                }
-                , sliderSpec, sBarH, sMinTh, sMaxTh, sTarget, 5
-            ),
-            ValueLabel<int>("Target FPS: {}", &usrCfg.targetFPS, Text("", "TNR", fontSize, 0))
+            Background(
+                UICSpec{}.SetFlex({1,1}), BackgroundStyle{.texture = "button_default", .tint = WHITE, .processing = ProcessingValues{.saturation = 0} },
+                VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
+                    Checkbox(Text("Show FPS", "TNR", fontSize, 0), &usrCfg.showFPS,
+                        [](bool){},UICSpec{}.SetFlex({1,1})
+                    ),
+                    HorizontalLayout( UICSpec{}.SetFlex({1,1}), LayoutSpec{}.AlignBegin(),
+                        Slider<float>(&usrCfg.userBrightness, 0.1f, 3.0f, 
+                            [](float ){}
+                            , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget
+                        ),
+                        ValueLabel<float>("Set Brightness: {:0.3f}", &usrCfg.userBrightness, Text("", "TNR", fontSize, 0))
+                    ),
+                    HorizontalLayout( UICSpec{}.SetFlex({1,1}), LayoutSpec{}.AlignBegin(),
+                        Slider<int>(&usrCfg.activeFontSize, 12,128, 
+                            [](float ){}
+                            , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 4
+                        ),
+                        ValueLabel<int>("FontSize: {}", &usrCfg.activeFontSize, Text("", "TNR", fontSize, 0))
+                    )
+                )
+            )
         )
     );
-
     root.AddChild(std::move(row));
     auto overlay = std::make_unique<Overlay>();
     overlay->Bind(InputKey::KEY_ESCAPE, [](){

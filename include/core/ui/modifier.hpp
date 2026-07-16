@@ -43,18 +43,18 @@ protected:
 
 struct BackgroundStyle
 {
-    std::string texture;
+    std::string texture{"default"};
     Color tint{WHITE};
-    std::optional<ProcessingValues> processing;
+    std::optional<ProcessingValues> processing{std::nullopt};
 };
 
 class Background: public Modifier{
 public:
     template<typename T>
     Background(
-        T&& child,
-        UIComponentSpec spec = {}, 
-        BackgroundStyle style = {"default", WHITE, std::nullopt}
+        UIComponentSpec spec, 
+        BackgroundStyle style,
+        T&& child
     ): Modifier(std::forward<T&&>(child), spec),m_style{style}{}
 
     void OnDrawBefore() override {

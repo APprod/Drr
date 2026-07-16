@@ -203,6 +203,12 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
         innerPos.*mainAxis = std::round(innerPos.*mainAxis + offset.*mainAxis);
     }
 
+    if (m_layoutSpec.uniformCross) {
+        float maxCross = 0;
+        for (auto& s : sizes) maxCross = std::max(maxCross, s.*crossAxis);
+        for (auto& s : sizes) s.*crossAxis = maxCross;
+    }
+
     for (size_t i = 0; i < m_children.size(); ++i) {
         auto finalSize = sizes[i];
 

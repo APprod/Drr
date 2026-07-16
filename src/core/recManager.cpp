@@ -152,6 +152,10 @@ void RecourceManager::loadFont(std::string name, std::string filepath, std::vect
     }
 }
 
+std::vector<std::string > RecourceManager::getLoadedFonts(){
+    return getKeys(m_fonts);
+}
+
 Font RecourceManager::getFont(std::string name, int fontSize)
 {
     auto fontIter = m_fonts.find(name);

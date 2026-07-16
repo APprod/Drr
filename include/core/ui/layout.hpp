@@ -22,6 +22,7 @@ struct LayoutSpec{
     JustifyContent justifyContent{JustifyContent::None};
     int spacing = 5;
     bool crossShrink = true;
+    bool uniformCross = false;
     LayoutSpec& SetAlign(Alignment a) { align = a; return *this; }
     LayoutSpec& AlignBegin() { align = Alignment::Beginning; return *this; }
     LayoutSpec& AlignCenter() { align = Alignment::Center; return *this; }
@@ -33,6 +34,7 @@ struct LayoutSpec{
     LayoutSpec& CrossShrink(bool a) { crossShrink = a; return *this; }
     LayoutSpec& ShrinkOn() { crossShrink = true; return *this; }
     LayoutSpec& ShrinkOff() { crossShrink = false; return *this; }
+    LayoutSpec& UniformCross() { uniformCross = true; return *this; }
     LayoutSpec& SetJustifyContent(JustifyContent j) { justifyContent = j; return *this; }
     LayoutSpec& JustifyEvenly() { justifyContent = JustifyContent::SpaceEvenly; return *this; }
     LayoutSpec& JustifyNone() { justifyContent = JustifyContent::None; return *this; }

@@ -7,25 +7,38 @@ Text::Text(std::string text, std::string fontName, int fontSize, float fontSpaci
     m_dirtyText = true;
 }
 
-std::vector<Line> splitLines(std::string& text){
+std::vector<Line> splitLines(std::string& text)
+{
     std::vector<Line> lines;
     Line line;
-    size_t start = 0;
-    for (size_t i = 0; i <= text.size(); i++){
-        if (i == text.size() || text[i] == ' ' || text[i] == '\n'){
-            if (i > start)
-                line.words.push_back({text.substr(start, i - start)});
-            start = i + 1;
-            if (i < text.size() && text[i] == '\n')
-            {
-                lines.push_back(std::move(line));
-                line = {};
-            }
+
+    size_t i = 0;
+    while (i < text.size())
+    {
+        if (text[i] == '\n')
+        {
+            lines.push_back(std::move(line));
+            line = {};
+            ++i;
+            continue;
         }
-        
+
+        size_t start = i;
+        bool isSpace = text[i] == ' ';
+
+        while (i < text.size() &&
+               text[i] != '\n' &&
+               (text[i] == ' ') == isSpace)
+        {
+            ++i;
+        }
+
+        line.words.push_back({text.substr(start, i - start)});
     }
+
     if (!line.words.empty())
         lines.push_back(std::move(line));
+
     return lines;
 }
 
@@ -47,48 +60,62 @@ void Text::measureLines(){
         line.size = linesize;
     }
 }
+std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vector2 borders)
+{
+    std::vector<Line> result;
 
-std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vector2 borders){
-    auto font = GetServices().recManager.getFont(m_fontName, static_cast<int>(m_fontSize));
-    float spaceSize = MeasureTextEx(font, " ", static_cast<float>(m_fontSize), m_fontSpacing).x;
-    std::vector<Line> resLines;
-    for (auto& line: lines){
-        Line newLine;
-        float currentWidth = 0;
-        for (auto& word : line.words)
-        {
-            float newWidth = currentWidth + word.size.x;
-            if (!newLine.words.empty()) newWidth += spaceSize;
-            if (!newLine.words.empty() && newWidth > borders.x){
-                newLine.size = {currentWidth, newLine.size.y};
-                resLines.push_back(std::move(newLine));
+    for (const auto& srcLine : lines){
+        Line current;
+        float currentWidth = 0.0f;
 
-                newLine = {};
-                currentWidth = 0;
+        for (const auto& token : srcLine.words){
+            bool isSpaces = !token.word.empty() && token.word[0] == ' ';
 
-                newWidth = word.size.x;
+            if (isSpaces && current.words.empty())
+                continue;
+
+            if (!current.words.empty() &&
+                currentWidth + token.size.x > borders.x &&
+                !isSpaces){
+                while (!current.words.empty() &&
+                       !current.words.back().word.empty() &&
+                       current.words.back().word[0] == ' '){
+                    currentWidth -= current.words.back().size.x;
+                    current.words.pop_back();
+                }
+
+                current.size.x = currentWidth;
+                result.push_back(std::move(current));
+
+                current = {};
+                currentWidth = 0.0f;
             }
 
-            newLine.words.push_back(word);
-            currentWidth = newWidth;
-            newLine.size.y = std::max(newLine.size.y, word.size.y);
+            current.words.push_back(token);
+            currentWidth += token.size.x;
+            current.size.y = std::max(current.size.y, token.size.y);
         }
-        if (!newLine.words.empty())
-        {
-            newLine.size.x = currentWidth;
-            resLines.push_back(std::move(newLine));
-        }
-    }
-    for (auto& line: resLines){
-        for (auto& word : line.words){
-            if (!line.lineView.empty())
-                line.lineView += " ";
 
-            line.lineView += word.word;
+        while (!current.words.empty() &&
+               !current.words.back().word.empty() &&
+               current.words.back().word[0] == ' '){
+            currentWidth -= current.words.back().size.x;
+            current.words.pop_back();
+        }
+
+        if (!current.words.empty()){
+            current.size.x = currentWidth;
+            result.push_back(std::move(current));
         }
     }
-    
-    return resLines;
+
+    for (auto& line : result){
+        line.lineView.clear();
+        for (auto& token : line.words)
+            line.lineView += token.word;
+    }
+
+    return result;
 }
 
 

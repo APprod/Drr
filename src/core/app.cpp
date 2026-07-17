@@ -55,7 +55,7 @@ void App::init(){
                 auto fps = GetMonitorRefreshRate(m);
                 if (!fps)  fps = 60;
                 SetTargetFPS(fps);
-                SetWindowState(::FLAG_WINDOW_MAXIMIZED); 
+                // SetWindowState(::FLAG_WINDOW_MAXIMIZED); 
     }
     auto& recManager = GetServices().recManager;
     recManager.init();

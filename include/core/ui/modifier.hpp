@@ -3,13 +3,16 @@
 #include <memory>
 #include <optional>
 
+// Acts as a wrapper above single UIComponent, explicitly allows to draw additionally before and after draw calls of original UIComponent
+// Can override more functions for example to catch its events if needed, etc. 
+// Anything that needs to Enhance funtnionaliity of a single UiComponent but needs to work with any UIComponent child create custom Modifier by deriving from it
 class Modifier: public UIComponent{
 public:
     using UIComponent::UIComponent;
     template<typename T>
     Modifier(T&& child,
         UIComponentSpec spec = {}): UIComponent{spec}, m_child{std::make_unique<std::decay_t<T>>(std::forward<T>(child))}{}
-
+    
     bool OnUpdate(){
         return m_child->OnUpdate();
     }
@@ -84,3 +87,34 @@ public:
 protected:
     BackgroundStyle m_style;
 };
+
+class Popup: public Modifier{
+public:
+    using Modifier::Modifier;
+    Popup&& SetAnchor(std::function<Rectangle()> anchor){m_anchorGetter = anchor; return std::move(*this);}
+    virtual void ArrangeContent(Rectangle actualRect){
+        auto popupRect = CalculateRect(actualRect);
+        m_child->OnArrange(popupRect);
+    }  
+    Rectangle CalculateRect(Rectangle available){
+        Rectangle anchor = m_anchorGetter();
+        Rectangle desiredTarget = {anchor.x, anchor.y + anchor.height, m_desiredSize.x, m_desiredSize.y};
+        myClamp(desiredTarget.width, 0.0f, available.width);
+        myClamp(desiredTarget.height, 0.0f, available.height);
+        auto diffX = (available.x + available.width) - (desiredTarget.x + desiredTarget.width);
+        auto diffY = (available.y + available.height) - (desiredTarget.y + desiredTarget.height);
+        if (diffX < 0) desiredTarget.x += diffX;
+        if (diffY < 0) desiredTarget.y += diffY;
+
+        auto halfDiff = (anchor.width - desiredTarget.width) / 2;
+        desiredTarget.x += halfDiff;
+        return desiredTarget;
+    }
+private:
+    std::function<Rectangle()> m_anchorGetter;
+};
+
+// Popup(Button(...))
+// 
+// 
+// 

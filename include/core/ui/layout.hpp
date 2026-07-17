@@ -73,6 +73,7 @@ public:
 protected:
     LayoutSpec m_layoutSpec;
     std::vector<std::unique_ptr<UIComponent>> m_children;
+    bool m_needsRemeasure = false;
 
     using Axis = float Vector2::*;
     void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis);

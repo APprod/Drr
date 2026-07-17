@@ -52,6 +52,7 @@ public:
     };
 protected:
     virtual void OnResize(){
+        dbg::GetLogger().DebugInfo("Resized: ", Vector2{::GetScreenWidth()/1.0f, ::GetScreenHeight()/1.0f});
         PerfTester tester = GetServices().perfLog.log("OnResize");
         auto dims = Vector2{
                 static_cast<float>(::GetScreenWidth()),

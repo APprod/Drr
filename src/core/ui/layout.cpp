@@ -12,6 +12,7 @@ UICompId Layout::AddChild(std::unique_ptr<UIComponent>&& child)
     UICompId newId = GetUIContext().nextId();
     child->id = newId;
     m_children.push_back(std::move(child));
+    m_needsRemeasure = true;
     return newId;
 }
 
@@ -23,6 +24,7 @@ bool Layout::RemoveChild(UICompId icompIdd) {
         return false;
     }
     m_children.erase(it);
+    m_needsRemeasure = true;
     return true;
 }
 
@@ -36,7 +38,8 @@ void Layout::OnDrawContent()
 
 bool Layout::OnUpdate()
 {
-    bool dirty = false;
+    bool dirty = m_needsRemeasure;
+    m_needsRemeasure = false;
     for(auto& child : m_children){
         dirty = child->OnUpdate() || dirty;
     }

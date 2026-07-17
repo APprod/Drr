@@ -1,6 +1,8 @@
 #include "core/ui/label.hpp"
 #include "core/util.hpp"
 
+#include <cmath>
+
 Label::Label(
     Text text,
     UIComponentSpec spec
@@ -14,9 +16,26 @@ void Label::SetText(std::string text){
 bool Label::OnUpdate()
 {
     auto r = GetDrawRect();
-    m_text.ReMeasure({r.width,r.height});
-    if (m_text.IsDirty()) {
-        m_text.ClearDirty();
+    m_text.ReMeasure({r.width, r.height});
+
+    if (m_compSpec.fillMode == FillMode::FillMaxSize)
+        return false;
+
+    auto oldContent = m_contentDesiredSize;
+    MeasureContent({r.width, r.height});
+
+    auto effectiveOld = oldContent;
+    auto effectiveNew = m_contentDesiredSize;
+    switch (m_compSpec.fillMode) {
+        case FillMode::FillMaxWidth:  effectiveOld.x = effectiveNew.x = 0; break;
+        case FillMode::FillMaxHeight: effectiveOld.y = effectiveNew.y = 0; break;
+        default: break;
+    }
+
+    if (effectiveOld != effectiveNew) {
+        dbg::GetLogger().DebugInfoFmt("Label relayout: old=({:.1f},{:.1f}) new=({:.1f},{:.1f}) rect=({:.1f},{:.1f})",
+            oldContent.x, oldContent.y, m_contentDesiredSize.x, m_contentDesiredSize.y,
+            r.width, r.height);
         return true;
     }
     return false;
@@ -25,8 +44,8 @@ bool Label::OnUpdate()
 void Label::MeasureContent(Vector2 available){
     auto textSize = m_text.ReMeasure(available);
     m_contentDesiredSize = {
-        std::min(available.x, textSize.x),
-        textSize.y
+        std::min(available.x, std::round(textSize.x)),
+        std::round(textSize.y)
     };
 }
 

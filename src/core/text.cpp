@@ -124,7 +124,6 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 // Returns desired size;
 Vector2 Text::ReMeasure(Vector2 borders)
 {
-    auto lastDesired = m_desiredFullSize;
     if (m_dirtyText)
     {
         m_lines = splitLines(m_text);
@@ -134,16 +133,17 @@ Vector2 Text::ReMeasure(Vector2 borders)
             m_desiredFullSize.x = std::max(line.size.x, m_desiredFullSize.x);
             m_desiredFullSize.y += line.size.y;
         }
-        if (lastDesired != m_desiredFullSize){
-            m_dirtyFull = true;
-        }
     }
     if (borders != m_lastBorder || m_dirtyText){
+        auto lastMeasured = m_lastMeasuredSize;
         m_linesConstrained = constructConstrained(m_lines, borders);
         m_lastMeasuredSize = {0,0};
         for (auto& line: m_linesConstrained){
             m_lastMeasuredSize.x = std::max(line.size.x, m_lastMeasuredSize.x);
             m_lastMeasuredSize.y += line.size.y;
+        }
+        if (lastMeasured != m_lastMeasuredSize){
+            m_dirtyFull = true;
         }
         m_lastBorder = borders;
     }

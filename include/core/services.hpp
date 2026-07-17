@@ -9,7 +9,7 @@ struct Services
 {
     RecourceManager recManager;
     MyInput input;
-    PerformanceLog perfLog{20};
+    PerformanceLog perfLog{60};
     RuntimeConfig runtimeCfg;
     SceneManager sceneManager;
 

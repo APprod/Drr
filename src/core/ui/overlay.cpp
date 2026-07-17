@@ -71,3 +71,4 @@ bool Overlay::RemovePopup(UICompId compId){
     ids.erase(it);
     return RemoveChild(compId);
 }
+

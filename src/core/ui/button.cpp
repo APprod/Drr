@@ -13,6 +13,7 @@ Button::Button(
 
 bool Button::OnUpdate(){
     auto r = GetDrawRect();
+    //TODO: Separate it into a function inside the Text class if possible
     m_text.ReMeasure({r.width, r.height});
     if (m_text.IsDirty()) {
         m_text.ClearDirty();

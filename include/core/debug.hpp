@@ -89,6 +89,31 @@ public:
         LogTemplate(Severity::FATAL, std::forward<Args>(args)...);
     }
 
+    template<typename... Args>
+    void DebugInfoFmt(std::format_string<Args...> fmt, Args&&... args) {
+        Log(Severity::DBGINFO, std::format(fmt, std::forward<Args>(args)...));
+    }
+
+    template<typename... Args>
+    void InfoFmt(std::format_string<Args...> fmt, Args&&... args) {
+        Log(Severity::INFO, std::format(fmt, std::forward<Args>(args)...));
+    }
+
+    template<typename... Args>
+    void WarnFmt(std::format_string<Args...> fmt, Args&&... args) {
+        Log(Severity::WRN, std::format(fmt, std::forward<Args>(args)...));
+    }
+
+    template<typename... Args>
+    void ErrorFmt(std::format_string<Args...> fmt, Args&&... args) {
+        Log(Severity::ERROR, std::format(fmt, std::forward<Args>(args)...));
+    }
+
+    template<typename... Args>
+    void FatalFmt(std::format_string<Args...> fmt, Args&&... args) {
+        Log(Severity::FATAL, std::format(fmt, std::forward<Args>(args)...));
+    }
+
     void Log(Severity s, std::string message);
     void AddSink(std::unique_ptr<ISink> sink);
     void SetMinSeverity(Severity s);

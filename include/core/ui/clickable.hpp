@@ -9,7 +9,7 @@ public:
     void OnHoverEnter() override { m_hover = true; }
     void OnHoverExit() override { m_hover = false; }
     EventMask getCaptureTypes() const override { return EventType::CursorAction; }
-    EventResult OnEvent(const MyEvent& event) override;
+    bool OnEvent(const MyEvent& event) override;
     bool OnUpdate() override { return false; }
 
 protected:

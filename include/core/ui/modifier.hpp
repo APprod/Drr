@@ -13,7 +13,7 @@ public:
     bool OnUpdate(){
         return m_child->OnUpdate();
     }
-    EventResult OnEvent(const MyEvent& event){
+    bool OnEvent(const MyEvent& event){
         return m_child->OnEvent(event);
     }
     virtual void MeasureContent(Vector2 available){

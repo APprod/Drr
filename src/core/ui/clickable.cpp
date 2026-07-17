@@ -4,13 +4,14 @@ Clickable::Clickable(UIComponentSpec spec)
     : UIComponent(spec)
 {}
 
-EventResult Clickable::OnEvent(const MyEvent& event){
+bool Clickable::OnEvent(const MyEvent& event){
     if (auto* e = std::get_if<CursorActionEvent>(&event)){
         if (e->button == CursorAction::MOUSE_BUTTON_LEFT && e->pressed){
             if (HitTest(e->pos)){
                 m_hold = true;
                 OnPressed();
-                return EventResult::RequireCapture;
+                GetUIContext().SetCapture(this);
+                return true;
             }
         }
         if (e->button == CursorAction::MOUSE_BUTTON_LEFT && !e->pressed){
@@ -20,9 +21,10 @@ EventResult Clickable::OnEvent(const MyEvent& event){
                     OnClick();
                 }
                 m_hold = false;
-                return EventResult::ReleaseCapture;
+                GetUIContext().ReleaseCapture();
+                return true;
             }
         }
     }
-    return EventResult::NotHandled;
+    return false;
 }

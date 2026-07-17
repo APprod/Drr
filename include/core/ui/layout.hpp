@@ -63,10 +63,11 @@ public:
         (AddChild(std::make_unique<std::decay_t<Ts>>(std::forward<Ts>(iChildren))), ...);
         return *this;
     }
-    void AddChild(std::unique_ptr<UIComponent>&& child);
+    UICompId AddChild(std::unique_ptr<UIComponent>&& child);
+    bool RemoveChild(UICompId id);
     void OnDrawContent() override;
     bool OnUpdate() override;
-    EventResult OnEvent(const MyEvent& event) override;
+    bool OnEvent(const MyEvent& event) override;
     const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return m_children;}
     virtual UIComponent* FindTarget(Vector2 point) override;
 protected:

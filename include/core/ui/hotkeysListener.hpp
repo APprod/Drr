@@ -10,7 +10,7 @@ class HotkeysListener : public UIComponent {
 public:
     HotkeysListener(UIComponentSpec spec = {}) : UIComponent(spec) {
         visible = false;
-        interactive = true;
+        hitTesting = false;
     }
 
     void Bind(InputKey key, std::function<void()> cb) {
@@ -20,15 +20,15 @@ public:
         Bind(event.key, std::move(cb));
     }
 
-    EventResult OnEvent(const MyEvent& event) override {
+    bool OnEvent(const MyEvent& event) override {
         if (auto* e = std::get_if<InputKeyEvent>(&event)) {
             if (e->pressed && m_bindings.contains(e->key)) {
                 if (GetServices().runtimeCfg.debug.debugFeaturesAllowed)
                     m_bindings[e->key]();
-                return EventResult::Handled;
+                return true;
             }
         }
-        return EventResult::NotHandled;
+        return false;
     }
 
 private:

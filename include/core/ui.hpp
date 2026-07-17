@@ -10,3 +10,6 @@
 #include "ui/label.hpp"
 #include "ui/slider.hpp"
 #include "ui/valueLabel.hpp"
+#include "ui/modifier.hpp"
+#include "ui/overlay.hpp"
+#include "ui/debugOverlay.hpp"

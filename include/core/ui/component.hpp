@@ -5,8 +5,8 @@
 #include "core/events.hpp"
 #include "core/services.hpp"
 
-class UIComponent;
-enum class EventResult { NotHandled, Handled, RequireCapture, ReleaseCapture};
+
+using UICompId = size_t;
 
 class UIComponent{
 public:
@@ -20,7 +20,7 @@ public:
     }
 
     virtual bool OnUpdate(){ return false; }
-    virtual EventResult OnEvent(const MyEvent& ){ return EventResult::NotHandled;}
+    virtual bool OnEvent(const MyEvent& ){ return false;}
     virtual void OnDraw() final{
         OnDrawContent();
         if (GetServices().runtimeCfg.debug.showLayoutContentBounds){
@@ -75,7 +75,9 @@ public:
 
     Vector2 DesiredSize(){return m_desiredSize;}
     Rectangle FinalRect(){return m_actual;}
-    bool interactive = true;
+    UICompId id{0}; 
+    bool recievesEvents = true;
+    bool hitTesting = true;
     bool visible = true;
 protected:
     UIComponentSpec m_compSpec;
@@ -93,3 +95,49 @@ protected:
         };
     }
 };
+
+class IOverlay{
+public:
+    IOverlay() = default;
+    virtual ~IOverlay() = default;
+    virtual UICompId PushPopup(std::unique_ptr<UIComponent> comp) = 0;
+    virtual UICompId PopPopup() = 0;
+    virtual bool RemovePopup(UICompId id) = 0;
+};
+
+struct UIContext
+{
+    static UIContext& Get(){
+        static UIContext m_ctx;
+        return m_ctx;
+    }
+    template<typename T>
+    requires std::is_base_of_v<UIComponent, std::decay_t<T>>
+    UICompId PushPopup(T&& comp){
+        return PushPopup(std::make_unique<std::decay_t<T>>(std::forward<T>(comp)));
+    }
+    UICompId PushPopup(std::unique_ptr<UIComponent> comp);
+    UICompId PopPopup();
+    bool RemovePopup(UICompId id);
+
+    void SetOverlay(IOverlay* over){m_overlay = over;}
+    void ResetOverlay(){m_overlay = nullptr;}
+
+    void SetCapture(UIComponent* comp){m_captured = comp;}
+    EventMask  GetCaptureTypes() const;
+    UIComponent*  GetCapturered() const{return m_captured;}
+    void ReleaseCapture(){m_captured = nullptr;}
+    UICompId nextId(){return ++maxId;}
+private:
+    UICompId maxId{0}; 
+    IOverlay* m_overlay = nullptr;
+    UIComponent* m_captured = nullptr;
+    UIContext() = default;
+    UIContext(const UIContext&) = delete;
+    UIContext& operator=(const UIContext&) = delete;
+};
+
+inline UIContext& GetUIContext() {
+    return UIContext::Get();
+};
+

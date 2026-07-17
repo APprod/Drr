@@ -7,9 +7,23 @@
 
 
 
-void Layout::AddChild(std::unique_ptr<UIComponent>&& child)
+UICompId Layout::AddChild(std::unique_ptr<UIComponent>&& child)
 {
+    UICompId newId = GetUIContext().nextId();
+    child->id = newId;
     m_children.push_back(std::move(child));
+    return newId;
+}
+
+bool Layout::RemoveChild(UICompId icompIdd) {
+    auto it = std::find_if(m_children.begin(), m_children.end(),
+        [icompIdd](const auto& c){ return c->id == icompIdd; });
+    if (it == m_children.end()){
+        dbg::GetLogger().Warn("RemoveChild: id not found: ", icompIdd);
+        return false;
+    }
+    m_children.erase(it);
+    return true;
 }
 
 void Layout::OnDrawContent()
@@ -32,7 +46,7 @@ bool Layout::OnUpdate()
 UIComponent* Layout::FindTarget(Vector2 point){
     for (auto it = m_children.rbegin(); it != m_children.rend(); ++it){
         auto& child = (*it);
-        if (!child->interactive) continue;
+        if (!child->hitTesting) continue;
         UIComponent* comp = child->FindTarget(point);
         if (comp){
             return comp;
@@ -41,14 +55,15 @@ UIComponent* Layout::FindTarget(Vector2 point){
     return nullptr;
 }
 
-EventResult Layout::OnEvent(const MyEvent& event){
+bool Layout::OnEvent(const MyEvent& event){
     for (auto it = m_children.rbegin(); it != m_children.rend(); ++it){
         auto& child = (*it);
-        EventResult result = child->OnEvent(event);
-        if (result == EventResult::NotHandled) continue;
+        if (!child->recievesEvents) continue;
+        bool result = child->OnEvent(event);
+        if (!result) continue;
         return result;
     }
-    return EventResult::NotHandled;
+    return false;
 }
 
 void Layout::MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis) {

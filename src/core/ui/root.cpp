@@ -18,10 +18,10 @@ Vector2 Root::getPos(const MyEvent& event){
 void Root::UpdateHover()
 {
     UIComponent* newHovered = nullptr;
-
-    if (m_captured){
-        if (m_captured->HitTest(m_cursorPos))
-            newHovered = m_captured;
+    auto captured = GetUIContext().GetCapturered();
+    if (captured){
+        if (captured->HitTest(m_cursorPos))
+            newHovered = captured;
     }
     else{
         newHovered = FindTarget(m_cursorPos);
@@ -37,35 +37,26 @@ void Root::UpdateHover()
         m_hovered->OnHoverEnter();
 }
 
-std::optional<EventResult> Root::CheckCaptured(const MyEvent& event){
-    if (!m_captured)
+std::optional<bool> Root::CheckCaptured(const MyEvent& event){
+    auto captured = GetUIContext().GetCapturered();
+    if (!captured)
         return std::nullopt;
-    if (!(m_captured->getCaptureTypes() & getEventType(event)))
+    if (!(captured->getCaptureTypes() & getEventType(event)))
         return std::nullopt;
 
-    EventResult result = m_captured->OnEvent(event);
-    if (result == EventResult::ReleaseCapture)
-    {
-        m_captured = nullptr;
-        UpdateHover();
-    }
+    bool result = captured->OnEvent(event);
+    UpdateHover();
     return result;
 }
 
-EventResult Root::OnEvent(const MyEvent& event){
+bool Root::OnEvent(const MyEvent& event){
     PerfTester tester = GetServices().perfLog.log("Root::OnEvent");
 
     if (auto* move = std::get_if<CursorMoveEvent>(&event))
     {
         m_cursorPos = move->pos;
-        if (auto r = CheckCaptured(event))
-            return *r;
-        Layout::OnEvent(event);
-        UpdateHover();
-        return EventResult::Handled;
     }
-
-    if (auto* screen = std::get_if<ScreenInterEvent>(&event))
+    else if (auto* screen = std::get_if<ScreenInterEvent>(&event))
     {
         if (screen->action == ScreenInteraction::EXIT)
         {
@@ -76,16 +67,12 @@ EventResult Root::OnEvent(const MyEvent& event){
             }
         }
 
-        return EventResult::Handled;
+        return true;
     }
-    {
+    { //Always
         if (auto r = CheckCaptured(event)) return *r;
-        EventResult result = Layout::OnEvent(event);
-        if (result == EventResult::RequireCapture)
-        {
-            m_captured = FindTarget(getPos(event));
-            UpdateHover();
-        }
+        bool result = Layout::OnEvent(event);
+        UpdateHover();
         return result;
     }
 }

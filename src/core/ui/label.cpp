@@ -63,15 +63,15 @@ void Label::CalculateOffset(float delta){
     m_atBottom = (m_scrollOffset == maxOffset);
 }
 
-EventResult Label::OnEvent(const MyEvent& event){
+bool Label::OnEvent(const MyEvent& event){
     if (auto* e = std::get_if<ScrollEvent>(&event)){
         if (!m_hovered){
-            return EventResult::NotHandled;
+            return false;
         }
         CalculateOffset(e->delta.y);
-        return EventResult::Handled;
+        return true;
     }
-    return EventResult::NotHandled;
+    return false;
 }
 
 

@@ -17,7 +17,7 @@ public:
 class CursorTrack: public Label{
 public:
     using Label::Label;
-    virtual EventResult OnEvent(const MyEvent& )override;
+    virtual bool OnEvent(const MyEvent& )override;
     bool OnUpdate() override;
     Vector2 m_pos{0,0};
 };

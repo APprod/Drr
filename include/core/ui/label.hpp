@@ -12,7 +12,7 @@ public:
         UIComponentSpec spec = {}
     );
     void SetText(std::string text);
-    EventResult OnEvent(const MyEvent& event) override;
+    bool OnEvent(const MyEvent& event) override;
     bool OnUpdate() override;
     void MeasureContent(Vector2 available) override;
     void OnDrawContent() override;
@@ -31,6 +31,9 @@ protected:
 
 class FPSDraw: public Label{
 public:
-    using Label::Label;
+    FPSDraw(
+        Text text,
+        UIComponentSpec spec = {}
+    ): Label{text, spec}{hitTesting = recievesEvents = false;}
     bool OnUpdate() override;
 };

@@ -1,12 +1,5 @@
 #include "app/scenes/settingsScene.hpp"
-#include "core/ui/layout.hpp"
-#include "core/ui/slider.hpp"
-#include "core/ui/checkbox.hpp"
-#include "core/ui/valueLabel.hpp"
-#include "core/ui/overlay.hpp"
-#include "core/ui/debugOverlay.hpp"
-#include "core/ui/modifier.hpp"
-#include "core/ui/label.hpp"
+#include "core/ui.hpp"
 
 void SettingsScene::OnEnter(){
     
@@ -18,7 +11,7 @@ void SettingsScene::OnEnter(){
     auto fonts = GetServices().recManager.getLoadedFonts();
     std::vector<std::pair<std::string, std::string>> fontItems;
     for (auto& f : fonts) fontItems.emplace_back(f, f);
-
+    auto buttonText = Text("Test", "TNR", 32, 0, RAYWHITE);
     auto row = std::make_unique<HorizontalLayout>(
         UICSpec{}.SetPaddingPct({.top =  10.0, .bottom =  10.0, .left = 10.0, .right = 10.0}),
         LayoutSpec{}.AlignEnd().CrossBegin(),
@@ -39,7 +32,7 @@ void SettingsScene::OnEnter(){
                             [](int value){
                                 SetTargetFPS(value);
                             }
-                            , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 5
+                            , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 2
                         ),
                         ValueLabel<int>("Target FPS: {:0>3}", &usrCfg.targetFPS, Text("", "TNR", fontSize, 0))
                     )
@@ -66,6 +59,10 @@ void SettingsScene::OnEnter(){
                         ValueLabel<int>("FontSize: {}", &usrCfg.activeFontSize, Text("", "TNR", fontSize, 0))
                     )
                 )
+            ),
+            Button(buttonText, [buttonText](){
+                GetUIContext().PushPopup(Button(buttonText,[](){dbg::GetLogger().DebugInfo("Clicked !!!!!!!!!!!!!!!"); dbg::GetLogger().DebugInfo("Popped ", GetUIContext().PopPopup());},"button_default",{200.f,100.f},UICSpec{}));
+            },"button_default",{200.f,100.f},UICSpec{}
             )
         )
     );

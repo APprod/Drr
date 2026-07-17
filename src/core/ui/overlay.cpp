@@ -5,8 +5,6 @@
 Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
 
-    interactive = false;
-
     auto listener = std::make_unique<HotkeysListener>();
     m_listener = listener.get();
     listener->Bind(InputKey::KEY_F1, []{
@@ -38,4 +36,38 @@ Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     });
     AddChild(std::move(listener));
     Add(FPSDraw(Text("FPS: ", "TNR", 32, 0)));
+    GetUIContext().SetOverlay(this);
+}
+
+Overlay::~Overlay(){
+    GetUIContext().ResetOverlay();
+}
+
+UICompId Overlay::PushPopup(std::unique_ptr<UIComponent> comp){
+    id = AddChild(std::move(comp));
+    ids.push_back(id);
+    dbg::GetLogger().DebugInfo("Popup pushed");
+    return id;
+}
+
+UICompId Overlay::PopPopup(){
+    if (ids.empty()){
+        dbg::GetLogger().Warn("Trying to pop Popup in empty list");
+        return 0;
+    }
+    UICompId last = ids.back();
+    ids.pop_back();
+    RemoveChild(last);
+    return last;
+}
+
+bool Overlay::RemovePopup(UICompId compId){
+    auto it = std::find_if(ids.begin(), ids.end(),
+        [compId](const auto& c){ return c == compId; });
+    if (it == ids.end()){
+        dbg::GetLogger().Warn("RemovePopup: id not found: ", compId);
+        return false;
+    }
+    ids.erase(it);
+    return RemoveChild(compId);
 }

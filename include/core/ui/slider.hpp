@@ -44,6 +44,8 @@ public:
         float norm = valueToNorm();
         float thumbX = rect.x + norm * rect.width;
         float thumbSize = std::clamp(rect.height, m_minThumbSize, m_maxThumbSize);
+        float thumbRadius = thumbSize / 2.0f;
+        thumbX = std::clamp(thumbX, rect.x + thumbRadius, rect.x + rect.width - thumbRadius);
 
         Color thumbColor = RAYWHITE;
         if (m_hover && !m_hold)  thumbColor = LIGHTGRAY;
@@ -61,13 +63,13 @@ public:
         };
     }
 
-    EventResult OnEvent(const MyEvent& event) override {
+    bool OnEvent(const MyEvent& event) override {
         if (auto* e = std::get_if<CursorMoveEvent>(&event)) {
             if (m_hold) {
                 updateValueFromPos(e->pos.x);
-                return EventResult::Handled;
+                return true;
             }
-            return EventResult::NotHandled;
+            return false;
         }
 
         if (auto* e = std::get_if<CursorActionEvent>(&event)) {
@@ -103,7 +105,7 @@ private:
     float valueToNorm() const {
         if (!m_value) return 0.0f;
         if (m_max == m_min) return 0.0f;
-        return static_cast<float>((*m_value - m_min)) / (m_max - m_min);
+        return std::clamp(static_cast<float>((*m_value - m_min)) / (m_max - m_min), 0.0f, 1.0f);
     }
 
     void updateValueFromPos(float mouseX) {

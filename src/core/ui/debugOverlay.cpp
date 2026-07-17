@@ -8,7 +8,7 @@
 DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
     
-    interactive = true;
+    recievesEvents = true;
     int fontSize = 20;
     
     PaddingPct padBase{1,1,1,1};
@@ -88,17 +88,17 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 
 bool DebugOverlay::OnUpdate(){
     visible = GetServices().runtimeCfg.debug.showDebugOverlay;
-    interactive = visible;
+    hitTesting = recievesEvents = visible;
     return Stack::OnUpdate();
 }
 
 
-EventResult CursorTrack::OnEvent(const MyEvent& event){
+bool CursorTrack::OnEvent(const MyEvent& event){
     if (std::holds_alternative<CursorMoveEvent>(event)){
         const auto& pos = std::get<CursorMoveEvent>(event).pos;
         m_pos = pos;
     }
-    return EventResult::NotHandled;
+    return false;
 }
 
 
@@ -132,7 +132,7 @@ bool DebugLogDisplay::OnUpdate(){
     std::string out;
     int shown = 0;
     for (int i = static_cast<int>(messages.size()) - 1; i >= 0 && shown < count; --i) {
-        if (messages[i].severity == dbg::Severity::DBGINFO) continue;
+        // if (messages[i].severity == dbg::Severity::DBGINFO) continue;
         out = std::format("{}: {}\n", dbg::ToString(messages[i].severity), messages[i].message) + out;
         ++shown;
     }

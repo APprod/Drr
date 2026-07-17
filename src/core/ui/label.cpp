@@ -15,7 +15,6 @@ bool Label::OnUpdate()
 {
     auto r = GetDrawRect();
     m_text.ReMeasure({r.width,r.height});
-    CalculateOffset(0);
     if (m_text.IsDirty()) {
         m_text.ClearDirty();
         return true;
@@ -33,10 +32,16 @@ void Label::MeasureContent(Vector2 available){
 
 void Label::OnDrawContent(){
     auto rect = GetDrawRect();
+    auto maxOffset = getMaxOffset();
+
+    if (maxOffset > 0.0f && m_atBottom) {
+        m_scrollOffset = maxOffset;
+    }
+    myClamp(m_scrollOffset, 0.0f, maxOffset);
+
     auto ir = irect(rect);
     BeginScissorMode(ir.x, ir.y, ir.width, ir.height);
     m_text.Draw({rect.x, rect.y - m_scrollOffset});
-    auto maxOffset = getMaxOffset();
     if (maxOffset > 0.0f){
         ::DrawRectangleLinesEx(rect,1,WHITE);
     }
@@ -54,13 +59,8 @@ float Label::getMaxOffset(){
 void Label::CalculateOffset(float delta){
     auto maxOffset = getMaxOffset();
     m_scrollOffset -= m_scrollSpeed * delta;
-    myClamp(m_scrollOffset,0.0f,maxOffset);
-    if (delta == 0.0f){
-        if (m_atBottom){
-            m_scrollOffset = maxOffset;
-        }
-    }
-    m_atBottom = m_scrollOffset == maxOffset;
+    myClamp(m_scrollOffset, 0.0f, maxOffset);
+    m_atBottom = (m_scrollOffset == maxOffset);
 }
 
 EventResult Label::OnEvent(const MyEvent& event){

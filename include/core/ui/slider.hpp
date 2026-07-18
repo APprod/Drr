@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "core/ui/clickable.hpp"
+#include "core/animated.hpp"
 
 template<typename T>
 requires std::is_arithmetic_v<T>
@@ -30,6 +31,15 @@ public:
         , m_maxThumbSize(maxThumbSize)
     {
         this->m_targetSize = targetSize;
+        m_visualNorm.setImmediate(valueToNorm());
+    }
+
+    bool OnUpdate(float dt) override {
+        m_visualNorm.setTarget(valueToNorm());
+        m_thumbScale.setTarget(m_hover ? 1.3f : 1.0f);
+        m_visualNorm.update(dt);
+        m_thumbScale.update(dt);
+        return false;
     }
 
     void OnDrawContent() override {
@@ -41,9 +51,9 @@ public:
                         static_cast<int>(rect.width), static_cast<int>(m_barHeight), GRAY);
 
         if (!m_value) return;
-        float norm = valueToNorm();
-        float thumbX = rect.x + norm * rect.width;
+        float thumbX = rect.x + m_visualNorm.current * rect.width;
         float thumbSize = std::clamp(rect.height, m_minThumbSize, m_maxThumbSize);
+        thumbSize *= m_thumbScale.current;
         float thumbRadius = thumbSize / 2.0f;
         thumbX = std::clamp(thumbX, rect.x + thumbRadius, rect.x + rect.width - thumbRadius);
 
@@ -101,6 +111,8 @@ private:
     std::function<void(T)> m_onChange;
     float m_barHeight;
     float m_minThumbSize, m_maxThumbSize;
+    Animated<float> m_visualNorm{0.0f, 0.06f, Easing::easeOutCubic};
+    Animated<float> m_thumbScale{1.0f, 0.10f, Easing::easeOutBack};
 
     float valueToNorm() const {
         if (!m_value) return 0.0f;

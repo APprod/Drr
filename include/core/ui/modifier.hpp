@@ -10,8 +10,13 @@ class Modifier: public UIComponent{
 public:
     using UIComponent::UIComponent;
     template<typename T>
-    Modifier(T&& child,
-        UIComponentSpec spec = {}): UIComponent{spec}, m_child{std::make_unique<std::decay_t<T>>(std::forward<T>(child))}{}
+    Modifier(T&& child, UIComponentSpec spec = {})
+        : UIComponent{spec}, 
+          m_child{std::make_unique<std::decay_t<T>>(std::forward<T>(child))} {}
+
+    Modifier(std::unique_ptr<UIComponent> child, UIComponentSpec spec = {})
+    : UIComponent{spec}, m_child{std::move(child)} {}
+    
     
     virtual bool OnUpdate(float dt) override{
         return m_child->OnUpdate(dt);
@@ -50,6 +55,8 @@ struct BackgroundStyle
     Color tint{WHITE};
     std::optional<ProcessingValues> processing{std::nullopt};
 };
+
+enum class OpenDirection { Down, Up, Auto };
 
 class Background: public Modifier{
 public:
@@ -91,8 +98,11 @@ protected:
 class Popup: public Modifier{
 public:
     using Modifier::Modifier;
+    Popup(std::unique_ptr<UIComponent> child, UIComponentSpec spec = {})
+        : Modifier(std::move(child), spec) {}
     Popup&& SetAnchor(std::function<Rectangle()> anchor){m_anchorGetter = anchor; return std::move(*this);}
     Popup&& ParentSize(bool use){m_useParentSize = use; return std::move(*this);}
+    Popup&& Direction(OpenDirection d) { m_direction = d; return std::move(*this); }
     bool OnUpdate(float dt)override{
         auto popupRect = CalculateRect(m_actual);
         m_child->OnArrange(popupRect);
@@ -103,29 +113,123 @@ public:
         auto popupRect = CalculateRect(actualRect);
         m_child->OnArrange(popupRect);
     }  
-    Rectangle CalculateRect(Rectangle available){
+    Rectangle CalculateRect(Rectangle available) {
         Rectangle anchor = m_anchorGetter();
-        Rectangle desiredTarget = {anchor.x, anchor.y + anchor.height, m_desiredSize.x, m_desiredSize.y};
-        if (m_useParentSize) {desiredTarget.width = anchor.width;}
+        Rectangle desiredTarget = {
+            anchor.x, 0,
+            m_desiredSize.x, m_desiredSize.y
+        };
+        if (m_useParentSize) desiredTarget.width = anchor.width;
+
         myClamp(desiredTarget.width, 0.0f, available.width);
         myClamp(desiredTarget.height, 0.0f, available.height);
 
         auto halfDiff = (anchor.width - desiredTarget.width) / 2;
         desiredTarget.x += halfDiff;
-
         myClamp(desiredTarget.x, available.x, available.x + available.width - desiredTarget.width);
 
-        auto diffY = (available.y + available.height) - (desiredTarget.y + desiredTarget.height);
-        if (diffY < 0) desiredTarget.y += diffY;
+        float availableBottom = available.y + available.height;
+        float anchorBottom = anchor.y + anchor.height;
+
+        if (m_direction == OpenDirection::Up) {
+            desiredTarget.y = anchor.y - desiredTarget.height;
+            float topEdge = desiredTarget.y;
+            if (topEdge < available.y)
+                desiredTarget.y = available.y;
+        } else if (m_direction == OpenDirection::Auto) {
+            desiredTarget.y = anchorBottom;
+            float bottomEdge = desiredTarget.y + desiredTarget.height;
+            if (bottomEdge > availableBottom) {
+                desiredTarget.y = anchor.y - desiredTarget.height;
+                myClamp(desiredTarget.y, available.y, desiredTarget.y);
+            }
+        } else {
+            desiredTarget.y = anchorBottom;
+        }
 
         return desiredTarget;
     }
 private:
     std::function<Rectangle()> m_anchorGetter;
     bool m_useParentSize{false};
+    OpenDirection m_direction{OpenDirection::Auto};
 };
 
-// Popup(Button(...))
-// 
-// 
-// 
+class AnimatedReveal : public Modifier {
+public:
+    template<typename T>
+    AnimatedReveal(T&& child, UIComponentSpec spec = {},
+                   Animated<float> anim = {0.0f, 0.20f, Easing::easeOutCubic},
+                   OpenDirection dir = OpenDirection::Down)
+        : Modifier(std::forward<T>(child), spec)
+        , m_clipHeight(anim)
+        , m_revealDirection(dir) {}
+
+    void setOpen(bool open) {
+        m_open = open;
+        m_clipHeight.setTarget(open ? 1.0f : 0.0f);
+    }
+
+    bool isClosingDone() const { return !m_open && m_clipHeight.isDone(); }
+
+    bool OnUpdate(float dt) override {
+        m_clipHeight.update(dt);
+        return Modifier::OnUpdate(dt);
+    }
+
+    bool OnEvent(const MyEvent& event) override {
+        auto inClip = [&](Vector2 pos) -> bool {
+            float h = m_actual.height * m_clipHeight.current;
+            if (h <= 0.0f) return false;
+            float clipY = (m_revealDirection == OpenDirection::Up)
+                ? m_actual.y + m_actual.height - h
+                : m_actual.y;
+            return CheckCollisionPointRec(pos, {m_actual.x, clipY, m_actual.width, h});
+        };
+
+        if (auto* e = std::get_if<CursorActionEvent>(&event)) {
+            if (!inClip(e->pos)) return false;
+        }
+        if (auto* e = std::get_if<CursorMoveEvent>(&event)) {
+            if (!inClip(e->pos)) return false;
+        }
+        if (auto* e = std::get_if<ScreenInterEvent>(&event)) {
+            if (!inClip(e->pos)) return false;
+        }
+
+        return Modifier::OnEvent(event);
+    }
+
+    void OnDrawContent() override {
+        float h = m_actual.height * m_clipHeight.current;
+        float clipY = (m_revealDirection == OpenDirection::Up)
+            ? m_actual.y + m_actual.height - h
+            : m_actual.y;
+        BeginScissorMode(
+            static_cast<int>(m_actual.x), static_cast<int>(clipY),
+            static_cast<int>(m_actual.width), static_cast<int>(h)
+        );
+        Modifier::OnDrawContent();
+        EndScissorMode();
+    }
+
+    void setPopupId(UICompId popupId) { m_popupId = popupId; }
+
+    UIComponent* FindTarget(Vector2 point) override {
+        float h = m_actual.height * m_clipHeight.current;
+        if (h <= 0.0f) return nullptr;
+        float clipY = (m_revealDirection == OpenDirection::Up)
+            ? m_actual.y + m_actual.height - h
+            : m_actual.y;
+        Rectangle clipRect = {m_actual.x, clipY, m_actual.width, h};
+        if (!CheckCollisionPointRec(point, clipRect))
+            return nullptr;
+        return Modifier::FindTarget(point);
+    }
+
+private:
+    Animated<float> m_clipHeight;
+    bool m_open = false;
+    UICompId m_popupId = 0;
+    OpenDirection m_revealDirection{OpenDirection::Down};
+};

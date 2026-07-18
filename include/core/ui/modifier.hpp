@@ -13,8 +13,8 @@ public:
     Modifier(T&& child,
         UIComponentSpec spec = {}): UIComponent{spec}, m_child{std::make_unique<std::decay_t<T>>(std::forward<T>(child))}{}
     
-    virtual bool OnUpdate() override{
-        return m_child->OnUpdate();
+    virtual bool OnUpdate(float dt) override{
+        return m_child->OnUpdate(dt);
     }
     virtual bool OnEvent(const MyEvent& event)override{
         return m_child->OnEvent(event);
@@ -93,10 +93,10 @@ public:
     using Modifier::Modifier;
     Popup&& SetAnchor(std::function<Rectangle()> anchor){m_anchorGetter = anchor; return std::move(*this);}
     Popup&& ParentSize(bool use){m_useParentSize = use; return std::move(*this);}
-    bool OnUpdate()override{
+    bool OnUpdate(float dt)override{
         auto popupRect = CalculateRect(m_actual);
         m_child->OnArrange(popupRect);
-        return m_child->OnUpdate();
+        return m_child->OnUpdate(dt);
     }  
     virtual void ArrangeContent(Rectangle actualRect)override{
         m_actual = actualRect;

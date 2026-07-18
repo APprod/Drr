@@ -19,7 +19,7 @@ public:
         return m_compSpec;
     }
 
-    virtual bool OnUpdate(){ return false; }
+    virtual bool OnUpdate(float){ return false; }
     virtual bool OnEvent(const MyEvent& ){ return false;}
     virtual void OnDraw() final{
         OnDrawContent();

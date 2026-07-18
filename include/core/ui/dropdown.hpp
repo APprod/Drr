@@ -37,7 +37,7 @@ public:
         m_pendingClose = true;
     }
 
-    bool OnUpdate() override {
+    bool OnUpdate(float dt) override {
         if (m_pendingClose) {
             GetUIContext().RemovePopup(m_popupId);
             m_isOpen = false;
@@ -45,7 +45,7 @@ public:
         }
         if (m_text.GetText() != m_items[m_currentIdx].first)
             m_text.SetText(m_items[m_currentIdx].first);
-        return Button::OnUpdate();
+        return Button::OnUpdate(dt);
     }
     void openPopup(){
         if (m_isOpen) closePopup();

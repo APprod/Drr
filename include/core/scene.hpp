@@ -13,7 +13,7 @@ public:
     virtual void OnEnter() = 0; //Allocate everything
     virtual void OnRestore() = 0; //Called only if it was Suspended
 
-    virtual void OnUpdate() = 0;
+    virtual void OnUpdate(float dt) = 0;
     virtual void OnDraw() = 0; 
 
     virtual void OnExit() = 0; //DeAllocate, called on normal transit
@@ -33,7 +33,7 @@ public:
         OnDrawContent();
         EndDrawing();
     };
-    void OnUpdate() override {
+    void OnUpdate(float dt) override {
         PerfTester tester = GetServices().perfLog.log("Scene OnUpdate Full");
         auto& input = GetServices().input;
         {
@@ -44,7 +44,7 @@ public:
         for (auto& event: events){
             root.OnEvent(event); //updates states
         }
-        bool needsResize = root.OnUpdate(); //updates other data related to UI states
+        bool needsResize = root.OnUpdate(dt); //updates other data related to UI states
         if (needsResize || ::IsWindowResized()) { //resize if needed
             OnResize();
         }

@@ -14,7 +14,7 @@ void Label::SetText(std::string text){
     m_text.SetText(std::move(text));
 }
 
-bool Label::OnUpdate()
+bool Label::OnUpdate(float)
 {
     auto r = GetDrawRect();
     m_text.ReMeasure({r.width, r.height});
@@ -100,10 +100,10 @@ bool Label::OnEvent(const MyEvent& event){
 
 
 
-bool FPSDraw::OnUpdate(){
+bool FPSDraw::OnUpdate(float dt){
     if (GetServices().runtimeCfg.user.showFPS)
         SetText(std::to_string(GetFPS()) + " FPS");
     else
         SetText("");
-    return Label::OnUpdate();
+    return Label::OnUpdate(dt);
 }

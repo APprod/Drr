@@ -10,7 +10,7 @@ public:
     void OnHoverExit() override { m_hover = false; }
     EventMask getCaptureTypes() const override { return EventType::CursorAction; }
     bool OnEvent(const MyEvent& event) override;
-    bool OnUpdate() override { return false; }
+    bool OnUpdate(float) override { return false; }
 
 protected:
     bool m_hold = false;

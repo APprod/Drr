@@ -19,14 +19,28 @@ void Button::MeasureContent(Vector2 available) {
     };
 }
 
-bool Button::OnUpdate(){
+bool Button::OnUpdate(float dt){
     auto r = GetDrawRect();
-    //TODO: Separate it into a function inside the Text class if possible
     m_text.ReMeasure({r.width, r.height});
     if (m_text.IsDirty()) {
         m_text.ClearDirty();
         return true;
     }
+
+    float targetBrightness = 1.0f;
+    float targetScale = 1.0f;
+    if (m_hover && !m_hold) {
+        targetBrightness = 1.5f;
+        targetScale = 1.05f;
+    } else if (m_hold) {
+        targetBrightness = 0.7f;
+    }
+    m_brightness.setTarget(targetBrightness);
+    m_scale.setTarget(targetScale);
+
+    m_brightness.update(dt);
+    m_scale.update(dt);
+
     return false;
 }
 
@@ -34,15 +48,17 @@ void Button::OnDrawContent(){
     auto& manager = GetServices().recManager;
     auto texture = manager.getTexture(m_textureName);
     auto target = GetDrawRect();
+    float s = m_scale.current;
+    if (s != 1.0f) {
+        target = {
+            target.x + target.width * (1.0f - s) * 0.5f,
+            target.y + target.height * (1.0f - s) * 0.5f,
+            target.width * s,
+            target.height * s,
+        };
+    }
     auto& shader = GetServices().recManager.getShaderProgram("processing");
-    float brightness = 1.0f;
-    if (m_hover && !m_hold){
-        brightness = 1.5f;
-    }
-    else if (m_hover && m_hold){
-        brightness = 0.7f;
-    }
-    useShaderUnchecked(shader,{{"brightness", brightness}},
+    useShaderUnchecked(shader,{{"brightness", m_brightness.current}},
             [this, texture, target](){
                 ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
                 m_text.DrawCentered(target);

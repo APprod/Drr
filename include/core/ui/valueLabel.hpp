@@ -16,11 +16,11 @@ public:
         , m_value(value)
     {}
 
-    bool OnUpdate() override {
+    bool OnUpdate(float dt) override {
         if (m_value) {
             SetText(std::vformat(m_fmt, std::make_format_args(*m_value)));
         }
-        return Label::OnUpdate();
+        return Label::OnUpdate(dt);
     }
 
 private:

@@ -46,7 +46,7 @@ public:
         m_contentDesiredSize = {m_boxSize, m_boxSize};
     }
 
-    bool OnUpdate() override { return false; }
+    bool OnUpdate(float) override { return false; }
 
 protected:
     void OnClick() override {

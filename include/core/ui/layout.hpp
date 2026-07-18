@@ -66,7 +66,7 @@ public:
     UICompId AddChild(std::unique_ptr<UIComponent>&& child);
     bool RemoveChild(UICompId id);
     void OnDrawContent() override;
-    bool OnUpdate() override;
+    bool OnUpdate(float dt) override;
     bool OnEvent(const MyEvent& event) override;
     const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return m_children;}
     virtual UIComponent* FindTarget(Vector2 point) override;

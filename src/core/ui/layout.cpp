@@ -37,12 +37,12 @@ void Layout::OnDrawContent()
     }
 }
 
-bool Layout::OnUpdate()
+bool Layout::OnUpdate(float dt)
 {
     bool dirty = m_needsRemeasure;
     m_needsRemeasure = false;
     for(auto& child : m_children){
-        dirty = child->OnUpdate() || dirty;
+        dirty = child->OnUpdate(dt) || dirty;
     }
     return dirty;
 }

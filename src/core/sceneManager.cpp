@@ -78,7 +78,7 @@ void SceneManager::Update(){
             .Error("Scene Stack is Empty");
         return;
     }
-    m_scenes.back()->OnUpdate();
+    m_scenes.back()->OnUpdate(GetFrameTime());
 }
 void SceneManager::Draw(){
     if (m_scenes.empty()){

@@ -85,10 +85,10 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     AddChild(std::move(temp));
 }
 
-bool DebugOverlay::OnUpdate(){
+bool DebugOverlay::OnUpdate(float dt){
     visible = GetServices().runtimeCfg.debug.showDebugOverlay;
     hitTesting = recievesEvents = visible;
-    return Stack::OnUpdate();
+    return Stack::OnUpdate(dt);
 }
 
 
@@ -101,30 +101,30 @@ bool CursorTrack::OnEvent(const MyEvent& event){
 }
 
 
-bool CursorTrack::OnUpdate(){
+bool CursorTrack::OnUpdate(float dt){
     if (GetServices().runtimeCfg.debug.showCursorPos)
         SetText(std::format("Cursor pos: {:04d} {:04d}",
             static_cast<int>(m_pos.x), static_cast<int>(m_pos.y)));
     else
         SetText("");
-    return Label::OnUpdate();
+    return Label::OnUpdate(dt);
 }
 
-bool PerformanceDisplay::OnUpdate(){
+bool PerformanceDisplay::OnUpdate(float dt){
     if (!GetServices().runtimeCfg.debug.showPerformance) {
-        SetText(""); return Label::OnUpdate();
+        SetText(""); return Label::OnUpdate(dt);
     }
     std::string out;
     for (auto& [name, stat] : GetServices().perfLog.getLogData()) {
         out += std::format("{}: avg={:.2f}ms pk={:.2f}ms\n", name, stat.average(), stat.peak());
     }
     SetText(out);
-    return Label::OnUpdate();
+    return Label::OnUpdate(dt);
 }
 
-bool DebugLogDisplay::OnUpdate(){
+bool DebugLogDisplay::OnUpdate(float dt){
     if (!GetServices().runtimeCfg.debug.showDebugLog) {
-        SetText(""); return Label::OnUpdate();
+        SetText(""); return Label::OnUpdate(dt);
     }
     int count = GetServices().runtimeCfg.debug.debugMessagesCount;
     const auto& messages = dbg::GetLogger().GetMessages();
@@ -136,7 +136,7 @@ bool DebugLogDisplay::OnUpdate(){
         ++shown;
     }
     SetText(out);
-    return Label::OnUpdate();
+    return Label::OnUpdate(dt);
 }
 
 
@@ -153,14 +153,14 @@ void DebugVerticalLayout::OnDrawContent(){
         child->OnDraw();
     }
 }
-bool CfgDisplay::OnUpdate(){
+bool CfgDisplay::OnUpdate(float dt){
     auto& cfg = GetServices().runtimeCfg;
     auto& p = cfg.user.processing;
     SetText(std::format(
         "shader: {}\nbrightness: {:.2f}\ncontrast:   {:.2f}\nsaturation: {:.2f}\ngamma:      {:.2f}\nalpha:      {:.2f}",
         cfg.debug.useProcessingShader ? "PROCESSING" : "BRIGHTNESS",
         p.brightness, p.contrast, p.saturation, p.gamma, p.alpha));
-    return Label::OnUpdate();
+    return Label::OnUpdate(dt);
 }
 
 void DebugHorizontalLayout::OnDrawContent(){

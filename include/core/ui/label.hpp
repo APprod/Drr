@@ -16,7 +16,7 @@ public:
     );
     void SetText(std::string text);
     bool OnEvent(const MyEvent& event) override;
-    bool OnUpdate() override;
+    bool OnUpdate(float dt) override;
     void MeasureContent(Vector2 available) override;
     void OnDrawContent() override;
     void CalculateOffset(float delta);
@@ -26,10 +26,11 @@ public:
 protected:
     Text m_text;
     TextAlign m_textAlign = TextAlign::Left;
-    float m_scrollSpeed{10.f};
     float m_scrollOffset{0.0f};
     bool m_hovered{false};
     bool m_atBottom{false};
+public:
+    float m_scrollSpeed{20.f};
 
 };
 
@@ -39,5 +40,5 @@ public:
         Text text,
         UIComponentSpec spec = {}
     ): Label{text, spec}{hitTesting = recievesEvents = false;}
-    bool OnUpdate() override;
+    bool OnUpdate(float dt) override;
 };

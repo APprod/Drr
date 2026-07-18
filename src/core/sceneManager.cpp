@@ -17,6 +17,7 @@ void SceneManager::QuePop(){
     }
     m_status.action = SceneAction::Pop;
     m_status.transitingScene.reset();
+    m_state = State::Exiting;
 }
 void SceneManager::ResolveTransitions(){
     //called once per frame
@@ -49,6 +50,7 @@ void SceneManager::PopScene(){
     m_scenes.back()->OnExit();
     m_scenes.pop_back();
     m_scenes.back()->OnRestore();
+    m_state = State::Entering;
 }
 void SceneManager::PerformTransit(std::unique_ptr<IScene> scene){
     if (m_scenes.size() != 0) {
@@ -69,16 +71,44 @@ void SceneManager::PerformSuspendAndTransit(std::unique_ptr<IScene> scene){
 void SceneManager::AddScene(std::unique_ptr<IScene> scene){
     m_scenes.push_back(std::move(scene));
     m_scenes.back()->OnEnter();
+    m_state = State::Entering;
 }
-
 void SceneManager::Update(){
-    ResolveTransitions();
-    if (m_scenes.empty()){
-        dbg::GetLogger()
-            .Error("Scene Stack is Empty");
-        return;
+    float dt = GetFrameTime();
+    
+    if (m_scenes.empty()) {
+        ResolveTransitions();
+        if (m_scenes.empty()) {
+            dbg::GetLogger().Error("Scene Stack is Empty");
+            return;
+        }
     }
-    m_scenes.back()->OnUpdate(GetFrameTime());
+    switch (m_state) {
+    case State::Idle:
+        m_scenes.back()->OnUpdate(dt);
+        break;
+
+    case State::Entering:
+        if (m_scenes.back()->AnimateEnter(dt))
+            m_state = State::Idle;
+        m_scenes.back()->OnUpdate(dt);
+        break;
+
+    case State::Exiting: {
+        bool finished = m_scenes.back()->AnimateExit(dt);
+        if (!finished) {
+            m_scenes.back()->OnUpdate(dt);
+        } else {
+            ResolveTransitions();
+            if (m_state == State::Entering) {
+                if (m_scenes.back()->AnimateEnter(dt))
+                    m_state = State::Idle;
+                m_scenes.back()->OnUpdate(dt);
+            }
+        }
+        break;
+    }
+    }
 }
 void SceneManager::Draw(){
     if (m_scenes.empty()){

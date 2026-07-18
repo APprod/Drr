@@ -4,7 +4,7 @@
 #include "core/userSettings.hpp"
 
 void SettingsScene::OnEnter(){
-    
+    m_transitionTime = 0.2f;    
     UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     auto& usrCfg = GetServices().runtimeCfg.user;
@@ -134,6 +134,7 @@ void SettingsScene::OnDrawContent(){
         drawCall
     );
     root.OnDraw();
+    ::BaseScene::DrawFadeTransition();
 }
 
 void SettingsScene::OnUpdateState(){

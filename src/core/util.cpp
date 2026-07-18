@@ -151,7 +151,7 @@ Tester::~Tester()
     if (!m_active) return;
     auto end = std::chrono::steady_clock::now();
     auto ms = std::chrono::duration<float, std::milli>(end - m_start).count();
-    if (ms > m_thresholdMs * 2) dbg::GetLogger().DebugInfo("!!!!!! Tester " + m_name + " , ms:", ms);
+    if (ms > m_thresholdMs * 2) dbg::GetLogger().DebugInfo("Tester " + m_name + " , ms:", ms);
     else if (ms > m_thresholdMs) dbg::GetLogger().DebugInfo("Tester: " + m_name + " , ms:", ms);
 }
 

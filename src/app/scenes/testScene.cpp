@@ -10,7 +10,9 @@
 #include "core/ui/dropdown.hpp"
 
 TestScene::TestScene(RecourceManager& manager): m_manager{manager}
-{}
+{
+    m_transitionTime = 0.2f;
+}
 
 void TestScene::OnEnter(){
     static int counter{0};
@@ -72,6 +74,7 @@ void TestScene::OnDrawContent(){
 
     auto& cfg = GetServices().runtimeCfg;
     auto& p = cfg.user.processing;
+    p.brightness = 2.5;
     auto drawCall = [this](){
         ::DrawTexture(m_manager.getTexture("menu"), 0, 0, RAYWHITE);
     };
@@ -89,4 +92,6 @@ void TestScene::OnDrawContent(){
             drawCall);
     }
     root.OnDraw();
+    BaseScene::DrawFadeTransition();
+    
 }

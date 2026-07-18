@@ -5,8 +5,9 @@
 
 Label::Label(
     Text text,
-    UIComponentSpec spec
-): UIComponent{spec}, m_text{std::move(text)}
+    UIComponentSpec spec,
+    TextAlign align
+): UIComponent{spec}, m_text{std::move(text)}, m_textAlign{align}
 {}
 
 void Label::SetText(std::string text){
@@ -41,26 +42,33 @@ bool Label::OnUpdate()
 void Label::MeasureContent(Vector2 available){
     auto textSize = m_text.ReMeasure(available);
     m_contentDesiredSize = {
-        std::min(available.x, std::round(textSize.x)),
-        std::round(textSize.y)
+        std::min(available.x, std::ceil(textSize.x)),
+        std::ceil(textSize.y)
     };
 }
 
 void Label::OnDrawContent(){
     auto rect = GetDrawRect();
+    auto textSize = m_text.RealSize();
     auto maxOffset = getMaxOffset();
 
-    if (maxOffset > 0.0f && m_atBottom) {
+    if (maxOffset > 0.0f && m_atBottom)
         m_scrollOffset = maxOffset;
-    }
     myClamp(m_scrollOffset, 0.0f, maxOffset);
 
     auto ir = irect(rect);
     BeginScissorMode(ir.x, ir.y, ir.width, ir.height);
-    m_text.Draw({rect.x, rect.y - m_scrollOffset});
-    if (maxOffset > 0.0f){
-        ::DrawRectangleLinesEx(rect,1,WHITE);
+
+    Vector2 pos;
+    pos.y = rect.y - m_scrollOffset;
+    switch (m_textAlign) {
+        case TextAlign::Left:   pos.x = rect.x; break;
+        case TextAlign::Center: pos.x = rect.x + (rect.width - textSize.x) / 2; break;
+        case TextAlign::Right:  pos.x = rect.x + rect.width - textSize.x; break;
     }
+    m_text.Draw(pos);
+    if (maxOffset > 0.0f)
+        ::DrawRectangleLinesEx(rect, 1, WHITE);
     EndScissorMode();
 }
 
@@ -93,7 +101,7 @@ bool Label::OnEvent(const MyEvent& event){
 
 
 bool FPSDraw::OnUpdate(){
-    if (GetServices().runtimeCfg.debug.showFPS)
+    if (GetServices().runtimeCfg.user.showFPS)
         SetText(std::to_string(GetFPS()) + " FPS");
     else
         SetText("");

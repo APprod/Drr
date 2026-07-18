@@ -35,7 +35,7 @@ Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         GetServices().runtimeCfg.debug.showOverlayGradient ^= true;
     });
     AddChild(std::move(listener));
-    Add(FPSDraw(Text("FPS: ", "TNR", 32, 0)));
+    Add(FPSDraw(Text("FPS: ", "big header")));
     GetUIContext().SetOverlay(this);
 }
 

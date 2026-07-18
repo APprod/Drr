@@ -5,4 +5,7 @@ class SettingsScene:  public BaseScene{
     void OnEnter() override;
     void OnDrawContent() override;
     void OnUpdateState() override;
+private:
+    int m_pendingSizeIndex{5};
+    std::string m_pendingFontName;
 };

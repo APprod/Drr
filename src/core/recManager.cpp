@@ -118,8 +118,7 @@ void RecourceManager::loadFont(std::string name, std::string filepath, std::vect
         for (auto size: fontSizes){
             Font newFont = ::LoadFontEx(filepath.c_str(), size, nullptr, 0);
             ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_BILINEAR);
-            if (!::IsFontValid(newFont))
-            {
+            if (!::IsFontValid(newFont)){
                 dbg::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
                 continue;
             }
@@ -158,17 +157,21 @@ std::vector<std::string > RecourceManager::getLoadedFonts(){
 
 Font RecourceManager::getFont(std::string name, int fontSize)
 {
+    if (name == "default") {
+        return m_fonts.at("default").begin()->second;
+    }
+
     auto fontIter = m_fonts.find(name);
     if (fontIter == m_fonts.end()) 
     {
         dbg::GetLogger().Error("Font not found:", name);
-        return m_fonts.at("default")[32];
+        return getFont("default", fontSize);
     }else{
         auto& fontMap = fontIter->second;
         auto fontSizeIter = fontMap.find(fontSize);
         if (fontSizeIter == fontMap.end()){
-            dbg::GetLogger().Error("Font size not found: ", fontSize);
-            return m_fonts.at("default")[32];
+            dbg::GetLogger().Error("Font size not found: ", fontSize, " for font: ", name);
+            return getFont("default", fontSize);
         }else{
             return fontSizeIter->second;
         }

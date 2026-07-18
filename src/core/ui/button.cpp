@@ -11,6 +11,14 @@ Button::Button(
     this->m_targetSize = targetSize;
 }
 
+void Button::MeasureContent(Vector2 available) {
+    auto textSize = m_text.ReMeasure(available);
+    m_contentDesiredSize = {
+        std::min(available.x, std::max(m_targetSize.x, textSize.x)),
+        std::min(available.y, std::max(m_targetSize.y, textSize.y))
+    };
+}
+
 bool Button::OnUpdate(){
     auto r = GetDrawRect();
     //TODO: Separate it into a function inside the Text class if possible

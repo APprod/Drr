@@ -22,7 +22,7 @@ public:
     bool loadTexture(std::string name, std::string filepath);
     bool unloadTexture(std::string name); 
 
-    void loadFont(std::string name, std::string filepath, std::vector<int> fontSizes = {12,14,16,20,26,32,40,48,56,64,128});
+    void loadFont(std::string name, std::string filepath, std::vector<int> fontSizes = {12,14,16,18,20,22,24,26,28,32,36,40,44,48,52,56,60,64,72,80,88,96});
     Font getFont(std::string name, int fontSize);
     std::vector<std::string > getLoadedFonts();
 

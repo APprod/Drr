@@ -21,8 +21,8 @@ std::vector<Line> splitLines(std::string& text);
 class Text {
 public:
     Text() = default;
-    Text(std::string text, std::string fontName = "default",
-         int fontSize = 20, float fontSpacing = 2, Color color = RAYWHITE);
+    Text(std::string text, std::string role = "default",
+         float fontSpacing = 1, Color color = RAYWHITE);
 
     void SetText(std::string t) { 
         m_text = std::move(t); 
@@ -42,8 +42,7 @@ public:
 
 private:
     std::string m_text;
-    std::string m_fontName = "default";
-    int m_fontSize = 20;
+    std::string m_role = "default";
     float m_fontSpacing = 2;
     Color m_color = RAYWHITE;
 
@@ -55,4 +54,6 @@ private:
     std::vector<Line> m_linesConstrained;
     bool m_dirtyText = false;
     bool m_dirtyFull = false;
+    int m_lastFontSize = 0;
+    std::string m_lastFontName;
 };

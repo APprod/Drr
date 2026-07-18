@@ -9,7 +9,6 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
     
     recievesEvents = true;
-    int fontSize = 20;
     
     PaddingPct padBase{1,1,1,1};
 
@@ -27,16 +26,16 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     );
     auto& cfg = GetServices().runtimeCfg;
     auto& p = cfg.user.processing;
-    Text valText("", "TNR", fontSize, 0);
+    Text valText("", "text");
     UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     left->Add(
-        FPSDraw(Text("", "TNR", fontSize, 0)),
-        CursorTrack(Text("", "TNR", fontSize, 0)),
-        CfgDisplay(Text("", "TNR", fontSize, 0)),
-        Checkbox(Text("Layout bounds", "TNR", fontSize, 0), &cfg.debug.showLayoutBounds),
-        Checkbox(Text("Content bounds", "TNR", fontSize, 0), &cfg.debug.showLayoutContentBounds),
-        Checkbox(Text("VSYNC", "TNR", fontSize, 0), &cfg.user.vsync,
+        FPSDraw(Text("", "big header")),
+        CursorTrack(Text("", "text")),
+        CfgDisplay(Text("", "text")),
+        Checkbox(Text("Layout bounds", "text"), &cfg.debug.showLayoutBounds),
+        Checkbox(Text("Content bounds", "text"), &cfg.debug.showLayoutContentBounds),
+        Checkbox(Text("VSYNC", "text"), &cfg.user.vsync,
             [](bool vsync){
                 dbg::GetLogger().LogFormat(dbg::Severity::DBGINFO, "Switching vsync: {}", vsync);
                 if (vsync) {SetWindowState(FLAG_VSYNC_HINT);}
@@ -50,7 +49,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
             }
             , sliderSpec, sBarH, sMinTh, sMaxTh, sTarget, 5),
         ValueLabel<int>("Target FPS: {}", &cfg.user.targetFPS, valText),
-        DebugLogDisplay(Text("", "TNR", fontSize, 0),UICSpec{}.SetFlex({0,1}).FillMaxSize())
+        DebugLogDisplay(Text("", "text"),UICSpec{}.SetFlex({0,1}).FillMaxSize())
     );
     auto right = std::make_unique<DebugVerticalLayout>(
         UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
@@ -71,7 +70,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         ValueLabel<int>("Log msgs: {}", &cfg.debug.debugMessagesCount, valText),
         Slider<int>(&cfg.debug.debugMessagesCount, 1, 50, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
         Label(
-            Text("F1 overlay  F2 layout\nF3 content  F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "TNR", fontSize, 0),
+            Text("F1 overlay  F2 layout\nF3 content  F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "text"),
             UICSpec{}.SetFlex({0,1}))
     );
     mainC->AddChild(std::move(left));

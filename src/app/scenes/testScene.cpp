@@ -16,7 +16,7 @@ void TestScene::OnEnter(){
     static int counter{0};
     auto column= std::make_unique<VerticalLayout>(UIComponentSpec{},LayoutSpec{Alignment::End});
     for(int i = 0; i < 1; i++){
-        auto buttonText = Text("Test", "TNR", 32, 0, RAYWHITE);
+        auto buttonText = Text("Test", "button");
         auto spec = UICSpec().SetFlex({.growth = 1, .shrink = 1})
                     .MinSize({100,50});
         auto row = std::make_unique<HorizontalLayout>(
@@ -31,7 +31,7 @@ void TestScene::OnEnter(){
             );
         }
         row->Add(
-            Button(Text("Settings", "TNR", 32, 0, RAYWHITE),
+            Button(Text("Settings", "button"),
                 [](){ 
                     GetServices().sceneManager.QueTransitSus<SettingsScene>();
                 },

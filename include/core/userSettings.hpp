@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include "core/uiTheme.hpp"
 
 struct ProcessingValues {
     float brightness{1.0f};
@@ -15,20 +16,14 @@ enum class WindowMode { Windowed, Fullscreen, Borderless };
 
 class UserSettings {
 public:
-    ProcessingValues processing;
-
     int targetFPS{60};
     bool vsync{true};
-    bool showFPS{true};
 
-    //not yet
-    float userBrightness;
-    //not yet
-    WindowMode windowMode{WindowMode::Windowed};
+    bool showFPS{true};
+    float userBrightness{1};
     
-    //not yet
-    std::string activeFont{"TNR"};
-    //not yet
-    int activeFontSize{20};
+    WindowMode windowMode{WindowMode::Windowed};
+    ProcessingValues processing;
+    UITheme theme;
 };
 

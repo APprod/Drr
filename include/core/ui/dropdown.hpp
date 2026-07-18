@@ -17,7 +17,7 @@ public:
         std::string textureName,
         Vector2 targetSize,
         std::function<void(T)> onChange = nullptr,
-        Text labelText = Text("", "TNR", 20, 0),
+        Text labelText = Text("", "button"),
         UIComponentSpec spec = {}
     ): Button{labelText,[](){},textureName,targetSize,spec}, m_items{std::move(items)}, m_selected{selectedValue},
     m_onChange{onChange}{
@@ -82,7 +82,7 @@ public:
                         closePopup();
                     },
                     m_textureName,
-                    m_targetSize,
+                    {m_targetSize.x, m_actual.height},
                     UICSpec{}.FillMaxWidth()
                 )
             );

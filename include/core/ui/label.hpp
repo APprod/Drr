@@ -5,11 +5,14 @@
 #include "core/ui/component.hpp"
 #include "core/text.hpp"
 
+enum class TextAlign { Left, Center, Right };
+
 class Label: public UIComponent{
 public:
     Label(
         Text text,
-        UIComponentSpec spec = {}
+        UIComponentSpec spec = {},
+        TextAlign align = TextAlign::Left
     );
     void SetText(std::string text);
     bool OnEvent(const MyEvent& event) override;
@@ -22,6 +25,7 @@ public:
     virtual void OnHoverExit()override{m_hovered = false;}
 protected:
     Text m_text;
+    TextAlign m_textAlign = TextAlign::Left;
     float m_scrollSpeed{10.f};
     float m_scrollOffset{0.0f};
     bool m_hovered{false};

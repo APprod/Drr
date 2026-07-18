@@ -17,6 +17,7 @@ public:
     );
     void OnDrawContent() override;
     bool OnUpdate() override;
+    void MeasureContent(Vector2 available) override;
 protected:
     void OnClick() override { m_onClick(); }
     std::function<void()> m_onClick;

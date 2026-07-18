@@ -1,8 +1,10 @@
 #include "core/text.hpp"
 #include "core/services.hpp"
 
-Text::Text(std::string text, std::string fontName, int fontSize, float fontSpacing, Color color)
-    : m_text{std::move(text)}, m_fontName{std::move(fontName)}, m_fontSize{fontSize}, m_fontSpacing{fontSpacing}, m_color{color}
+#include <cmath>
+
+Text::Text(std::string text, std::string role, float fontSpacing, Color color)
+    : m_text{std::move(text)}, m_role{std::move(role)}, m_fontSpacing{fontSpacing}, m_color{color}
 {
     m_dirtyText = true;
 }
@@ -44,13 +46,15 @@ std::vector<Line> splitLines(std::string& text)
 
 //Measures the m_lines words sizes
 void Text::measureLines(){
-    auto font = GetServices().recManager.getFont(m_fontName, static_cast<int>(m_fontSize));
-    float spaceSize = MeasureTextEx(font, " ", static_cast<float>(m_fontSize), m_fontSpacing).x;
+    auto& theme = GetServices().runtimeCfg.user.theme;
+    auto font = theme.resolveFont(m_role);
+    int fontSize = theme.resolveSize(m_role);
+    float spaceSize = MeasureTextEx(font, " ", static_cast<float>(fontSize), m_fontSpacing).x;
     for (auto& line: m_lines ){
         Vector2 linesize{0,0};
         bool first = true;
         for (auto& word: line.words){
-            auto size = MeasureTextEx(font, word.word.c_str(), static_cast<float>(m_fontSize), m_fontSpacing);
+            auto size = MeasureTextEx(font, word.word.c_str(), static_cast<float>(fontSize), m_fontSpacing);
             word.size = size;
             linesize.x += size.x;
             if (!first) linesize.x += spaceSize;
@@ -85,6 +89,8 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
                 }
 
                 current.size.x = currentWidth;
+                if (current.words.size() > 1)
+                    current.size.x += (current.words.size() - 1) * m_fontSpacing;
                 result.push_back(std::move(current));
 
                 current = {};
@@ -105,6 +111,8 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 
         if (!current.words.empty()){
             current.size.x = currentWidth;
+            if (current.words.size() > 1)
+                current.size.x += (current.words.size() - 1) * m_fontSpacing;
             result.push_back(std::move(current));
         }
     }
@@ -124,8 +132,15 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 // Returns desired size;
 Vector2 Text::ReMeasure(Vector2 borders)
 {
-    if (m_dirtyText)
+    auto& theme = GetServices().runtimeCfg.user.theme;
+    int curFontSize = theme.resolveSize(m_role);
+    std::string curFontName = theme.resolveFontName(m_role);
+    bool fontChanged = curFontSize != m_lastFontSize || curFontName != m_lastFontName;
+
+    if (m_dirtyText || fontChanged)
     {
+        m_lastFontSize = curFontSize;
+        m_lastFontName = curFontName;
         m_lines = splitLines(m_text);
         measureLines();
         m_desiredFullSize = {0,0};
@@ -134,7 +149,7 @@ Vector2 Text::ReMeasure(Vector2 borders)
             m_desiredFullSize.y += line.size.y;
         }
     }
-    if (borders != m_lastBorder || m_dirtyText){
+    if (borders != m_lastBorder || m_dirtyText || fontChanged){
         auto lastMeasured = m_lastMeasuredSize;
         m_linesConstrained = constructConstrained(m_lines, borders);
         m_lastMeasuredSize = {0,0};
@@ -154,11 +169,15 @@ Vector2 Text::ReMeasure(Vector2 borders)
 
 void Text::Draw(Vector2 position)
 {
-    auto font = GetServices().recManager.getFont(m_fontName, static_cast<int>(m_fontSize));
+    position.x = std::round(position.x);
+    position.y = std::round(position.y);
+    auto& theme = GetServices().runtimeCfg.user.theme;
+    auto font = theme.resolveFont(m_role);
+    int fontSize = theme.resolveSize(m_role);
     auto pos = position;
     for (auto& line: m_linesConstrained){
         
-        ::DrawTextEx(font, line.lineView.c_str(), pos, static_cast<float>(m_fontSize), m_fontSpacing, m_color);
+        ::DrawTextEx(font, line.lineView.c_str(), pos, static_cast<float>(fontSize), m_fontSpacing, m_color);
         pos.y += line.size.y;
     }
     
@@ -166,7 +185,7 @@ void Text::Draw(Vector2 position)
 
 void Text::DrawCentered(Rectangle bounds)
 {
-    float x = bounds.x + (bounds.width - m_lastMeasuredSize.x) / 2;
-    float y = bounds.y + (bounds.height - m_lastMeasuredSize.y) / 2;
+    float x = std::round(bounds.x + (bounds.width - m_lastMeasuredSize.x) / 2);
+    float y = std::round(bounds.y + (bounds.height - m_lastMeasuredSize.y) / 2);
     Draw({x, y});
 }

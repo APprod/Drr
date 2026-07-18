@@ -18,7 +18,7 @@ EventMask  UIContext::GetCaptureTypes() const {
 
 UICompId UIContext::PushPopup(std::unique_ptr<UIComponent> comp){
     if (m_overlayStack.empty()){
-        dbg::GetLogger().Warn("Can't push a Popup, no overlays registered");
+        mylog::GetLogger().Warn("Can't push a Popup, no overlays registered");
         return 0;
     }
     return m_overlayStack.back()->PushPopup(std::move(comp));
@@ -26,14 +26,14 @@ UICompId UIContext::PushPopup(std::unique_ptr<UIComponent> comp){
     
 UICompId UIContext::PopPopup(){
     if (m_overlayStack.empty()){
-        dbg::GetLogger().Warn("Can't pop a Popup, no overlays registered");
+        mylog::GetLogger().Warn("Can't pop a Popup, no overlays registered");
         return 0;
     }
     return m_overlayStack.back()->PopPopup();
 }
 void UIContext::RemovePopup(UICompId id){
     if (m_overlayStack.empty()){
-        dbg::GetLogger().Warn("Can't Remove a Popup, no overlays registered");
+        mylog::GetLogger().Warn("Can't Remove a Popup, no overlays registered");
         return;
     }
     m_overlayStack.back()->RemovePopup(id);

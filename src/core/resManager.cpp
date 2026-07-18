@@ -1,14 +1,14 @@
-#include "core/recManager.hpp"
+#include "core/resManager.hpp"
 #include "core/util.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 #include "core/platform.hpp"
 
 
-RecourceManager::RecourceManager()
+ResourceManager::ResourceManager()
 {
 }
 
-RecourceManager::~RecourceManager()
+ResourceManager::~ResourceManager()
 {
     auto keys = getKeys(m_textures);
     for (auto key: keys)
@@ -26,7 +26,7 @@ RecourceManager::~RecourceManager()
 
 
 
-void RecourceManager::init()
+void ResourceManager::init()
 {
     FontMap defFonts;
     defFonts[10] = ::GetFontDefault();
@@ -58,13 +58,13 @@ void RecourceManager::init()
     );
 }
 
-void RecourceManager::load()
+void ResourceManager::load()
 {
     this->loadFont("TNR", "assets/TNR/timesnewromanpsmt.ttf");
     loadTextures();
 }
 
-bool RecourceManager::loadTexture(std::string name)
+bool ResourceManager::loadTexture(std::string name)
 {
     std::string path = ::GetWorkingDirectory();
     path = path + "/assets/" + name + ".png";
@@ -72,30 +72,30 @@ bool RecourceManager::loadTexture(std::string name)
     
 }
 
-bool RecourceManager::loadTexture(std::string name, std::string filepath)
+bool ResourceManager::loadTexture(std::string name, std::string filepath)
 {
-    dbg::GetLogger().Info("loading texture: ", name + " path: " + filepath);
+    mylog::GetLogger().Info("loading texture: ", name + " path: " + filepath);
     if (m_textures.count(name) != 0)
     {
-        dbg::GetLogger().Warn("Texture is already loaded, texture: ", name);
+        mylog::GetLogger().Warn("Texture is already loaded, texture: ", name);
         return false;
     }
     Texture2D newTexture = ::LoadTexture(filepath.c_str());
     if (!::IsTextureValid(newTexture)) 
     {
-        dbg::GetLogger().Error("Failed to load texture: " + name +  " path: " + filepath);
+        mylog::GetLogger().Error("Failed to load texture: " + name +  " path: " + filepath);
         return false;
     }
     m_textures[name] = newTexture;
     return true;
 }   
 
-bool RecourceManager::unloadTexture(std::string name)
+bool ResourceManager::unloadTexture(std::string name)
 {
-    dbg::GetLogger().Info("Unloading texture: ", name);
+    mylog::GetLogger().Info("Unloading texture: ", name);
     if (m_textures.count(name) == 0) 
     {
-        dbg::GetLogger().Warn("Failed no unload cause: no texture: " + name);
+        mylog::GetLogger().Warn("Failed no unload cause: no texture: " + name);
         return false;
     }
     ::UnloadTexture(m_textures[name]);
@@ -103,11 +103,11 @@ bool RecourceManager::unloadTexture(std::string name)
     return true;
 }
 
-void RecourceManager::loadFont(std::string name, std::string filepath, std::vector<int> fontSizes)
+void ResourceManager::loadFont(std::string name, std::string filepath, std::vector<int> fontSizes)
 {
-    dbg::GetLogger().Info("loading Font: ", name, " path: ", filepath, " sizes: ", fontSizes);
+    mylog::GetLogger().Info("loading Font: ", name, " path: ", filepath, " sizes: ", fontSizes);
     if (!::FileExists(filepath.c_str())){
-        dbg::GetLogger().Error("Path Does Not exist (loading Font: ", name, " path: ", filepath, ")");
+        mylog::GetLogger().Error("Path Does Not exist (loading Font: ", name, " path: ", filepath, ")");
         return;
     }
     auto font = m_fonts.find(name);
@@ -119,7 +119,7 @@ void RecourceManager::loadFont(std::string name, std::string filepath, std::vect
             Font newFont = ::LoadFontEx(filepath.c_str(), size, nullptr, 0);
             ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_BILINEAR);
             if (!::IsFontValid(newFont)){
-                dbg::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
+                mylog::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
                 continue;
             }
             anyLoaded = true;
@@ -129,7 +129,7 @@ void RecourceManager::loadFont(std::string name, std::string filepath, std::vect
             m_fonts[name] = std::move(newFontMap);
         }
         else{
-            dbg::GetLogger().Error("Failed to load font for all sizes: " + name +  " path: " + filepath);
+            mylog::GetLogger().Error("Failed to load font for all sizes: " + name +  " path: " + filepath);
         }
     }else{
         auto& fontMap = font->second;
@@ -140,22 +140,22 @@ void RecourceManager::loadFont(std::string name, std::string filepath, std::vect
                 Font newFont = ::LoadFontEx(filepath.c_str(), size, nullptr, 0);
                 ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_TRILINEAR);
                 if (!::IsFontValid(newFont)){
-                    dbg::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
+                    mylog::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
                     continue;
                 }
                 fontMap[size] = newFont;
             }else{
-                dbg::GetLogger().DebugInfo("Font already loaded: ", name, " , size: ", size);
+                mylog::GetLogger().DebugInfo("Font already loaded: ", name, " , size: ", size);
             }
         }
     }
 }
 
-std::vector<std::string > RecourceManager::getLoadedFonts(){
+std::vector<std::string > ResourceManager::getLoadedFonts(){
     return getKeys(m_fonts);
 }
 
-Font RecourceManager::getFont(std::string name, int fontSize)
+Font ResourceManager::getFont(std::string name, int fontSize)
 {
     if (name == "default") {
         return m_fonts.at("default").begin()->second;
@@ -164,13 +164,13 @@ Font RecourceManager::getFont(std::string name, int fontSize)
     auto fontIter = m_fonts.find(name);
     if (fontIter == m_fonts.end()) 
     {
-        dbg::GetLogger().Error("Font not found:", name);
+        mylog::GetLogger().Error("Font not found:", name);
         return getFont("default", fontSize);
     }else{
         auto& fontMap = fontIter->second;
         auto fontSizeIter = fontMap.find(fontSize);
         if (fontSizeIter == fontMap.end()){
-            dbg::GetLogger().Error("Font size not found: ", fontSize, " for font: ", name);
+            mylog::GetLogger().Error("Font size not found: ", fontSize, " for font: ", name);
             return getFont("default", fontSize);
         }else{
             return fontSizeIter->second;
@@ -178,7 +178,7 @@ Font RecourceManager::getFont(std::string name, int fontSize)
     }
 }
 
-Texture2D RecourceManager::getTexture(std::string name)
+Texture2D ResourceManager::getTexture(std::string name)
 {
     if (m_failed_textures.count(name) != 0)  //this texture not found
     {
@@ -195,15 +195,15 @@ Texture2D RecourceManager::getTexture(std::string name)
     return m_textures[name];
 }
 
-bool RecourceManager::lazyLoad(std::string name)
+bool ResourceManager::lazyLoad(std::string name)
 {
-    dbg::GetLogger().Info("LazyLoading texture: ", name);
+    mylog::GetLogger().Info("LazyLoading texture: ", name);
     bool success = loadTexture(name);
     if (!success)
     {
         if (name == "default") 
         {
-            dbg::GetLogger().Fatal("Default texture is missing");
+            mylog::GetLogger().Fatal("Default texture is missing");
             throw std::runtime_error("Default Texture missing, Can't fallback on texture loading failure");
         } // not found(default)s
 
@@ -213,7 +213,7 @@ bool RecourceManager::lazyLoad(std::string name)
     return true;
 }
 
-void RecourceManager::loadTextures()
+void ResourceManager::loadTextures()
 {
     loadTexture("default");
     loadTexture("button_default");
@@ -221,32 +221,32 @@ void RecourceManager::loadTextures()
     loadTexture("menu");
 }
 
-void RecourceManager::loadShader(std::string shaderName, std::string filepath, 
+void ResourceManager::loadShader(std::string shaderName, std::string filepath, 
     const Uniforms& uniforms)
 {
-    dbg::GetLogger().DebugInfo("Loading shader: ", filepath);
+    mylog::GetLogger().DebugInfo("Loading shader: ", filepath);
     ShaderProgram program;
     program.defaults = uniforms;
     auto shader = ::LoadShader(nullptr,filepath.c_str());
     if (!::IsShaderValid(shader)){
-        dbg::GetLogger().Fatal("Failder to load shader, can't execute future shader draw calls");
+        mylog::GetLogger().Fatal("Failder to load shader, can't execute future shader draw calls");
         throw std::runtime_error("Failder to load shader, can't execute future shader draw calls");
     }
     program.shader = shader;
     for (auto& [name, val]: uniforms){
         auto loc = ::GetShaderLocation(shader, name.c_str());
         if (loc == -1){
-            dbg::GetLogger().Warn("Shader uniform not found: ", name);
+            mylog::GetLogger().Warn("Shader uniform not found: ", name);
         }else{
             program.locations.emplace(name, loc);
         }
     }
     m_shaders[shaderName] = program;
 }
-ShaderProgram& RecourceManager::getShaderProgram(std::string name){
+ShaderProgram& ResourceManager::getShaderProgram(std::string name){
     auto iter = m_shaders.find(name);
     if (iter == m_shaders.end()){
-        dbg::GetLogger().Fatal("Couldn't find shader, can't execute future shader draw calls");
+        mylog::GetLogger().Fatal("Couldn't find shader, can't execute future shader draw calls");
         throw std::runtime_error("Couldn't find shader   , can't execute future shader draw calls");
     }
     return iter->second;

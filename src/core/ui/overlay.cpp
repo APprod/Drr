@@ -51,7 +51,7 @@ UICompId Overlay::PushPopup(std::unique_ptr<UIComponent> comp){
 
 UICompId Overlay::PopPopup(){
     if (ids.empty()){
-        dbg::GetLogger().Warn("Trying to pop Popup in empty list");
+        mylog::GetLogger().Warn("Trying to pop Popup in empty list");
         return 0;
     }
     UICompId last = ids.back();
@@ -64,7 +64,7 @@ void Overlay::RemovePopup(UICompId compId){
     auto it = std::find_if(ids.begin(), ids.end(),
         [compId](const auto& c){ return c == compId; });
     if (it == ids.end()){
-        dbg::GetLogger().Warn("RemovePopup: id not found: ", compId);
+        mylog::GetLogger().Warn("RemovePopup: id not found: ", compId);
         return;
     }
     ids.erase(it);

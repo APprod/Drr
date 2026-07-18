@@ -1,5 +1,5 @@
 #include "core/shader.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 #include "core/services.hpp"
 
 namespace {
@@ -51,7 +51,7 @@ void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::func
             std::string all = "";
             for (auto& thisName: unisNames)
                 all += ", " + thisName;
-            dbg::GetLogger().Error(std::format("INCORRECT UNIFORM LOCATION NAME, CHECK FOR TYPOS. Uniform name: {}, available:{}", name, all));
+            mylog::GetLogger().Error(std::format("INCORRECT UNIFORM LOCATION NAME, CHECK FOR TYPOS. Uniform name: {}, available:{}", name, all));
         }
     }
 

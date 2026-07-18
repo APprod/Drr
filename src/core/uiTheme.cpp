@@ -1,6 +1,6 @@
 #include "core/uiTheme.hpp"
 #include "core/services.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 
 #include <algorithm>
 
@@ -29,10 +29,10 @@ void UITheme::setRole(const std::string& role, RoleDef def) {
 RoleDef UITheme::getRole(const std::string& role) const {
     auto it = m_roles.find(role);
     if (it == m_roles.end()) {
-        dbg::GetLogger().Warn("UITheme: role not found \"", role, "\", falling back to \"default\"");
+        mylog::GetLogger().Warn("UITheme: role not found \"", role, "\", falling back to \"default\"");
         auto defIt = m_roles.find("default");
         if (defIt == m_roles.end()) {
-            dbg::GetLogger().Warn("UITheme: \"default\" role not found either, using fallback");
+            mylog::GetLogger().Warn("UITheme: \"default\" role not found either, using fallback");
             return {0};
         }
         return defIt->second;
@@ -44,7 +44,7 @@ Font UITheme::resolveFont(const std::string& role, int delta) const {
     auto def = getRole(role);
 
     if (m_fontSizes.empty()) {
-        dbg::GetLogger().Warn("UITheme: fontSizes is empty, using  fallback");
+        mylog::GetLogger().Warn("UITheme: fontSizes is empty, using  fallback");
         auto& rm = GetServices().recManager;
         return rm.getFont(m_fontName, 20);
     }
@@ -65,7 +65,7 @@ int UITheme::resolveSize(const std::string& role, int delta) const {
     auto def = getRole(role);
 
     if (m_fontSizes.empty()) {
-        dbg::GetLogger().Warn("UITheme: fontSizes is empty, using fallback");
+        mylog::GetLogger().Warn("UITheme: fontSizes is empty, using fallback");
         return 20;
     }
 

@@ -6,7 +6,7 @@
 #include "core/ui/button.hpp"
 #include "core/ui/modifier.hpp"
 #include "core/ui/layout.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 
 template<typename T>
 class Dropdown : public Button {
@@ -30,7 +30,7 @@ public:
                 }
             }
         } else {
-            dbg::GetLogger().Warn("Dropdown: selectedValue is null");
+            mylog::GetLogger().Warn("Dropdown: selectedValue is null");
         }
     }
     void closePopup() {

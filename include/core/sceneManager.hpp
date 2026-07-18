@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include "core/debug.hpp"
+#include "core/log.hpp"
 
 class IScene;
 
@@ -35,7 +35,7 @@ public:
     template<typename T, typename... Args> 
     void QueTransit(Args&&... args){
         if (m_status.action != SceneAction::Idle) {
-            dbg::GetLogger().Warn("Transition already queued, ignoring");
+            mylog::GetLogger().Warn("Transition already queued, ignoring");
             return;
         }
         m_status.transitingScene = std::make_unique<T>(std::forward<Args>(args)...);
@@ -47,7 +47,7 @@ public:
     template<typename T, typename... Args> 
     void QueTransitSus(Args&&... args){
         if (m_status.action != SceneAction::Idle) {
-            dbg::GetLogger().Warn("Transition already queued, ignoring");
+            mylog::GetLogger().Warn("Transition already queued, ignoring");
             return;
         }
         m_status.transitingScene = std::make_unique<T>(std::forward<Args>(args)...);

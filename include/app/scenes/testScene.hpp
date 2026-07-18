@@ -1,18 +1,18 @@
 #pragma once
 #include "core/scene.hpp"
-#include "core/recManager.hpp"
+#include "core/resManager.hpp"
 #include "core/animated.hpp"
 
 
 class TestScene: public BaseScene{
 public:
-    TestScene(RecourceManager& manager);
+    TestScene(ResourceManager& manager);
     void OnEnter() override;
     void OnRestore() override;
     void OnDrawContent() override;
     void OnUpdateState() override;
 
 private:
-    RecourceManager& m_manager;
+    ResourceManager& m_manager;
     
 };

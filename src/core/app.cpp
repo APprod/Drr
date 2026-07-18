@@ -1,6 +1,6 @@
 #include "raylib.h"
 #include "core/app.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 #include "core/util.hpp"
 #include "core/services.hpp"
 #include "app/scenes/testScene.hpp"
@@ -19,15 +19,15 @@ void setupDebugConfig() {
     GetServices().runtimeCfg.debug = kDebugFlags;
     #else
     GetServices().runtimeCfg.debug = kReleaseFlags;
-    dbg::GetLogger().SetMinSeverity(dbg::Severity::INFO);
+    mylog::GetLogger().SetMinSeverity(mylog::Severity::INFO);
 #endif
 }
 
 static void initPlatform()
 {
 #ifndef __EMSCRIPTEN__
-    dbg::GetLogger().AddSink(
-        std::make_unique<dbg::FileSink>(dbg::FileSink("log.txt")));
+    mylog::GetLogger().AddSink(
+        std::make_unique<mylog::FileSink>(mylog::FileSink("mylog.txt")));
     auto path = GetApplicationDirectory();
     ChangeDirectory(path);
 #endif
@@ -38,13 +38,13 @@ App::App(int screenWidth, int screenHeight): m_screenHeight(screenHeight), m_scr
 }
 
 void App::init(){
-    dbg::GetLogger();// Will be initialized before services, destroyed after
+    mylog::GetLogger();// Will be initialized before services, destroyed after
     setupDebugConfig();
-    dbg::GetLogger().AddSink(
-        std::make_unique<dbg::ConsoleSink>(dbg::ConsoleSink()));
+    mylog::GetLogger().AddSink(
+        std::make_unique<mylog::ConsoleSink>(mylog::ConsoleSink()));
     initPlatform();
-    dbg::GetLogger().Info("app:run \n");
-    dbg::GetLogger().Info("Running directory: ", GetWorkingDirectory());
+    mylog::GetLogger().Info("app:run \n");
+    mylog::GetLogger().Info("Running directory: ", GetWorkingDirectory());
     {
         InitWindow(m_screenWidth, m_screenHeight, "Raylib app");
                 SetWindowPosition(5,20);

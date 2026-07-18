@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/services.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 #include "core/ui/root.hpp"
 #include "core/util.hpp"
 #include "core/animated.hpp"
@@ -83,7 +83,7 @@ public:
     }
 protected:
     virtual void OnResize(){
-        dbg::GetLogger().DebugInfo("Resized: ", Vector2{::GetScreenWidth()/1.0f, ::GetScreenHeight()/1.0f});
+        mylog::GetLogger().DebugInfo("Resized: ", Vector2{::GetScreenWidth()/1.0f, ::GetScreenHeight()/1.0f});
         PerfTester tester = GetServices().perfLog.log("OnResize");
         auto dims = Vector2{
                 static_cast<float>(::GetScreenWidth()),

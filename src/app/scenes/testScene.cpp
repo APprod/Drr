@@ -9,7 +9,7 @@
 #include "core/ui/modifier.hpp"
 #include "core/ui/dropdown.hpp"
 
-TestScene::TestScene(RecourceManager& manager): m_manager{manager}
+TestScene::TestScene(ResourceManager& manager): m_manager{manager}
 {
     m_transitionTime = 0.2f;
 }
@@ -28,7 +28,7 @@ void TestScene::OnEnter(){
         for(int j = 0; j < 4; j++){
             row->Add(
                 Button(buttonText,
-                    [j](){ dbg::GetLogger().Info(std::to_string(++counter), " Button"+ std::to_string(j) +" clicked!"); },
+                    [j](){ mylog::GetLogger().Info(std::to_string(++counter), " Button"+ std::to_string(j) +" clicked!"); },
                     "button_default",{200.f,100.f}, spec)
             );
         }

@@ -1,21 +1,21 @@
-#include "core/debug.hpp"
+#include "core/log.hpp"
 #include "core/platform.hpp"
 
 #include <string>
 #include <iostream>
 #include <filesystem>
 
-namespace dbg {
+namespace mylog {
 
-inline const char* SeverityColor(dbg::Severity s)
+inline const char* SeverityColor(mylog::Severity s)
 {
     switch (s) {
-        case dbg::Severity::DBGINFO: return "\033[35m"; // violet
-        // case dbg::Severity::DBGINFO: return "\033[90m"; // bright black (gray)
-        case dbg::Severity::INFO:    return "\033[34m";       // blue
-        case dbg::Severity::WRN:     return "\033[33m";       // yellow
-        case dbg::Severity::ERROR:   return "\033[38;5;208m"; // orange
-        case dbg::Severity::FATAL:   return "\033[31m";       // red
+        case mylog::Severity::DBGINFO: return "\033[35m"; // violet
+        // case mylog::Severity::DBGINFO: return "\033[90m"; // bright black (gray)
+        case mylog::Severity::INFO:    return "\033[34m";       // blue
+        case mylog::Severity::WRN:     return "\033[33m";       // yellow
+        case mylog::Severity::ERROR:   return "\033[38;5;208m"; // orange
+        case mylog::Severity::FATAL:   return "\033[31m";       // red
         default: return "\033[0m";
     }
 }

@@ -8,7 +8,7 @@
 #include <sstream>
 #include <format>
 
-namespace dbg {
+namespace mylog {
 
 enum class Severity
 {
@@ -19,7 +19,7 @@ enum class Severity
     FATAL
 };
 
-const char* SeverityColor(dbg::Severity s);
+const char* SeverityColor(mylog::Severity s);
 
 const char* ToString(Severity s);
 

@@ -2,7 +2,7 @@
 
 #include "core/scene.hpp"
 #include "core/sceneManager.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 
 Status::~Status() = default;
 SceneManager::~SceneManager() = default;
@@ -12,7 +12,7 @@ SceneManager::SceneManager() {
 void SceneManager::QuePop(){
     //Ques to pop Scenes Stack aka return to previous Scene
     if (m_status.action != SceneAction::Idle) {
-        dbg::GetLogger().Warn("Transition already queued");
+        mylog::GetLogger().Warn("Transition already queued");
         return;
     }
     m_status.action = SceneAction::Pop;
@@ -43,7 +43,7 @@ void SceneManager::ResolveTransitions(){
 }
 void SceneManager::PopScene(){
     if (m_scenes.size() == 1) {
-        dbg::GetLogger()
+        mylog::GetLogger()
             .Error("No scene left when trying to pop scene");
         return;
     }
@@ -61,7 +61,7 @@ void SceneManager::PerformTransit(std::unique_ptr<IScene> scene){
 }
 void SceneManager::PerformSuspendAndTransit(std::unique_ptr<IScene> scene){
     if (m_scenes.size() == 0) {
-        dbg::GetLogger()
+        mylog::GetLogger()
             .Error("No scene left when trying to transit");
         return;
     }
@@ -79,7 +79,7 @@ void SceneManager::Update(){
     if (m_scenes.empty()) {
         ResolveTransitions();
         if (m_scenes.empty()) {
-            dbg::GetLogger().Error("Scene Stack is Empty");
+            mylog::GetLogger().Error("Scene Stack is Empty");
             return;
         }
     }
@@ -112,7 +112,7 @@ void SceneManager::Update(){
 }
 void SceneManager::Draw(){
     if (m_scenes.empty()){
-        dbg::GetLogger()
+        mylog::GetLogger()
             .Error("Scene Stack is Empty");
         return;
     }

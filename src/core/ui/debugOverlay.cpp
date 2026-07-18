@@ -1,6 +1,6 @@
 #include "core/ui/debugOverlay.hpp"
 #include "core/services.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 #include "core/util.hpp"
 #include "core/ui/label.hpp"
 #include <format>
@@ -37,14 +37,14 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         Checkbox(Text("Content bounds", "text"), &cfg.debug.showLayoutContentBounds),
         Checkbox(Text("VSYNC", "text"), &cfg.user.vsync,
             [](bool vsync){
-                dbg::GetLogger().LogFormat(dbg::Severity::DBGINFO, "Switching vsync: {}", vsync);
+                mylog::GetLogger().LogFormat(mylog::Severity::DBGINFO, "Switching vsync: {}", vsync);
                 if (vsync) {SetWindowState(FLAG_VSYNC_HINT);}
                 else {ClearWindowState(FLAG_VSYNC_HINT);}
             }
         ),
         Slider<int>(&cfg.user.targetFPS, 0, 240, 
             [](int value){
-                dbg::GetLogger().LogFormat(dbg::Severity::DBGINFO, "Switching FPS: {}. cfg.user.targetFPS: {}", value, GetServices().runtimeCfg.user.targetFPS);
+                mylog::GetLogger().LogFormat(mylog::Severity::DBGINFO, "Switching FPS: {}. cfg.user.targetFPS: {}", value, GetServices().runtimeCfg.user.targetFPS);
                 SetTargetFPS(value);
             }
             , sliderSpec, sBarH, sMinTh, sMaxTh, sTarget, 5),
@@ -127,12 +127,12 @@ bool DebugLogDisplay::OnUpdate(float dt){
         SetText(""); return Label::OnUpdate(dt);
     }
     int count = GetServices().runtimeCfg.debug.debugMessagesCount;
-    const auto& messages = dbg::GetLogger().GetMessages();
+    const auto& messages = mylog::GetLogger().GetMessages();
     std::string out;
     int shown = 0;
     for (int i = static_cast<int>(messages.size()) - 1; i >= 0 && shown < count; --i) {
         // if (messages[i].severity == dbg::Severity::DBGINFO) continue;
-        out = std::format("{}: {}\n", dbg::ToString(messages[i].severity), messages[i].message) + out;
+        out = std::format("{}: {}\n", mylog::ToString(messages[i].severity), messages[i].message) + out;
         ++shown;
     }
     SetText(out);

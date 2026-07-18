@@ -6,7 +6,7 @@
 #include "core/events.hpp"
 #include "core/ui/hotkeysListener.hpp"
 #include "core/ui/layout.hpp"
-#include "core/debug.hpp"
+#include "core/log.hpp"
 
 
 

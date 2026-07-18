@@ -20,7 +20,7 @@ bool Layout::RemoveChild(UICompId compId) {
     auto it = std::find_if(m_children.begin(), m_children.end(),
         [compId](const auto& c){ return c->id == compId; });
     if (it == m_children.end()){
-        dbg::GetLogger().Warn("RemoveChild: id not found: ", compId);
+        mylog::GetLogger().Warn("RemoveChild: id not found: ", compId);
         return false;
     }
     GetUIContext().InvalidateComponent(it->get());

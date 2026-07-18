@@ -1,5 +1,5 @@
 #pragma once
-#include "core/recManager.hpp"
+#include "core/resManager.hpp"
 #include "core/myinput.hpp"
 #include "core/runtimeConfig.hpp"
 #include "core/sceneManager.hpp"
@@ -7,7 +7,7 @@
 
 struct Services
 {
-    RecourceManager recManager;
+    ResourceManager recManager;
     MyInput input;
     PerformanceLog perfLog{60};
     RuntimeConfig runtimeCfg;

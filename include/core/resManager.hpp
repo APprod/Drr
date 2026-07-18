@@ -9,13 +9,13 @@
 
 using FontMap = std::unordered_map<int, Font>;
 
-class RecourceManager
+class ResourceManager
 {
 public:
-    RecourceManager();
+    ResourceManager();
     void init();
     void load();
-    ~RecourceManager();
+    ~ResourceManager();
 
     Texture2D getTexture(std::string name);
     bool loadTexture(std::string name);

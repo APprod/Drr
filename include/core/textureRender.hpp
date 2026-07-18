@@ -1,7 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <vector>
-#include "core/debug.hpp"
+#include "core/log.hpp"
 
 class Renderer {
 public:
@@ -12,7 +12,7 @@ public:
 
     void endTextureMode() {
         if (m_stack.empty()) {
-            dbg::GetLogger().Error("Rendere::endTextureMode called but beginTextureMode wasn't registered. Maybe Used Raylib global function?");
+            mylog::GetLogger().Error("Rendere::endTextureMode called but beginTextureMode wasn't registered. Maybe Used Raylib global function?");
             return;
         }
         ::EndTextureMode();

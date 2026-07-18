@@ -16,17 +16,21 @@ UICompId Layout::AddChild(std::unique_ptr<UIComponent>&& child)
     return newId;
 }
 
-bool Layout::RemoveChild(UICompId icompIdd) {
+bool Layout::RemoveChild(UICompId compId) {
     auto it = std::find_if(m_children.begin(), m_children.end(),
-        [icompIdd](const auto& c){ return c->id == icompIdd; });
+        [compId](const auto& c){ return c->id == compId; });
     if (it == m_children.end()){
-        dbg::GetLogger().Warn("RemoveChild: id not found: ", icompIdd);
+        dbg::GetLogger().Warn("RemoveChild: id not found: ", compId);
         return false;
     }
     GetUIContext().InvalidateComponent(it->get());
     m_children.erase(it);
     m_needsRemeasure = true;
     return true;
+}
+
+void Layout::QueueRemoveChild(UICompId compId) {
+    m_removalQueue.push_back(compId);
 }
 
 void Layout::OnDrawContent()
@@ -41,6 +45,10 @@ bool Layout::OnUpdate(float dt)
 {
     bool dirty = m_needsRemeasure;
     m_needsRemeasure = false;
+    for (auto& childId: m_removalQueue){
+        RemoveChild(childId);
+    }
+    m_removalQueue.clear();
     for(auto& child : m_children){
         dirty = child->OnUpdate(dt) || dirty;
     }

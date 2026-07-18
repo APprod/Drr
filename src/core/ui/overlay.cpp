@@ -56,17 +56,24 @@ UICompId Overlay::PopPopup(){
     }
     UICompId last = ids.back();
     ids.pop_back();
-    RemoveChild(last);
+    QueueRemoveChild(last);
     return last;
 }
 
-bool Overlay::RemovePopup(UICompId compId){
+void Overlay::RemovePopup(UICompId compId){
     auto it = std::find_if(ids.begin(), ids.end(),
         [compId](const auto& c){ return c == compId; });
     if (it == ids.end()){
         dbg::GetLogger().Warn("RemovePopup: id not found: ", compId);
-        return false;
+        return;
     }
     ids.erase(it);
-    return RemoveChild(compId);
+    QueueRemoveChild(compId);
+}
+
+UIComponent* Overlay::GetPopup(UICompId popupId){
+    for (auto& child : m_children) {
+        if (child->id == popupId) return child.get();
+    }
+    return nullptr;
 }

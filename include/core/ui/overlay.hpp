@@ -23,8 +23,9 @@ public:
     }
     UICompId PushPopup(std::unique_ptr<UIComponent> comp) override;
     UICompId PopPopup() override;
-    bool RemovePopup(UICompId id) override;
-
+    void RemovePopup(UICompId id) override;
+    virtual UIComponent* GetPopup(UICompId popupId);
+    
 private:
     HotkeysListener* m_listener{};
     std::vector<UICompId> ids;

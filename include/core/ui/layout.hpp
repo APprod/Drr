@@ -64,7 +64,7 @@ public:
         return *this;
     }
     UICompId AddChild(std::unique_ptr<UIComponent>&& child);
-    bool RemoveChild(UICompId id);
+    void QueueRemoveChild(UICompId id);
     void OnDrawContent() override;
     bool OnUpdate(float dt) override;
     bool OnEvent(const MyEvent& event) override;
@@ -73,6 +73,7 @@ public:
 protected:
     LayoutSpec m_layoutSpec;
     std::vector<std::unique_ptr<UIComponent>> m_children;
+    std::vector<UICompId> m_removalQueue;
     bool m_needsRemeasure = false;
 
     using Axis = float Vector2::*;
@@ -82,6 +83,7 @@ protected:
     std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, Axis crossAxis, float& spare);
     void ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
         float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance);
+    bool RemoveChild(UICompId id);
 };
 
 class VerticalLayout: public Layout{

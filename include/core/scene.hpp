@@ -35,6 +35,7 @@ public:
     };
     void OnUpdate(float dt) override {
         PerfTester tester = GetServices().perfLog.log("Scene OnUpdate Full");
+        Tester perfProblemCheck("Scene OnUpdate", 20, true);
         auto& input = GetServices().input;
         {
             PerfTester innerTester = GetServices().perfLog.log("Scene input.pollEvents");

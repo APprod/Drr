@@ -102,7 +102,7 @@ public:
     virtual ~IOverlay() = default;
     virtual UICompId PushPopup(std::unique_ptr<UIComponent> comp) = 0;
     virtual UICompId PopPopup() = 0;
-    virtual bool RemovePopup(UICompId id) = 0;
+    virtual void RemovePopup(UICompId id) = 0;
 };
 
 struct UIContext
@@ -118,7 +118,7 @@ struct UIContext
     }
     UICompId PushPopup(std::unique_ptr<UIComponent> comp);
     UICompId PopPopup();
-    bool RemovePopup(UICompId id);
+    void RemovePopup(UICompId id);
 
     void SetOverlay(IOverlay* over){m_overlayStack.push_back(over);}
     void ResetOverlay(){if (!m_overlayStack.empty()) m_overlayStack.pop_back(); }

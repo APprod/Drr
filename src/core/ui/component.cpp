@@ -31,10 +31,10 @@ UICompId UIContext::PopPopup(){
     }
     return m_overlayStack.back()->PopPopup();
 }
-bool UIContext::RemovePopup(UICompId id){
+void UIContext::RemovePopup(UICompId id){
     if (m_overlayStack.empty()){
         dbg::GetLogger().Warn("Can't Remove a Popup, no overlays registered");
-        return 0;
+        return;
     }
-    return m_overlayStack.back()->RemovePopup(id);
+    m_overlayStack.back()->RemovePopup(id);
 }

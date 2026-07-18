@@ -3,7 +3,7 @@
 #include <string>
 
 #include "core/ui/component.hpp"
-#include "core/text.hpp"
+#include "core/rendering/text.hpp"
 
 enum class TextAlign { Left, Center, Right };
 

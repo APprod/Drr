@@ -1,6 +1,6 @@
-#include "core/uiTheme.hpp"
+#include "core/ui/uiTheme.hpp"
 #include "core/services.hpp"
-#include "core/log.hpp"
+#include "core/utils/log.hpp"
 
 #include <algorithm>
 

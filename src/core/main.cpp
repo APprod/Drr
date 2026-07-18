@@ -1,5 +1,5 @@
 #include "core/app.hpp"
-#include "core/log.hpp"
+#include "core/utils/log.hpp"
 
 #include <iostream>
 

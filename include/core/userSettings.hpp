@@ -1,7 +1,7 @@
 #pragma once
 
 #include "raylib.h"
-#include "core/uiTheme.hpp"
+#include "core/ui/uiTheme.hpp"
 
 struct ProcessingValues {
     float brightness{1.0f};

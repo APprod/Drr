@@ -1,7 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <vector>
-#include "core/log.hpp"
+#include "core/utils/log.hpp"
 
 class Renderer {
 public:

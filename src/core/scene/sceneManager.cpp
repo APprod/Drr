@@ -1,8 +1,8 @@
 #include <memory>
 
-#include "core/scene.hpp"
-#include "core/sceneManager.hpp"
-#include "core/log.hpp"
+#include "core/scene/scene.hpp"
+#include "core/scene/sceneManager.hpp"
+#include "core/utils/log.hpp"
 
 Status::~Status() = default;
 SceneManager::~SceneManager() = default;

@@ -1,7 +1,7 @@
 #include "core/ui/debugOverlay.hpp"
 #include "core/services.hpp"
-#include "core/log.hpp"
-#include "core/util.hpp"
+#include "core/utils/log.hpp"
+#include "core/utils/util.hpp"
 #include "core/ui/label.hpp"
 #include <format>
 

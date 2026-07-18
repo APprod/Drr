@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include "core/app.hpp"
-#include "core/log.hpp"
-#include "core/util.hpp"
+#include "core/utils/log.hpp"
+#include "core/utils/util.hpp"
 #include "core/services.hpp"
 #include "app/scenes/testScene.hpp"
 

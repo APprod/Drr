@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <vector>
 #include "raylib.h"
-#include "core/shader.hpp"
+#include "core/rendering/shader.hpp"
 
 using FontMap = std::unordered_map<int, Font>;
 

@@ -1,8 +1,8 @@
 #pragma once
-#include "core/resManager.hpp"
-#include "core/myinput.hpp"
+#include "core/rendering/resManager.hpp"
+#include "core/input/myinput.hpp"
 #include "core/runtimeConfig.hpp"
-#include "core/sceneManager.hpp"
+#include "core/scene/sceneManager.hpp"
 #include "core/textureRender.hpp"
 
 struct Services

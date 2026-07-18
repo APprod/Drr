@@ -1,4 +1,4 @@
-#include "core/text.hpp"
+#include "core/rendering/text.hpp"
 #include "core/services.hpp"
 
 #include <cmath>

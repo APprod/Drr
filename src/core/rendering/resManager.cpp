@@ -1,6 +1,6 @@
-#include "core/resManager.hpp"
-#include "core/util.hpp"
-#include "core/log.hpp"
+#include "core/rendering/resManager.hpp"
+#include "core/utils/util.hpp"
+#include "core/utils/log.hpp"
 #include "core/platform.hpp"
 
 

@@ -1,5 +1,5 @@
-#include "core/shader.hpp"
-#include "core/log.hpp"
+#include "core/rendering/shader.hpp"
+#include "core/utils/log.hpp"
 #include "core/services.hpp"
 
 namespace {

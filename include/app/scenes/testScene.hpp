@@ -1,7 +1,7 @@
 #pragma once
-#include "core/scene.hpp"
-#include "core/resManager.hpp"
-#include "core/animated.hpp"
+#include "core/scene/scene.hpp"
+#include "core/rendering/resManager.hpp"
+#include "core/utils/animated.hpp"
 
 
 class TestScene: public BaseScene{

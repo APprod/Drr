@@ -6,7 +6,7 @@
 #include <type_traits>
 
 #include "core/ui/clickable.hpp"
-#include "core/animated.hpp"
+#include "core/utils/animated.hpp"
 
 template<typename T>
 requires std::is_arithmetic_v<T>

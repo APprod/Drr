@@ -3,7 +3,7 @@
 #include <functional>
 
 #include "core/ui/layout.hpp"
-#include "core/text.hpp"
+#include "core/rendering/text.hpp"
 
 class Checkbox : public HorizontalLayout {
 public:

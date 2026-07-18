@@ -3,10 +3,10 @@
 #include <functional>
 #include <unordered_map>
 
-#include "core/events.hpp"
+#include "core/input/events.hpp"
 #include "core/ui/hotkeysListener.hpp"
 #include "core/ui/layout.hpp"
-#include "core/log.hpp"
+#include "core/utils/log.hpp"
 
 
 

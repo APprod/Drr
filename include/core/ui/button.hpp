@@ -4,8 +4,8 @@
 #include <string>
 
 #include "core/ui/clickable.hpp"
-#include "core/text.hpp"
-#include "core/animated.hpp"
+#include "core/rendering/text.hpp"
+#include "core/utils/animated.hpp"
 
 class Button: public Clickable{
 public:

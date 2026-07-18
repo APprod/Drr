@@ -3,7 +3,7 @@
 #include <functional>
 #include <unordered_map>
 
-#include "core/events.hpp"
+#include "core/input/events.hpp"
 #include "core/ui/component.hpp"
 
 class HotkeysListener : public UIComponent {

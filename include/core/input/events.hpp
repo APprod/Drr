@@ -1,7 +1,7 @@
 #pragma once
 #include <variant>
 #include "raylib.h"
-#include "util.hpp"
+#include "core/utils/util.hpp"
 
 
 struct CursorMoveEvent{

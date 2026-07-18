@@ -2,7 +2,7 @@
 
 #include "raylib.h"
 #include "core/ui/spec.hpp"
-#include "core/events.hpp"
+#include "core/input/events.hpp"
 #include "core/services.hpp"
 
 

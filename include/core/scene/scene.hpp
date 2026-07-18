@@ -1,10 +1,10 @@
 #pragma once
 
 #include "core/services.hpp"
-#include "core/log.hpp"
+#include "core/utils/log.hpp"
 #include "core/ui/root.hpp"
-#include "core/util.hpp"
-#include "core/animated.hpp"
+#include "core/utils/util.hpp"
+#include "core/utils/animated.hpp"
 
 class IScene{ //Base class for Scene
 public:

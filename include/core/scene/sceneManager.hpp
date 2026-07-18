@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include "core/log.hpp"
+#include "core/utils/log.hpp"
 
 class IScene;
 

@@ -23,6 +23,7 @@ bool Layout::RemoveChild(UICompId icompIdd) {
         dbg::GetLogger().Warn("RemoveChild: id not found: ", icompIdd);
         return false;
     }
+    GetUIContext().InvalidateComponent(it->get());
     m_children.erase(it);
     m_needsRemeasure = true;
     return true;

@@ -26,15 +26,18 @@ void Root::UpdateHover()
     else{
         newHovered = FindTarget(m_cursorPos);
     }
-
-    if (newHovered == m_hovered)
+    auto hovered = GetUIContext().GetHovered();
+    if (newHovered == hovered)
         return;
-    if (m_hovered)
-        m_hovered->OnHoverExit();
+    if (hovered)
+    {
+        dbg::GetLogger().DebugInfo("OnHoverExit on: ", hovered->id);
+        hovered->OnHoverExit();
+    }
 
-    m_hovered = newHovered;
-    if (m_hovered)
-        m_hovered->OnHoverEnter();
+    GetUIContext().SetHovered(newHovered);
+    if (newHovered)
+        newHovered->OnHoverEnter();
 }
 
 std::optional<bool> Root::CheckCaptured(const MyEvent& event){
@@ -52,21 +55,19 @@ std::optional<bool> Root::CheckCaptured(const MyEvent& event){
 bool Root::OnEvent(const MyEvent& event){
     PerfTester tester = GetServices().perfLog.log("Root::OnEvent");
 
-    if (auto* move = std::get_if<CursorMoveEvent>(&event))
-    {
+    if (auto* move = std::get_if<CursorMoveEvent>(&event)){
         m_cursorPos = move->pos;
     }
-    else if (auto* screen = std::get_if<ScreenInterEvent>(&event))
-    {
+    else if (auto* screen = std::get_if<ScreenInterEvent>(&event)){
         if (screen->action == ScreenInteraction::EXIT)
         {
-            if (m_hovered)
+            auto hovered = GetUIContext().GetHovered();
+            if (hovered)
             {
-                m_hovered->OnHoverExit();
-                m_hovered = nullptr;
+                hovered->OnHoverExit();
+                GetUIContext().SetHovered(nullptr);
             }
         }
-
         return true;
     }
     { //Always

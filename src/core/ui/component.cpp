@@ -6,6 +6,10 @@ UIComponent* UIComponent::FindTarget(Vector2 point){
     return nullptr;
 }
 
+UIComponent::~UIComponent(){
+    GetUIContext().InvalidateComponent(this);
+}
+
 EventMask  UIContext::GetCaptureTypes() const {
     if (m_captured) return m_captured->getCaptureTypes();
     return 0;
@@ -13,24 +17,36 @@ EventMask  UIContext::GetCaptureTypes() const {
 
 
 UICompId UIContext::PushPopup(std::unique_ptr<UIComponent> comp){
-    if (!m_overlay){
-        dbg::GetLogger().Warn("Can't push a Popup, overlay isn't set");
+    if (m_overlayStack.empty()){
+        dbg::GetLogger().Warn("Can't push a Popup, no overlays registered");
         return 0;
     }
-    return m_overlay->PushPopup(std::move(comp));
+    if (m_overlayStack.empty()){
+        dbg::GetLogger().Warn("Can't push a Popup, current overlay isn't set");
+        return 0;
+    }
+    return m_overlayStack.back()->PushPopup(std::move(comp));
 }
     
 UICompId UIContext::PopPopup(){
-    if (!m_overlay){
-        dbg::GetLogger().Warn("Can't Pop a Popup, overlay isn't set");
+    if (m_overlayStack.empty()){
+        dbg::GetLogger().Warn("Can't pop a Popup, no overlays registered");
         return 0;
     }
-    return m_overlay->PopPopup();
+    if (m_overlayStack.empty()){
+        dbg::GetLogger().Warn("Can't pop a Popup, current overlay isn't set");
+        return 0;
+    }
+    return m_overlayStack.back()->PopPopup();
 }
 bool UIContext::RemovePopup(UICompId id){
-    if (!m_overlay){
-        dbg::GetLogger().Warn("Can't Remove a Popup, overlay isn't set");
+    if (m_overlayStack.empty()){
+        dbg::GetLogger().Warn("Can't Remove a Popup, no overlays registered");
         return 0;
     }
-    return m_overlay->RemovePopup(id);
+    if (m_overlayStack.empty()){
+        dbg::GetLogger().Warn("Can't Remove a Popup, current overlay isn't set");
+        return 0;
+    }
+    return m_overlayStack.back()->RemovePopup(id);
 }

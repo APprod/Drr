@@ -6,6 +6,8 @@
 #include "core/ui/button.hpp"
 #include "core/ui/layout.hpp"
 #include "app/scenes/settingsScene.hpp"
+#include "core/ui/modifier.hpp"
+#include "core/ui/dropdown.hpp"
 
 TestScene::TestScene(RecourceManager& manager): m_manager{manager}
 {}
@@ -43,6 +45,7 @@ void TestScene::OnEnter(){
     OnResize();
 }
 void TestScene::OnRestore(){
+    BaseScene::OnRestore();
     OnResize();
 }
 

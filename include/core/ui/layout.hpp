@@ -20,7 +20,7 @@ struct LayoutSpec{
     Alignment align;
     Alignment crossAlign{Alignment::Center};
     JustifyContent justifyContent{JustifyContent::None};
-    int spacing = 5;
+    int spacing = 0;
     bool crossShrink = true;
     bool uniformCross = false;
     LayoutSpec& SetAlign(Alignment a) { align = a; return *this; }

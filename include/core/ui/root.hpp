@@ -13,5 +13,4 @@ public:
     Vector2 getPos(const MyEvent& event);
 private:
     Vector2 m_cursorPos{};
-    UIComponent* m_hovered = nullptr;
 };

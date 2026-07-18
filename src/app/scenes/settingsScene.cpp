@@ -1,5 +1,7 @@
 #include "app/scenes/settingsScene.hpp"
 #include "core/ui.hpp"
+#include "core/ui/dropdown.hpp"
+#include "core/userSettings.hpp"
 
 void SettingsScene::OnEnter(){
     
@@ -53,7 +55,7 @@ void SettingsScene::OnEnter(){
                     ),
                     HorizontalLayout( UICSpec{}.SetFlex({1,1}), LayoutSpec{}.AlignBegin(),
                         Slider<int>(&usrCfg.activeFontSize, 12,128, 
-                            [](float ){}
+                            [](int){}
                             , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 4
                         ),
                         ValueLabel<int>("FontSize: {}", &usrCfg.activeFontSize, Text("", "TNR", fontSize, 0))
@@ -69,7 +71,27 @@ void SettingsScene::OnEnter(){
                 );
             },"button_default",{200.f,100.f},UICSpec{}
             ),
-            Button(buttonText,[](){dbg::GetLogger().DebugInfo("------------------------");},"button_default",{200.f,100.f},UICSpec{})
+            Dropdown<WindowMode>(
+                {{"Fullscreen", WindowMode::Fullscreen},{"Windowed", WindowMode::Windowed},{"Borderless", WindowMode::Borderless}},
+                &GetServices().runtimeCfg.user.windowMode,
+                "button_default",
+                {200,100},
+                [](WindowMode sel){
+                    switch(sel){
+                    case WindowMode::Fullscreen: //Currently doesn't work on web
+                        SetWindowState(FLAG_FULLSCREEN_MODE);
+                        ClearWindowState(FLAG_WINDOW_UNDECORATED);
+                        break;
+                    case WindowMode::Borderless:
+                        SetWindowState(FLAG_WINDOW_UNDECORATED);
+                        ClearWindowState(FLAG_FULLSCREEN_MODE);
+                        break;
+                    case WindowMode::Windowed:
+                        ClearWindowState(FLAG_FULLSCREEN_MODE | FLAG_WINDOW_UNDECORATED);
+                        break;
+                    }
+                }
+            )
         )
     );
     root.AddChild(std::move(row));

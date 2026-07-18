@@ -19,7 +19,6 @@ public:
     bool OnUpdate() override;
 protected:
     void OnClick() override { m_onClick(); }
-private:
     std::function<void()> m_onClick;
     std::string m_textureName;
     Text m_text;

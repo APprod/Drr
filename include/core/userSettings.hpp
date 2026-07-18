@@ -11,6 +11,8 @@ struct ProcessingValues {
     Vector3 tint{1.0f, 1.0f, 1.0f};
 };
 
+enum class WindowMode { Windowed, Fullscreen, Borderless };
+
 class UserSettings {
 public:
     ProcessingValues processing;
@@ -22,7 +24,7 @@ public:
     //not yet
     float userBrightness;
     //not yet
-    enum class WindowMode { Windowed, Fullscreen, Borderless } windowMode{WindowMode::Windowed};
+    WindowMode windowMode{WindowMode::Windowed};
     
     //not yet
     std::string activeFont{"TNR"};

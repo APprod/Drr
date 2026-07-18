@@ -13,7 +13,7 @@ public:
     UIComponent(UIComponentSpec spec = {}): m_compSpec{spec}{}
     UIComponent(UIComponent&&) = default;
     UIComponent& operator=(UIComponent&&) = default;
-    virtual ~UIComponent() = default;
+    virtual ~UIComponent();
 
     const UIComponentSpec& Spec() const {
         return m_compSpec;
@@ -120,18 +120,28 @@ struct UIContext
     UICompId PopPopup();
     bool RemovePopup(UICompId id);
 
-    void SetOverlay(IOverlay* over){m_overlay = over;}
-    void ResetOverlay(){m_overlay = nullptr;}
+    void SetOverlay(IOverlay* over){m_overlayStack.push_back(over);}
+    void ResetOverlay(){if (!m_overlayStack.empty()) m_overlayStack.pop_back(); }
 
     void SetCapture(UIComponent* comp){m_captured = comp;}
     EventMask  GetCaptureTypes() const;
     UIComponent*  GetCapturered() const{return m_captured;}
+    UIComponent*  GetHovered() const{return m_hovered;}
+    void  SetHovered(UIComponent* comp){m_hovered = comp;}
+    void InvalidateComponent(UIComponent* comp) {
+        if (comp == m_captured) ReleaseCapture();
+        if (m_hovered == comp) {
+            m_hovered->OnHoverExit();
+            m_hovered = nullptr;
+        }
+    }
     void ReleaseCapture(){m_captured = nullptr;}
     UICompId nextId(){return ++maxId;}
 private:
+    std::vector<IOverlay*> m_overlayStack;
     UICompId maxId{0}; 
-    IOverlay* m_overlay = nullptr;
     UIComponent* m_captured = nullptr;
+    UIComponent* m_hovered = nullptr;
     UIContext() = default;
     UIContext(const UIContext&) = delete;
     UIContext& operator=(const UIContext&) = delete;

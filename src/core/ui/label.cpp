@@ -33,9 +33,6 @@ bool Label::OnUpdate()
     }
 
     if (effectiveOld != effectiveNew) {
-        dbg::GetLogger().DebugInfoFmt("Label relayout: old=({:.1f},{:.1f}) new=({:.1f},{:.1f}) rect=({:.1f},{:.1f})",
-            oldContent.x, oldContent.y, m_contentDesiredSize.x, m_contentDesiredSize.y,
-            r.width, r.height);
         return true;
     }
     return false;

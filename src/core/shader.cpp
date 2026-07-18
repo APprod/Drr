@@ -46,13 +46,12 @@ void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::func
     auto& locs = program.locations;
 
     for (const auto& [name, _] : uniforms) {
-        if (!locs.contains(name)) { 
+        if (!locs.contains(name)) {
             auto unisNames = getKeys(locs);
             std::string all = "";
-            for (auto& thisName: unisNames){
+            for (auto& thisName: unisNames)
                 all += ", " + thisName;
-            }
-            dbg::GetLogger().Error(std::format("INCORRECT UNIFORM LOCATION NAME, CHECK FOR TYPOS. Uniform name: {}, available: ", name));
+            dbg::GetLogger().Error(std::format("INCORRECT UNIFORM LOCATION NAME, CHECK FOR TYPOS. Uniform name: {}, available:{}", name, all));
         }
     }
 

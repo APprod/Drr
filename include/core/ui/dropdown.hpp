@@ -35,7 +35,6 @@ public:
     }
     void closePopup() {
         m_pendingClose = true;
-        m_isOpen = false;
     }
 
     bool OnUpdate() override {

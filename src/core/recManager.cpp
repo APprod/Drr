@@ -114,7 +114,7 @@ void RecourceManager::loadFont(std::string name, std::string filepath, std::vect
     if (font == m_fonts.end()){ 
         // Not found, load All
         FontMap newFontMap;
-        auto success = false;
+        auto anyLoaded = false;
         for (auto size: fontSizes){
             Font newFont = ::LoadFontEx(filepath.c_str(), size, nullptr, 0);
             ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_BILINEAR);
@@ -123,10 +123,10 @@ void RecourceManager::loadFont(std::string name, std::string filepath, std::vect
                 dbg::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
                 continue;
             }
-            success = true;
+            anyLoaded = true;
             newFontMap[size] = newFont;
         }
-        if (success) {
+        if (anyLoaded) {
             m_fonts[name] = std::move(newFontMap);
         }
         else{
@@ -146,7 +146,7 @@ void RecourceManager::loadFont(std::string name, std::string filepath, std::vect
                 }
                 fontMap[size] = newFont;
             }else{
-                dbg::GetLogger().Info("Font already loaded: ", name, " , size: ", size);
+                dbg::GetLogger().DebugInfo("Font already loaded: ", name, " , size: ", size);
             }
         }
     }

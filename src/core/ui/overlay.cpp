@@ -46,7 +46,6 @@ Overlay::~Overlay(){
 UICompId Overlay::PushPopup(std::unique_ptr<UIComponent> comp){
     id = AddChild(std::move(comp));
     ids.push_back(id);
-    dbg::GetLogger().DebugInfo("Popup pushed");
     return id;
 }
 

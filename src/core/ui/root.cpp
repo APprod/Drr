@@ -31,7 +31,6 @@ void Root::UpdateHover()
         return;
     if (hovered)
     {
-        dbg::GetLogger().DebugInfo("OnHoverExit on: ", hovered->id);
         hovered->OnHoverExit();
     }
 

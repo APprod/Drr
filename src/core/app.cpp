@@ -44,7 +44,7 @@ void App::init(){
         std::make_unique<dbg::ConsoleSink>(dbg::ConsoleSink()));
     initPlatform();
     dbg::GetLogger().Info("app:run \n");
-    dbg::GetLogger().Info("Running direcotry: ", GetWorkingDirectory());
+    dbg::GetLogger().Info("Running directory: ", GetWorkingDirectory());
     {
         InitWindow(m_screenWidth, m_screenHeight, "Raylib app");
                 SetWindowPosition(5,20);

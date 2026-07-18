@@ -128,6 +128,10 @@ struct UIContext
     UIComponent*  GetCapturered() const{return m_captured;}
     UIComponent*  GetHovered() const{return m_hovered;}
     void  SetHovered(UIComponent* comp){m_hovered = comp;}
+    void ClearComponent(UIComponent* comp) {
+        if (comp == m_captured) m_captured = nullptr;
+        if (m_hovered == comp)  m_hovered = nullptr;
+    }
     void InvalidateComponent(UIComponent* comp) {
         if (comp == m_captured) ReleaseCapture();
         if (m_hovered == comp) {

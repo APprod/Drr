@@ -65,7 +65,7 @@ void SettingsScene::OnEnter(){
             Button(buttonText, [buttonText](){
                 GetUIContext().PushPopup(
                     Popup(
-                        Button(buttonText,[](){dbg::GetLogger().DebugInfo("Clicked !!!!!!!!!!!!!!!"); dbg::GetLogger().DebugInfo("Popped ", GetUIContext().PopPopup());},"button_default",{200.f,100.f},UICSpec{}),
+                        Button(buttonText,[](){GetUIContext().PopPopup();},"button_default",{200.f,100.f},UICSpec{}),
                         UICSpec{}
                     ).SetAnchor([](){return Rectangle{::GetScreenWidth()/2.0f,::GetScreenHeight()/2.0f,1,1};})
                 );

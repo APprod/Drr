@@ -93,7 +93,8 @@ void Layout::ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mai
     for (size_t i = 0; i < m_children.size(); ++i)
         frozen[i] = m_children[i]->Spec().flex.*flexField == 0;
 
-    while ((spare > 0 && spare > tolerance) || (spare < 0 && spare < -tolerance))
+    int maxIter = 100;
+    while (maxIter-- && ((spare > tolerance) || (spare < -tolerance)))
     {
         float total = 0;
         for (size_t i = 0; i < m_children.size(); ++i)
@@ -164,14 +165,6 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
 
     float spare{0};
     auto sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare);
-    for (auto& s : sizes) {
-        s.*mainAxis = std::round(s.*mainAxis);
-        s.*crossAxis = std::round(s.*crossAxis);
-    }
-    for (auto& s : sizes) {
-        s.*mainAxis = std::round(s.*mainAxis);
-        s.*crossAxis = std::round(s.*crossAxis);
-    }
 
     for (size_t i = 0; i < m_children.size(); ++i)
     {
@@ -180,10 +173,6 @@ void Layout::ArrangeAxialLayout(Rectangle innerRect, Axis mainAxis, Axis crossAx
 
     spare = {0};
     sizes = CalculateFlex(innerDim, mainAxis, crossAxis, spare);
-    for (auto& s : sizes) {
-        s.*mainAxis = std::round(s.*mainAxis);
-        s.*crossAxis = std::round(s.*crossAxis);
-    }
     for (auto& s : sizes) {
         s.*mainAxis = std::round(s.*mainAxis);
         s.*crossAxis = std::round(s.*crossAxis);

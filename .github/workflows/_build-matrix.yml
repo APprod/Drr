@@ -24,8 +24,8 @@ jobs:
         with:
           name: linux-desktop
           path: |
-            _build/${{ inputs.build_type }}/app
-            _build/${{ inputs.build_type }}/assets/
+            _build/${{ inputs.build_type }}/app/app
+            _build/${{ inputs.build_type }}/app/assets/
           retention-days: 1
 
   linux-web:
@@ -48,10 +48,10 @@ jobs:
         with:
           name: linux-web
           path: |
-            _build/Web/app.html
-            _build/Web/app.js
-            _build/Web/app.wasm
-            _build/Web/app.data
+            _build/Web/app/app.html
+            _build/Web/app/app.js
+            _build/Web/app/app.wasm
+            _build/Web/app/app.data
           retention-days: 1
 
   windows-mingw:
@@ -73,8 +73,8 @@ jobs:
         with:
           name: windows-mingw
           path: |
-            _build/${{ inputs.build_type }}/app.exe
-            _build/${{ inputs.build_type }}/assets/
+            _build/${{ inputs.build_type }}/app/app.exe
+            _build/${{ inputs.build_type }}/app/assets/
           retention-days: 1
 
   windows-msvc:
@@ -87,6 +87,6 @@ jobs:
         with:
           name: windows-msvc
           path: |
-            _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/app.exe
-            _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/assets/
+            _build/msvc-${{ inputs.build_type }}/app/${{ inputs.build_type }}/app.exe
+            _build/msvc-${{ inputs.build_type }}/app/${{ inputs.build_type }}/assets/
           retention-days: 1

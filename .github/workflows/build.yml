@@ -39,7 +39,7 @@ jobs:
           path: release/windows-msvc
 
       - name: Make binaries executable
-        run: chmod +x release/linux-desktop/app
+        run: chmod +x release/linux-desktop/app/app
 
       - name: Package linux-desktop
         run: |

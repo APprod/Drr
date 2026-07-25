@@ -25,98 +25,9 @@ if(IS_STATIC AND NOT EMSCRIPTEN)
     message("building static")
 endif()
 
-FILE(GLOB_RECURSE MyCPPSources ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/include/*.hpp)
+# FILE(GLOB_RECURSE MyCPPSources ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/include/*.hpp)
 
-add_executable(app ${MyCPPSources})
-
-
-if(CMAKE_CONFIGURATION_TYPES)
-    set(ASSETS_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>/assets")
-else()
-    set(ASSETS_DIR "${CMAKE_BINARY_DIR}/assets")
-endif()
-
-add_custom_target(copy-assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/assets"
-        "${ASSETS_DIR}"
-    COMMENT "Copying assets to build directory"
-)
-add_dependencies(${PROJECT_NAME} copy-assets)
-
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND NOT EMSCRIPTEN)
-  target_compile_options(app PRIVATE
-  $<$<CONFIG:Debug>:-g -gdwarf-4 
-    -Wall -Wextra -Wpedantic
-    -Wshadow
-    -Wnon-virtual-dtor
-    -Wold-style-cast
-    -Wcast-align
-    -Woverloaded-virtual
-    -Wformat=2
-    -Wmisleading-indentation
-    -Wduplicated-cond
-    -Wduplicated-branches
-    -Wlogical-op
-    -Wnull-dereference
-    -Wdouble-promotion
-    -Wfloat-conversion
-    -Wuseless-cast
-    -Werror>
-  $<$<CONFIG:Release>:-O3
-    -Wall -Wextra -Wpedantic
-    -Wshadow
-    -Wnon-virtual-dtor
-    -Wold-style-cast
-    -Wcast-align
-    -Woverloaded-virtual
-    -Wformat=2
-    -Wmisleading-indentation
-    -Wduplicated-cond
-    -Wduplicated-branches
-    -Wlogical-op
-    -Wnull-dereference
-    -Wdouble-promotion
-    -Wfloat-conversion
-    -Wuseless-cast
-    >
-  )
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(app PRIVATE -Wchanges-meaning)
-  endif()
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  target_compile_options(app PRIVATE
-    $<$<CONFIG:Debug>:
-      /W4
-      /WX
-      /permissive->
-
-    $<$<CONFIG:Release>:
-      /O1
-      /Ob2
-      /W4
-      /permissive->
-
-    $<$<AND:$<CONFIG:Release>,$<BOOL:${PROFILE}>>:
-      /Zi
-      /Zo>
-  )
-
-  target_link_options(app PRIVATE
-    $<$<AND:$<CONFIG:Release>,$<BOOL:${PROFILE}>>:
-      /DEBUG>
-  )
-endif()
-
-if(IS_STATIC AND NOT EMSCRIPTEN)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        if(MINGW)
-            target_link_options(app PRIVATE -static)
-        else()
-            target_link_options(app PRIVATE -static-libgcc -static-libstdc++)
-        endif()
-    endif()
-endif()
+# add_executable(app ${MyCPPSources})
 
 if (EMSCRIPTEN)
     set(GRAPHICS GRAPHICS_API_OPENGL_ES3 CACHE STRING "" FORCE)
@@ -153,8 +64,6 @@ endif()
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
-target_include_directories(app PUBLIC include/)
-
 if (PROFILE)
     message("adding profiling")
     add_compile_definitions(TRACY_PROFILE=TRACY_PROFILE)
@@ -168,33 +77,10 @@ if (PROFILE)
     set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
     set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
     set(TRACY_CALLSTACK ON CACHE BOOL "" FORCE)
-    target_compile_definitions(app PRIVATE TRACY_ENABLE)
     FetchContent_MakeAvailable(tracy)
-    target_link_libraries(app PRIVATE nlohmann_json::nlohmann_json raylib TracyClient)
 else()
-    target_link_libraries(app PRIVATE nlohmann_json::nlohmann_json raylib)
 endif()
 
 
-
-# Web Configurations
-if (EMSCRIPTEN)
-    # Tell Emscripten to build an example.html file.
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
-    target_link_options(${PROJECT_NAME} 
-    PRIVATE -sUSE_GLFW=3 
-    PRIVATE --preload-file assets
-    PRIVATE -sGL_ENABLE_GET_PROC_ADDRESS=1
-    PRIVATE -sWASM=1
-    PRIVATE -sMAX_WEBGL_VERSION=2
-    PRIVATE -sALLOW_MEMORY_GROWTH=1
-    PRIVATE --shell-file ${CMAKE_SOURCE_DIR}/web/minshell.html
-    )
-endif()
-
-# Checks if OSX and links appropriate frameworks (Only required on MacOS)
-if (APPLE)
-    target_link_libraries(${PROJECT_NAME} "-framework IOKit")
-    target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
-    target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
-endif()
+add_subdirectory(engine)
+add_subdirectory(app)

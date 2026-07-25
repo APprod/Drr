@@ -26,7 +26,7 @@ jobs:
         with:
           name: windows-msvc-profile-${{ inputs.build_type }}
           path: |
-            _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/app.exe
-            _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/app.pdb
-            _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/assets/
+            _build/msvc-${{ inputs.build_type }}/app/${{ inputs.build_type }}/app.exe
+            _build/msvc-${{ inputs.build_type }}/app/${{ inputs.build_type }}/app.pdb
+            _build/msvc-${{ inputs.build_type }}/app/${{ inputs.build_type }}/assets/
           retention-days: 1

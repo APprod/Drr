@@ -30,6 +30,8 @@ static void initPlatform()
         std::make_unique<mylog::FileSink>(mylog::FileSink("mylog.txt")));
     auto path = GetApplicationDirectory();
     ChangeDirectory(path);
+#else
+    SetConfigFlags(FLAG_WINDOW_MAXIMIZED | FLAG_WINDOW_RESIZABLE);
 #endif
 }
 
@@ -48,11 +50,12 @@ void Engine::init(){
     auto startConf = m_app->getStartConfig();
     auto& usr = GetServices().runtimeCfg.user = startConf;
     setupDebugConfig();
-    initPlatform();
+    
     mylog::GetLogger().Info("App init \n");
     mylog::GetLogger().Info("Running directory: ", GetWorkingDirectory());
    
     //OPengl+window
+    initPlatform();
     InitWindow(usr.windowSize.x, usr.windowSize.y, "Raylib app");
     SetWindowPosition(usr.windowPos.x, usr.windowPos.y);
     m_app->initPostOpenGl();

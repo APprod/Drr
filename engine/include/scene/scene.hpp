@@ -26,16 +26,37 @@ private:
 
 class BaseScene: public IScene{
 public:
+    BaseScene(){m_renderTarget = ::LoadRenderTexture(::GetScreenWidth(),::GetScreenHeight());}
+    ~BaseScene(){::UnloadRenderTexture(m_renderTarget);}
     void OnRestore() override {};
     void OnSuspend() override {};
     void OnExit() override {};
 
     void OnDraw() override {
         BeginDrawing();
+        GetServices().renderer.beginTextureMode(m_renderTarget);
         ClearBackground(BLACK);
         OnDrawContent();
+        GetServices().renderer.endTextureMode();
+        OnDrawToScreen();
         EndDrawing();
     };
+    //Use for post processing
+    virtual void OnDrawToScreen() {
+        auto drawCall = [this](){
+            ::DrawTextureRec(m_renderTarget.texture,
+            {0, 0, static_cast<float>(m_renderTarget.texture.width), static_cast<float>(-m_renderTarget.texture.height)},
+            {0, 0}, WHITE);
+        };
+        auto& usr = GetServices().runtimeCfg.user;
+        useShaderUnchecked(
+            "processing",
+            {{"brightness", usr.userBrightness},
+            },
+            drawCall
+        );
+        
+    }
     void OnUpdate(float dt) override {
         PerfTester tester = GetServices().perfLog.log("Scene OnUpdate Full");
         Tester perfProblemCheck("Scene OnUpdate", 20, true);
@@ -51,6 +72,7 @@ public:
         bool needsResize = root.OnUpdate(dt); //updates other data related to UI states
         if (needsResize || ::IsWindowResized()) { //resize if needed
             OnResize();
+            
         }
         OnUpdateState(); //updates scene data not UI
     };
@@ -85,16 +107,24 @@ protected:
         mylog::GetLogger().DebugInfo("Resized: ", Vector2{::GetScreenWidth()/1.0f, ::GetScreenHeight()/1.0f});
         PerfTester tester = GetServices().perfLog.log("OnResize");
         auto dims = Vector2{
-                static_cast<float>(::GetScreenWidth()),
-                static_cast<float>(::GetScreenHeight())
-            };
-            MyRectangle rect = {{0,0}, dims};
-            root.OnMeasure(dims);
-            root.OnArrange(rect);
+            static_cast<float>(::GetScreenWidth()),
+            static_cast<float>(::GetScreenHeight())
+        };
+        MyRectangle rect = {{0,0}, dims};
+        root.OnMeasure(dims);
+        root.OnArrange(rect);
+        Ivec2 newSize = {GetScreenWidth(),GetScreenHeight()};
+        if (lastSize!= newSize){
+            ::UnloadRenderTexture(m_renderTarget);
+            m_renderTarget = ::LoadRenderTexture(newSize.x,newSize.y);
+            lastSize = newSize;
+        }
     }
     virtual void OnDrawContent() = 0;
     virtual void OnUpdateState() = 0;
     Root root;
     Animated<float> m_transitionProggress{0.0f, 0.0f, Easing::easeInOutCubic};
+    RenderTexture2D m_renderTarget;
+    Ivec2 lastSize;
     float m_transitionTime{0}; //Set this to 0 to have zero transition time
 };

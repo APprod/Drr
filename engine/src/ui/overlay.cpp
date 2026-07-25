@@ -28,9 +28,6 @@ Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     listener->Bind(InputKey::KEY_F7, []{
         GetServices().runtimeCfg.debug.showDebugLog ^= true;
     }, "log");
-    listener->Bind(InputKey::KEY_F8, []{
-        GetServices().runtimeCfg.debug.useProcessingShader ^= true;
-    }, "shader");
     listener->Bind(InputKey::KEY_F9, []{
         GetServices().runtimeCfg.debug.showOverlayGradient ^= true;
     }, "gradient");

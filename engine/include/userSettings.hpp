@@ -24,7 +24,6 @@ public:
     float userBrightness{1};
     
     WindowMode windowMode{WindowMode::Windowed};
-    ProcessingValues processing;
     Ivec2 windowSize{};
     Ivec2 windowPos{};
     UITheme theme;

@@ -21,7 +21,7 @@ void SettingsScene::OnEnter(){
             
             Background(
                 UICSpec{}.SetFlex({0,1}), 
-                BackgroundStyle{.texture = "button_default", .tint = WHITE, .processing = ProcessingValues{.saturation = 0} },
+BackgroundStyle{.texture = "button_default", .tint = WHITE, .processing = ProcessingValues{.saturation = 0} },
                 VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
                     Checkbox(Text("VSYNC", "text"), &usrCfg.vsync,
                         [](bool vsync){
@@ -123,16 +123,7 @@ void SettingsScene::OnEnter(){
 
 void SettingsScene::OnDrawContent(){
     auto& manager = GetServices().resManager;
-    auto drawCall = [&manager](){
-        ::DrawTexture(manager.getTexture("menu"), 0, 0, RAYWHITE);
-    };
-    useShaderUnchecked(
-        manager.getShaderProgram("processing"),
-        {{"brightness", 2.0f},
-        {"saturation", 1.2f},
-        },
-        drawCall
-    );
+    ::DrawTexture(manager.getTexture("menu"), 0, 0, RAYWHITE);
     root.OnDraw();
     ::BaseScene::DrawFadeTransition();
 }

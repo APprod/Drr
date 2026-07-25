@@ -11,7 +11,6 @@ struct DebugFlags {
     bool showDebugOverlay{false};
     bool debugFeaturesAllowed{true};
     int debugMessagesCount{20};
-    bool useProcessingShader{true};
     bool showOverlayGradient{true};
 };
 
@@ -24,7 +23,6 @@ inline const DebugFlags defaultDebugFlags{
     .showDebugOverlay = true,
     .debugFeaturesAllowed = true,
     .debugMessagesCount = 20,
-    .useProcessingShader = true,
     .showOverlayGradient = true,
 };
 
@@ -37,7 +35,6 @@ inline const DebugFlags defaultReleaseFlags{
     .showDebugOverlay = false,
     .debugFeaturesAllowed = true,
     .debugMessagesCount = 20,
-    .useProcessingShader = true,
     .showOverlayGradient = false,
 };
 

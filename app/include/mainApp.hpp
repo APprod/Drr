@@ -11,7 +11,6 @@ class App: public IApp{
             .showFPS = true,    
             .userBrightness = 1,
             .windowMode = WindowMode::Windowed,
-            .processing{},
             .windowSize{1000,500},
             .windowPos{10,10},
             .theme{}

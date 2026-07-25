@@ -53,46 +53,12 @@ void TestScene::OnRestore(){
 }
 
 void TestScene::OnUpdateState(){
-    constexpr float speed = 0.02f;
-    auto& input = GetServices().input;
-    auto& p = GetServices().runtimeCfg.user.processing;
-
-    p.brightness += input.GetAxis(KEY_W, KEY_S) * speed;
-    p.contrast   += input.GetAxis(KEY_E, KEY_D) * speed;
-    p.saturation += input.GetAxis(KEY_R, KEY_F) * speed;
-    p.gamma      += input.GetAxis(KEY_T, KEY_G) * speed;
-    p.alpha      += input.GetAxis(KEY_Y, KEY_H) * speed;
-
-    myClamp(p.brightness, 0.1f, 3.0f);
-    myClamp(p.contrast,   0.0f, 5.0f);
-    myClamp(p.saturation, 0.0f, 5.0f);
-    myClamp(p.gamma,      0.1f, 5.0f);
-    myClamp(p.alpha,      0.0f, 1.0f);
 }
 
 void TestScene::OnDrawContent(){
     PerfTester tester = GetServices().perfLog.log("OnDrawContent");
-
-    auto& cfg = GetServices().runtimeCfg;
-    auto& p = cfg.user.processing;
-    p.brightness = 2.5;
     auto& manager = GetServices().resManager;
-    auto drawCall = [&manager](){
-        ::DrawTexture(manager.getTexture("menu"), 0, 0, RAYWHITE);
-    };
-    if (cfg.debug.useProcessingShader) {
-        useShaderUnchecked(manager.getShaderProgram("processing"),
-            {{"brightness", p.brightness},
-             {"contrast",   p.contrast},
-             {"saturation", p.saturation},
-             {"gamma",      p.gamma},
-             {"alpha",      p.alpha}},
-            drawCall);
-    } else {
-        useShaderUnchecked(manager.getShaderProgram("brightness"),
-            {{"brightness", p.brightness}},
-            drawCall);
-    }
+    ::DrawTexture(manager.getTexture("menu"), 0, 0, RAYWHITE);
     root.OnDraw();
     BaseScene::DrawFadeTransition();
     

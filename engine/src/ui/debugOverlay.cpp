@@ -26,7 +26,6 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
     auto& cfg = GetServices().runtimeCfg;
-    auto& p = cfg.user.processing;
     Text valText("", "text");
     UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
@@ -58,16 +57,8 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 
     right->Add(
         PerformanceDisplay(valText, UICSpec{}.SetFlex({0,1})),
-        ValueLabel<float>("Brightness: {:.2f}", &p.brightness, valText),
-        Slider<float>(&p.brightness, 0.1f, 3.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
-        ValueLabel<float>("Contrast: {:.2f}", &p.contrast, valText),
-        Slider<float>(&p.contrast, 0.0f, 5.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
-        ValueLabel<float>("Saturation: {:.2f}", &p.saturation, valText),
-        Slider<float>(&p.saturation, 0.0f, 5.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
-        ValueLabel<float>("Gamma: {:.2f}", &p.gamma, valText),
-        Slider<float>(&p.gamma, 0.1f, 5.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
-        ValueLabel<float>("Alpha: {:.2f}", &p.alpha, valText),
-        Slider<float>(&p.alpha, 0.0f, 1.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
+        ValueLabel<float>("Brightness: {:.2f}", &cfg.user.userBrightness, valText),
+        Slider<float>(&cfg.user.userBrightness, 0.1f, 3.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
         ValueLabel<int>("Log msgs: {}", &cfg.debug.debugMessagesCount, valText),
         Slider<int>(&cfg.debug.debugMessagesCount, 1, 50, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
         BindingsDisplay(Text("", "text"), UICSpec{}.SetFlex({0,1}))
@@ -168,11 +159,7 @@ void DebugVerticalLayout::OnDrawContent(){
 }
 bool CfgDisplay::OnUpdate(float dt){
     auto& cfg = GetServices().runtimeCfg;
-    auto& p = cfg.user.processing;
-    SetText(std::format(
-        "shader: {}\nbrightness: {:.2f}\ncontrast:   {:.2f}\nsaturation: {:.2f}\ngamma:      {:.2f}\nalpha:      {:.2f}",
-        cfg.debug.useProcessingShader ? "PROCESSING" : "BRIGHTNESS",
-        p.brightness, p.contrast, p.saturation, p.gamma, p.alpha));
+    SetText(std::format("brightness: {:.2f}", cfg.user.userBrightness));
     return Label::OnUpdate(dt);
 }
 

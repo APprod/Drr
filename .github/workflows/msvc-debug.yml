@@ -20,15 +20,6 @@ jobs:
 
       - uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Cache FetchContent
-        uses: actions/cache@v4
-        with:
-          path: |
-            _deps-cache
-            third-party/raylib
-            third-party/tracy
-          key: deps-windows-msvc-profile-${{ hashFiles('CMakeLists.txt') }}
-
       - run: ./build.bat msvc ${{ inputs.build_type }} static profile
 
       - uses: actions/upload-artifact@v4
@@ -38,4 +29,4 @@ jobs:
             _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/app.exe
             _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/app.pdb
             _build/msvc-${{ inputs.build_type }}/${{ inputs.build_type }}/assets/
-          retention-days: 3
+          retention-days: 1

@@ -1,4 +1,5 @@
 #include "rendering/shader.hpp"
+#include "rendering/renderer.hpp"
 #include "utils/log.hpp"
 #include "services.hpp"
 
@@ -23,26 +24,12 @@ void SetUniform(const Shader& shader, int location, const UniformValue& value) {
 }
 
 void useShaderUnchecked(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall){
-    auto& shader = program.shader;
-    auto& locs = program.locations;
-
-    ::BeginShaderMode(shader);
-
-    for (auto& [name, loc]: locs){
-        auto it = uniforms.find(name);
-        if (it != uniforms.end()){
-            SetUniform(shader, loc, it->second);
-        } else{
-            SetUniform(shader, loc, program.defaults.at(name));
-        }
-    }
-
+    GetServices().renderer.beginShaderMode(program, uniforms);
     drawCall();
-    ::EndShaderMode();
+    GetServices().renderer.endShaderMode();
 }
 
 void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall){
-    auto& shader = program.shader;
     auto& locs = program.locations;
 
     for (const auto& [name, _] : uniforms) {
@@ -55,8 +42,15 @@ void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::func
         }
     }
 
-    ::BeginShaderMode(shader);
+    GetServices().renderer.beginShaderMode(program, uniforms);
+    drawCall();
+    GetServices().renderer.endShaderMode();
+}
 
+void setShaderUnchecked(const ShaderProgram& program, const Uniforms& uniforms){
+    auto& shader = program.shader;
+    auto& locs = program.locations;
+    ::BeginShaderMode(shader);
     for (auto& [name, loc]: locs){
         auto it = uniforms.find(name);
         if (it != uniforms.end()){
@@ -65,12 +59,7 @@ void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::func
             SetUniform(shader, loc, program.defaults.at(name));
         }
     }
-
-    drawCall();
-    ::EndShaderMode();
 }
-
-
 
 
 void useShaderUnchecked(std::string name, const Uniforms& uniforms, std::function<void()> drawCall){

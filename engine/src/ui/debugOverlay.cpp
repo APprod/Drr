@@ -157,9 +157,9 @@ bool BindingsDisplay::OnUpdate(float dt){
 void DebugVerticalLayout::OnDrawContent(){
     if (GetServices().runtimeCfg.debug.showOverlayGradient) {
         auto r = m_actual;
-        ::BeginBlendMode(BlendMode::BLEND_MULTIPLIED);
+        GetServices().renderer.beginBlendMode(BlendMode::BLEND_MULTIPLIED);
         auto ir = irect(r); ::DrawRectangleGradientV(ir.x,ir.y,ir.width,ir.height, {0,0,50,100}, {25,0,0,50});
-        ::EndBlendMode();
+        GetServices().renderer.endBlendMode();
     }
     for(auto& child : m_children){
         if (!child->visible) continue;

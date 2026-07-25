@@ -1,20 +1,29 @@
 /* all functionality in this class */
 #pragma once
+#include "core/userSettings.hpp"
 
-#include "core/scene/scene.hpp"
-
-
-class App
-{
-private:
-    int m_screenHeight;
-    int m_screenWidth;
-
+class IApp{
 public:
-    App(int screenWidth = 800, int screenHeight = 450);
+    IApp() = default; //Methods in their call order
+    virtual void initPreOpenGl() = 0; 
+    virtual UserSettings getStartConfig() = 0;
+    virtual void initPostOpenGl() = 0; //Transition to the first scene
+    virtual void close() = 0;
+    virtual ~IApp() = default;    
+};
+
+//Implement to return your App class
+std::unique_ptr<IApp> createApp();
+
+class Engine
+{
+public:
+    Engine(std::unique_ptr<IApp> app);
     void init();
     void run();
     void frame();
     void close();
-    ~App();
+    ~Engine();
+private:
+    std::unique_ptr<IApp> m_app;
 };

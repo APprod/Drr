@@ -4,11 +4,10 @@
 #include "core/scene/sceneManager.hpp"
 #include "core/utils/log.hpp"
 
-Status::~Status() = default;
+Status::~Status() {};
+SceneManager::SceneManager() = default;
 SceneManager::~SceneManager() = default;
 
-SceneManager::SceneManager() {
-}
 void SceneManager::QuePop(){
     //Ques to pop Scenes Stack aka return to previous Scene
     if (m_status.action != SceneAction::Idle) {

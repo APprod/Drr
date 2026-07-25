@@ -9,10 +9,12 @@
 
 int main(void)
 {
-    App myapp(800, 450);
-    myapp.init();
-    myapp.run();
-    myapp.close();
+    auto app = createApp();
+    Engine engine{std::move(app)};
+
+    engine.init();
+    engine.run();
+    engine.close();
 
     std::cerr << "finished" << std::endl;
     return 0;

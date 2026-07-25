@@ -2,6 +2,7 @@
 #include "core/utils/util.hpp"
 #include "core/utils/log.hpp"
 
+
 std::ostream &operator<<(std::ostream &out, Vector2 vec)
 {
     out << "x: " << vec.x << " | y: " << vec.y;

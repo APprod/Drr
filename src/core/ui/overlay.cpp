@@ -17,7 +17,7 @@ Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         GetServices().runtimeCfg.debug.showLayoutContentBounds ^= true;
     });
     listener->Bind(InputKey::KEY_F4, []{
-        GetServices().runtimeCfg.debug.showFPS ^= true;
+        GetServices().runtimeCfg.user.showFPS ^= true;
     });
     listener->Bind(InputKey::KEY_F5, []{
         GetServices().runtimeCfg.debug.showCursorPos ^= true;

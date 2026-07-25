@@ -9,7 +9,7 @@
 #include "core/ui/modifier.hpp"
 #include "core/ui/dropdown.hpp"
 
-TestScene::TestScene(ResourceManager& manager): m_manager{manager}
+TestScene::TestScene()
 {
     m_transitionTime = 0.2f;
 }
@@ -75,11 +75,12 @@ void TestScene::OnDrawContent(){
     auto& cfg = GetServices().runtimeCfg;
     auto& p = cfg.user.processing;
     p.brightness = 2.5;
-    auto drawCall = [this](){
-        ::DrawTexture(m_manager.getTexture("menu"), 0, 0, RAYWHITE);
+    auto& manager = GetServices().recManager;
+    auto drawCall = [&manager](){
+        ::DrawTexture(manager.getTexture("menu"), 0, 0, RAYWHITE);
     };
     if (cfg.debug.useProcessingShader) {
-        useShaderUnchecked(m_manager.getShaderProgram("processing"),
+        useShaderUnchecked(manager.getShaderProgram("processing"),
             {{"brightness", p.brightness},
              {"contrast",   p.contrast},
              {"saturation", p.saturation},
@@ -87,7 +88,7 @@ void TestScene::OnDrawContent(){
              {"alpha",      p.alpha}},
             drawCall);
     } else {
-        useShaderUnchecked(m_manager.getShaderProgram("brightness"),
+        useShaderUnchecked(manager.getShaderProgram("brightness"),
             {{"brightness", p.brightness}},
             drawCall);
     }

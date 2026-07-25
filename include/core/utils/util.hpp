@@ -8,7 +8,6 @@
 #include <numeric>
 #include "raylib.h"
 
-
 struct Ivec2
 {
     int32_t x;
@@ -165,4 +164,3 @@ private:
     std::chrono::steady_clock::time_point m_lastLog;
     std::unordered_map<std::string, PerfStat> m_logData;
 };
-

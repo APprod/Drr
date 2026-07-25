@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/services.hpp"
 #include "core/utils/log.hpp"
 #include "core/ui/root.hpp"
 #include "core/utils/util.hpp"

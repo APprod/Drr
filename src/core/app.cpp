@@ -3,7 +3,7 @@
 #include "core/utils/log.hpp"
 #include "core/utils/util.hpp"
 #include "core/services.hpp"
-#include "app/scenes/testScene.hpp"
+
 
 #include <memory>
 
@@ -16,9 +16,9 @@
 
 void setupDebugConfig() {
 #ifndef NDEBUG
-    GetServices().runtimeCfg.debug = kDebugFlags;
+    GetServices().runtimeCfg.debug = defaultDebugFlags;
     #else
-    GetServices().runtimeCfg.debug = kReleaseFlags;
+    GetServices().runtimeCfg.debug = defaultReleaseFlags;
     mylog::GetLogger().SetMinSeverity(mylog::Severity::INFO);
 #endif
 }
@@ -33,39 +33,49 @@ static void initPlatform()
 #endif
 }
 
-App::App(int screenWidth, int screenHeight): m_screenHeight(screenHeight), m_screenWidth(screenWidth)
+Engine::Engine(std::unique_ptr<IApp> app): m_app{std::move(app)}
 { 
 }
 
-void App::init(){
+void Engine::init(){
+    //Logging
     mylog::GetLogger();// Will be initialized before services, destroyed after
-    setupDebugConfig();
     mylog::GetLogger().AddSink(
-        std::make_unique<mylog::ConsoleSink>(mylog::ConsoleSink()));
+        std::make_unique<mylog::ConsoleSink>(mylog::ConsoleSink())
+    );
+    //App + config
+    m_app->initPreOpenGl();
+    auto startConf = m_app->getStartConfig();
+    auto& usr = GetServices().runtimeCfg.user = startConf;
+    setupDebugConfig();
     initPlatform();
-    mylog::GetLogger().Info("app:run \n");
+    mylog::GetLogger().Info("App init \n");
     mylog::GetLogger().Info("Running directory: ", GetWorkingDirectory());
-    {
-        InitWindow(m_screenWidth, m_screenHeight, "Raylib app");
-                SetWindowPosition(5,20);
-                SetWindowState(::FLAG_WINDOW_RESIZABLE);
-                SetWindowState(::FLAG_VSYNC_HINT);
-
-                auto m = GetCurrentMonitor();  
-                auto fps = GetMonitorRefreshRate(m);
-                if (!fps)  fps = 60;
-                SetTargetFPS(fps);
-                // SetWindowState(::FLAG_WINDOW_MAXIMIZED); 
+   
+    //OPengl+window
+    InitWindow(usr.windowSize.x, usr.windowSize.y, "Raylib app");
+    SetWindowPosition(usr.windowPos.x, usr.windowPos.y);
+    m_app->initPostOpenGl();
+    if (usr.vsync) SetWindowState(::FLAG_VSYNC_HINT);
+    SetWindowState(::FLAG_WINDOW_RESIZABLE);
+    if (usr.targetFPS){
+        SetTargetFPS(usr.targetFPS);
+    }else{
+        auto m = GetCurrentMonitor();  
+        auto fps = GetMonitorRefreshRate(m);
+        if (!fps)  fps = 60;
+        SetTargetFPS(fps);
     }
+    SwitchWindowMode(usr.windowMode);
+
+    //All Services that need initialising
     auto& recManager = GetServices().recManager;
     recManager.init();
     recManager.load();
-    SetExitKey(0);
-    auto& manager = GetServices().sceneManager;
-    manager.QueTransit<TestScene>(recManager);
+    SetExitKey(0); //TODO: remove at some point
 }
 
-void App::frame(){
+void Engine::frame(){
     #ifdef TRACY_PROFILE
         FrameMark;
         ZoneScopedN("Frame"); 
@@ -83,13 +93,13 @@ void App::frame(){
     // dt = 1000.0f/GetFPS();
 }
 
-static void runPlatform(App* app)
+static void runPlatform(Engine* app)
 {
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop_arg(
         [](void* arg)
         {
-            static_cast<App*>(arg)->frame();
+            static_cast<Engine*>(arg)->frame();
         },
         app,
         0,
@@ -103,16 +113,16 @@ static void runPlatform(App* app)
 #endif
 } 
 
-void App::run()
+void Engine::run()
 {
     runPlatform(this);
 }
-void App::close()
+void Engine::close()
 {
-    
+    m_app->close();
 }
 
-App::~App()
+Engine::~Engine()
 {
     CloseWindow();
 }

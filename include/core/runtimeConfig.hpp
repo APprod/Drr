@@ -3,7 +3,6 @@
 #include "core/userSettings.hpp"
 
 struct DebugFlags {
-    bool showFPS{true};
     bool showLayoutBounds{false};
     bool showLayoutContentBounds{false};
     bool showCursorPos{true};
@@ -16,8 +15,7 @@ struct DebugFlags {
     bool showOverlayGradient{true};
 };
 
-inline const DebugFlags kDebugFlags{
-    .showFPS = true,
+inline const DebugFlags defaultDebugFlags{
     .showLayoutBounds = false,
     .showLayoutContentBounds = false,
     .showCursorPos = true,
@@ -30,8 +28,7 @@ inline const DebugFlags kDebugFlags{
     .showOverlayGradient = true,
 };
 
-inline const DebugFlags kReleaseFlags{
-    .showFPS = true,
+inline const DebugFlags defaultReleaseFlags{
     .showLayoutBounds = false,
     .showLayoutContentBounds = false,
     .showCursorPos = false,

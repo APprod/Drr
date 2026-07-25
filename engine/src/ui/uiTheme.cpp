@@ -45,7 +45,7 @@ Font UITheme::resolveFont(const std::string& role, int delta) const {
 
     if (m_fontSizes.empty()) {
         mylog::GetLogger().Warn("UITheme: fontSizes is empty, using  fallback");
-        auto& rm = GetServices().recManager;
+        auto& rm = GetServices().resManager;
         return rm.getFont(m_fontName, 20);
     }
 
@@ -53,7 +53,7 @@ Font UITheme::resolveFont(const std::string& role, int delta) const {
                                 static_cast<int>(m_fontSizes.size()) - 1);
     int size = m_fontSizes[finalIndex];
 
-    auto& rm = GetServices().recManager;
+    auto& rm = GetServices().resManager;
     return rm.getFont(m_fontName, size);
 }
 

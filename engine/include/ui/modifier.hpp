@@ -68,7 +68,7 @@ public:
     ): Modifier(std::forward<T&&>(child), spec),m_style{style}{}
 
     void OnDrawBefore() override {
-        auto& manager = GetServices().recManager;
+        auto& manager = GetServices().resManager;
         auto texture = manager.getTexture(m_style.texture);
         auto drawCall = [&texture, this](){::DrawTexturePro(
             texture,

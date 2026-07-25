@@ -46,3 +46,8 @@ class DebugVerticalLayout: public VerticalLayout {
     using VerticalLayout::VerticalLayout;
     void OnDrawContent() override;
 };
+
+class BindingsDisplay : public Label {
+    using Label::Label;
+    bool OnUpdate(float dt) override;
+};

@@ -7,7 +7,7 @@
 
 struct Services
 {
-    ResourceManager recManager;
+    ResourceManager resManager;
     MyInput input;
     PerformanceLog perfLog{60};
     RuntimeConfig runtimeCfg;

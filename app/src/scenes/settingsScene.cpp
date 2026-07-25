@@ -11,7 +11,7 @@ void SettingsScene::OnEnter(){
     m_pendingSizeIndex = usrCfg.theme.m_currentSizeIndex;
     m_pendingFontName = usrCfg.theme.m_fontName;
 
-    auto fonts = GetServices().recManager.getLoadedFonts();
+    auto fonts = GetServices().resManager.getLoadedFonts();
     std::vector<std::pair<std::string, std::string>> fontItems;
     for (auto& f : fonts) fontItems.emplace_back(f, f);
     auto row = std::make_unique<HorizontalLayout>(
@@ -122,7 +122,7 @@ void SettingsScene::OnEnter(){
 }
 
 void SettingsScene::OnDrawContent(){
-    auto& manager = GetServices().recManager;
+    auto& manager = GetServices().resManager;
     auto drawCall = [&manager](){
         ::DrawTexture(manager.getTexture("menu"), 0, 0, RAYWHITE);
     };

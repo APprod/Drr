@@ -3,6 +3,7 @@
 #include "utils/log.hpp"
 #include "utils/util.hpp"
 #include "ui/label.hpp"
+#include "ui/overlay.hpp"
 #include <format>
 
 DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
@@ -69,15 +70,13 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         Slider<float>(&p.alpha, 0.0f, 1.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
         ValueLabel<int>("Log msgs: {}", &cfg.debug.debugMessagesCount, valText),
         Slider<int>(&cfg.debug.debugMessagesCount, 1, 50, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
-        Label(
-            Text("F1 overlay  F2 layout\nF3 content  F4 fps\nF5 cursor   F6 perf\nF7 log   F8 shader\nF9 gradient", "text"),
-            UICSpec{}.SetFlex({0,1}))
+        BindingsDisplay(Text("", "text"), UICSpec{}.SetFlex({0,1}))
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));
 
     auto tempBottom = std::make_unique<HorizontalLayout>(
-        UICSpec{}.SetPaddingPct(padBase).SetFlex({0.5,2}).FillMaxSize(),
+        UICSpec{}.SetPaddingPct(padBase).SetFlex({0.2f,5.0f}).FillMaxSize(),
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
     temp->AddChild(std::move(mainC));
@@ -139,7 +138,21 @@ bool DebugLogDisplay::OnUpdate(float dt){
     return Label::OnUpdate(dt);
 }
 
-
+bool BindingsDisplay::OnUpdate(float dt){
+    auto* overlay = dynamic_cast<Overlay*>(GetUIContext().GetOverlay());
+    if (!overlay) { SetText(""); return Label::OnUpdate(dt); }
+    std::string out;
+    for (auto& [key, binding] : overlay->GetBindings()) {
+        auto keyStr = GetInputKeyName(key);
+        if (!binding.label.empty())
+            out += std::format("{}: {}\n", keyStr, binding.label);
+        else
+            out += std::format("{}\n", keyStr);
+    }
+    if (!out.empty()) out.pop_back();
+    SetText(out);   
+    return Label::OnUpdate(dt);
+}
 
 void DebugVerticalLayout::OnDrawContent(){
     if (GetServices().runtimeCfg.debug.showOverlayGradient) {

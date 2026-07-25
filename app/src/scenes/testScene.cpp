@@ -76,7 +76,7 @@ void TestScene::OnDrawContent(){
     auto& cfg = GetServices().runtimeCfg;
     auto& p = cfg.user.processing;
     p.brightness = 2.5;
-    auto& manager = GetServices().recManager;
+    auto& manager = GetServices().resManager;
     auto drawCall = [&manager](){
         ::DrawTexture(manager.getTexture("menu"), 0, 0, RAYWHITE);
     };

@@ -45,7 +45,7 @@ bool Button::OnUpdate(float dt){
 }
 
 void Button::OnDrawContent(){
-    auto& manager = GetServices().recManager;
+    auto& manager = GetServices().resManager;
     auto texture = manager.getTexture(m_textureName);
     auto target = GetDrawRect();
     float s = m_scale.current;
@@ -57,7 +57,7 @@ void Button::OnDrawContent(){
             target.height * s,
         };
     }
-    auto& shader = GetServices().recManager.getShaderProgram("processing");
+    auto& shader = GetServices().resManager.getShaderProgram("processing");
     useShaderUnchecked(shader,{{"brightness", m_brightness.current}},
             [this, texture, target](){
                 ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);

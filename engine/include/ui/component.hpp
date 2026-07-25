@@ -122,6 +122,7 @@ struct UIContext
 
     void SetOverlay(IOverlay* over){m_overlayStack.push_back(over);}
     void ResetOverlay(){if (!m_overlayStack.empty()) m_overlayStack.pop_back(); }
+    IOverlay* GetOverlay() const { return m_overlayStack.empty() ? nullptr : m_overlayStack.back(); }
 
     void SetCapture(UIComponent* comp){m_captured = comp;}
     EventMask  GetCaptureTypes() const;

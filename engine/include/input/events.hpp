@@ -55,6 +55,45 @@ enum EventType : uint32_t {
 };
 }
 
+inline std::string GetInputKeyName(InputKey key) {
+    if (key >= KEY_F1 && key <= KEY_F12)
+        return "F" + std::to_string(key - KEY_F1 + 1);
+    switch (key) {
+        case KEY_SPACE:       return "Space";
+        case KEY_ESCAPE:      return "Escape";
+        case KEY_ENTER:       return "Enter";
+        case KEY_TAB:         return "Tab";
+        case KEY_BACKSPACE:   return "Backspace";
+        case KEY_INSERT:      return "Insert";
+        case KEY_DELETE:      return "Delete";
+        case KEY_RIGHT:       return "Right";
+        case KEY_LEFT:        return "Left";
+        case KEY_DOWN:        return "Down";
+        case KEY_UP:          return "Up";
+        case KEY_PAGE_UP:     return "PageUp";
+        case KEY_PAGE_DOWN:   return "PageDown";
+        case KEY_HOME:        return "Home";
+        case KEY_END:         return "End";
+        case KEY_CAPS_LOCK:   return "CapsLock";
+        case KEY_SCROLL_LOCK: return "ScrollLock";
+        case KEY_NUM_LOCK:    return "NumLock";
+        case KEY_PRINT_SCREEN:return "PrintScreen";
+        case KEY_PAUSE:       return "Pause";
+        case KEY_LEFT_SHIFT:  return "LeftShift";
+        case KEY_LEFT_CONTROL:return "LeftControl";
+        case KEY_LEFT_ALT:    return "LeftAlt";
+        case KEY_LEFT_SUPER:  return "LeftSuper";
+        case KEY_RIGHT_SHIFT: return "RightShift";
+        case KEY_RIGHT_CONTROL:return "RightControl";
+        case KEY_RIGHT_ALT:   return "RightAlt";
+        case KEY_RIGHT_SUPER: return "RightSuper";
+        case KEY_KB_MENU:     return "Menu";
+        default: break;
+    }
+    const char* raw = GetKeyName(key);
+    return raw ? raw : std::to_string(static_cast<int>(key));
+}
+
 inline constexpr EventMask getEventType(const MyEvent& e){
     if (std::holds_alternative<CursorMoveEvent>(e))   return EventType::CursorMove;
     else if (std::holds_alternative<CursorActionEvent>(e)) return EventType::CursorAction;

@@ -69,9 +69,9 @@ void Engine::init(){
     SwitchWindowMode(usr.windowMode);
 
     //All Services that need initialising
-    auto& recManager = GetServices().recManager;
-    recManager.init();
-    recManager.load();
+    auto& resManager = GetServices().resManager;
+    resManager.init();
+    resManager.load();
     SetExitKey(0); //TODO: remove at some point
 }
 

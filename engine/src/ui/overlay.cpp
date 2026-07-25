@@ -9,31 +9,31 @@ Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     m_listener = listener.get();
     listener->Bind(InputKey::KEY_F1, []{
         GetServices().runtimeCfg.debug.showDebugOverlay ^= true;
-    });
+    }, "overlay");
     listener->Bind(InputKey::KEY_F2, []{
         GetServices().runtimeCfg.debug.showLayoutBounds ^= true;
-    });
+    }, "layout");
     listener->Bind(InputKey::KEY_F3, []{
         GetServices().runtimeCfg.debug.showLayoutContentBounds ^= true;
-    });
+    }, "content");
     listener->Bind(InputKey::KEY_F4, []{
         GetServices().runtimeCfg.user.showFPS ^= true;
-    });
+    }, "fps");
     listener->Bind(InputKey::KEY_F5, []{
         GetServices().runtimeCfg.debug.showCursorPos ^= true;
-    });
+    }, "cursor");
     listener->Bind(InputKey::KEY_F6, []{
         GetServices().runtimeCfg.debug.showPerformance ^= true;
-    });
+    }, "perf");
     listener->Bind(InputKey::KEY_F7, []{
         GetServices().runtimeCfg.debug.showDebugLog ^= true;
-    });
+    }, "log");
     listener->Bind(InputKey::KEY_F8, []{
         GetServices().runtimeCfg.debug.useProcessingShader ^= true;
-    });
+    }, "shader");
     listener->Bind(InputKey::KEY_F9, []{
         GetServices().runtimeCfg.debug.showOverlayGradient ^= true;
-    });
+    }, "gradient");
     AddChild(std::move(listener));
     Add(FPSDraw(Text("FPS: ", "big header")));
     GetUIContext().SetOverlay(this);

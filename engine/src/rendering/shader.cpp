@@ -74,12 +74,12 @@ void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::func
 
 
 void useShaderUnchecked(std::string name, const Uniforms& uniforms, std::function<void()> drawCall){
-    auto shaderProgram = GetServices().recManager.getShaderProgram(name);
+    auto shaderProgram = GetServices().resManager.getShaderProgram(name);
     useShaderUnchecked(shaderProgram, uniforms,drawCall);
 }
 
 
 void useShader(std::string name, const Uniforms& uniforms, std::function<void()> drawCall){
-    auto shaderProgram = GetServices().recManager.getShaderProgram(name);
+    auto shaderProgram = GetServices().resManager.getShaderProgram(name);
     useShader(shaderProgram, uniforms,drawCall);
 }

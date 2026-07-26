@@ -3,9 +3,11 @@
 #include <string>
 
 #include "ui/component.hpp"
+#include "ui/scrollable.hpp"
 #include "rendering/text.hpp"
 
 enum class TextAlign { Left, Center, Right };
+
 
 class Label: public UIComponent{
 public:
@@ -19,19 +21,12 @@ public:
     bool OnUpdate(float dt) override;
     void MeasureContent(Vector2 available) override;
     void OnDrawContent() override;
-    void CalculateOffset(float delta);
-    float getMaxOffset();
-    virtual void OnHoverEnter()override{m_hovered = true;}
-    virtual void OnHoverExit()override{m_hovered = false;}
+    virtual void OnHoverEnter() override {m_scroll.OnHover();}
+    virtual void OnHoverExit() override {m_scroll.OnHoverExit();}
 protected:
     Text m_text;
     TextAlign m_textAlign = TextAlign::Left;
-    float m_scrollOffset{0.0f};
-    bool m_hovered{false};
-    bool m_atBottom{false};
-public:
-    float m_scrollSpeed{20.f};
-
+    Scrollable m_scroll;
 };
 
 class FPSDraw: public Label{

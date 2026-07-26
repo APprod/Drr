@@ -137,24 +137,40 @@ public:
     }
     bool OnEvent(const MyEvent& event) override {
         m_scroll.OnUpdate(this->GetVisualRect(), this->m_contentDesiredSize);
+
         if (auto* e = std::get_if<ScrollEvent>(&event)) {
             m_scroll.hovered = CheckCollisionPointRec(e->pos, this->GetVisualRect());
             if (m_scroll.hovered) return m_scroll.OnEvent(event);
+            return false;
         }
+
+        if (m_scroll.OnEvent(event)) {
+            if (m_scroll.dragging)
+                GetUIContext().SetCapture(this);
+            else
+                GetUIContext().ReleaseCapture();
+            return true;
+        }
+
         return LayoutType::OnEvent(event);
     }
     void OnDrawContent() override{
+        auto viewport = this->GetVisualRect();
         m_scroll.DrawInside(
-            this->GetVisualRect(),
+            viewport,
             [this](){
                 LayoutType::OnDrawContent();
             }
         );
+        m_scroll.DrawScrollbar(viewport);
     }
     UIComponent* FindTarget(Vector2 point) override {
         if (!CheckCollisionPointRec(point, this->GetVisualRect()))
             return nullptr;
         return LayoutType::FindTarget(point);
+    }
+    EventMask getCaptureTypes() const override {
+        return EventType::CursorAction | EventType::CursorMove;
     }
 private:
     static constexpr auto sDir =

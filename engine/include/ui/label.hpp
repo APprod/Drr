@@ -19,6 +19,7 @@ public:
     void SetText(std::string text);
     bool OnEvent(const MyEvent& event) override;
     bool OnUpdate(float dt) override;
+    EventMask getCaptureTypes() const override { return EventType::CursorAction | EventType::CursorMove; }
     void MeasureContent(Vector2 available) override;
     void OnDrawContent() override;
     virtual void OnHoverEnter() override {m_scroll.OnHover();}

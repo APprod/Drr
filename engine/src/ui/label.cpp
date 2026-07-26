@@ -62,10 +62,18 @@ void Label::OnDrawContent(){
         m_text.Draw(pos);
     };
     m_scroll.DrawInside(rect, drawCall);
+    m_scroll.DrawScrollbar(rect);
 }
 
 bool Label::OnEvent(const MyEvent& event){
-    return m_scroll.OnEvent(event);
+    if (m_scroll.OnEvent(event)) {
+        if (m_scroll.dragging)
+            GetUIContext().SetCapture(this);
+        else
+            GetUIContext().ReleaseCapture();
+        return true;
+    }
+    return false;
 }
 
 bool FPSDraw::OnUpdate(float dt){

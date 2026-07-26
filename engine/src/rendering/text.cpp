@@ -26,13 +26,23 @@ std::vector<Line> splitLines(std::string& text)
         }
 
         size_t start = i;
-        bool isSpace = text[i] == ' ';
+        char c = text[i];
+        auto isSep = [](char ch) { return ch == '/' || ch == '\\'; };
 
-        while (i < text.size() &&
-               text[i] != '\n' &&
-               (text[i] == ' ') == isSpace)
+        if (c == ' ')
         {
-            ++i;
+            while (i < text.size() && text[i] == ' ')
+                ++i;
+        }
+        else if (isSep(c))
+        {
+            while (i < text.size() && isSep(text[i]))
+                ++i;
+        }
+        else
+        {
+            while (i < text.size() && text[i] != '\n' && text[i] != ' ' && !isSep(text[i]))
+                ++i;
         }
 
         line.words.push_back({text.substr(start, i - start)});
@@ -79,7 +89,7 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
                 continue;
 
             if (!current.words.empty() &&
-                currentWidth + token.size.x > borders.x &&
+                currentWidth + token.size.x + current.words.size() * m_fontSpacing > borders.x &&
                 !isSpaces){
                 while (!current.words.empty() &&
                        !current.words.back().word.empty() &&

@@ -9,7 +9,11 @@
 class Modifier: public UIComponent{
 public:
     using UIComponent::UIComponent;
+
+    template<typename T> struct is_unique_ptr : std::false_type {};
+    template<typename T, typename D> struct is_unique_ptr<std::unique_ptr<T,D>> : std::true_type {};
     template<typename T>
+    requires (!is_unique_ptr<std::decay_t<T>>::value)
     Modifier(T&& child, UIComponentSpec spec = {})
         : UIComponent{spec}, 
           m_child{std::make_unique<std::decay_t<T>>(std::forward<T>(child))} {}
@@ -41,6 +45,12 @@ public:
     virtual UIComponent* FindTarget(Vector2 point) override
     {
         return m_child->FindTarget(point);
+    }
+
+    UIComponent* FindById(UICompId searchId) override {
+        if (this->id == searchId) return this;
+        if (m_child) return m_child->FindById(searchId);
+        return nullptr;
     }
 
     virtual void OnDrawBefore(){};
@@ -97,12 +107,19 @@ protected:
 
 class Popup: public Modifier{
 public:
-    using Modifier::Modifier;
     Popup(std::unique_ptr<UIComponent> child, UIComponentSpec spec = {})
         : Modifier(std::move(child), spec) {}
+
+    template<typename T>
+    requires (!is_unique_ptr<std::decay_t<T>>::value)
+    Popup(T&& child, UIComponentSpec spec = {})
+        : Modifier(std::forward<T>(child), spec) {}
+    
     Popup&& SetAnchor(std::function<Rectangle()> anchor){m_anchorGetter = anchor; return std::move(*this);}
     Popup&& ParentSize(bool use){m_useParentSize = use; return std::move(*this);}
     Popup&& Direction(OpenDirection d) { m_direction = d; return std::move(*this); }
+    template<typename T>
+    T* GetChildAs(){return dynamic_cast<T*>(m_child.get());}
     bool OnUpdate(float dt)override{
         auto popupRect = CalculateRect(m_actual);
         m_child->OnArrange(popupRect);
@@ -215,8 +232,6 @@ public:
         EndScissorMode();
     }
 
-    void setPopupId(UICompId popupId) { m_popupId = popupId; }
-
     UIComponent* FindTarget(Vector2 point) override {
         auto actual = GetActualRect();
         float h = actual.height * m_clipHeight.current;
@@ -233,6 +248,5 @@ public:
 private:
     Animated<float> m_clipHeight;
     bool m_open = false;
-    UICompId m_popupId = 0;
     OpenDirection m_revealDirection{OpenDirection::Down};
 };

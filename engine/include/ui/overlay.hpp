@@ -26,8 +26,9 @@ public:
     const auto& GetBindings() const { return m_listener->GetBindings(); }
     UICompId PushPopup(std::unique_ptr<UIComponent> comp) override;
     UICompId PopPopup() override;
-    void RemovePopup(UICompId id) override;
-    virtual UIComponent* GetPopup(UICompId popupId);
+    void RemovePopup(UICompId compId) override;
+    void RemovePopupImmediate(UICompId compId) override;
+    UIComponent* GetPopupById(UICompId id) override;
     
 private:
     HotkeysListener* m_listener{};

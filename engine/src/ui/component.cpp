@@ -38,3 +38,17 @@ void UIContext::RemovePopup(UICompId id){
     }
     m_overlayStack.back()->RemovePopup(id);
 }
+void UIContext::RemovePopupImmediate(UICompId id){
+    if (m_overlayStack.empty()){
+        mylog::GetLogger().Warn("Can't Remove a Popup, no overlays registered");
+        return;
+    }
+    m_overlayStack.back()->RemovePopupImmediate(id);
+}
+
+UIComponent* UIContext::GetPopupById(UICompId id){
+    if (m_overlayStack.empty()){
+        return nullptr;
+    }
+    return m_overlayStack.back()->GetPopupById(id);
+}

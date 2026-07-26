@@ -68,7 +68,18 @@ void Overlay::RemovePopup(UICompId compId){
     QueueRemoveChild(compId);
 }
 
-UIComponent* Overlay::GetPopup(UICompId popupId){
+void Overlay::RemovePopupImmediate(UICompId compId){
+    auto it = std::find_if(ids.begin(), ids.end(),
+        [compId](const auto& c){ return c == compId; });
+    if (it == ids.end()){
+        mylog::GetLogger().Warn("RemovePopupImmediate: id not found: ", compId);
+        return;
+    }
+    ids.erase(it);
+    RemoveChild(compId);
+}
+
+UIComponent* Overlay::GetPopupById(UICompId popupId){
     for (auto& child : m_children) {
         if (child->id == popupId) return child.get();
     }

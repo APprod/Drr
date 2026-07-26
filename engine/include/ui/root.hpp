@@ -4,7 +4,8 @@
 
 class Root: public Stack{
 public:
-    using Stack::Stack;
+    Root() { GetUIContext().SetRoot(this); }
+    ~Root() { GetUIContext().SetRoot(nullptr); }
     virtual bool OnEvent(const MyEvent& event) override;
     void UpdateHover();
     std::optional<bool> CheckCaptured(const MyEvent& event);

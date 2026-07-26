@@ -75,6 +75,13 @@ public:
     bool OnEvent(const MyEvent& event) override;
     const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return m_children;}
     virtual UIComponent* FindTarget(Vector2 point) override;
+    UIComponent* FindById(UICompId searchId) override {
+        if (this->id == searchId) return this;
+        for (auto& child : m_children) {
+            if (auto* found = child->FindById(searchId)) return found;
+        }
+        return nullptr;
+    }
 protected:
     LayoutSpec m_layoutSpec;
     std::vector<std::unique_ptr<UIComponent>> m_children;

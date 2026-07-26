@@ -18,7 +18,8 @@ public:
     const UIComponentSpec& Spec() const {
         return m_compSpec;
     }
-
+    template<typename T>
+    T* GetAs(){return dynamic_cast<T*>(this);}
     virtual bool OnUpdate(float){ return false; }
     virtual bool OnEvent(const MyEvent& ){ return false;}
     virtual void OnDraw() final{
@@ -71,6 +72,9 @@ public:
     virtual void OnHoverEnter(){}
     virtual void OnHoverExit(){}
     virtual UIComponent* FindTarget(Vector2 point);
+    virtual UIComponent* FindById(UICompId searchId) {
+        return (this->id == searchId) ? this : nullptr;
+    }
     virtual EventMask getCaptureTypes() const {return 0;}
 
     Vector2 DesiredSize(){return m_desiredSize;}
@@ -111,6 +115,8 @@ public:
     virtual UICompId PushPopup(std::unique_ptr<UIComponent> comp) = 0;
     virtual UICompId PopPopup() = 0;
     virtual void RemovePopup(UICompId id) = 0;
+    virtual void RemovePopupImmediate(UICompId id) = 0;
+    virtual UIComponent* GetPopupById(UICompId id) = 0;
 };
 
 struct UIContext
@@ -127,6 +133,16 @@ struct UIContext
     UICompId PushPopup(std::unique_ptr<UIComponent> comp);
     UICompId PopPopup();
     void RemovePopup(UICompId id);
+    void RemovePopupImmediate(UICompId id);
+    UIComponent* GetPopupById(UICompId id);
+
+    void SetRoot(UIComponent* root){ m_root = root; }
+    template<typename T>
+    T* FindById(UICompId id) {
+        if (!m_root) return nullptr;
+        auto* found = m_root->FindById(id);
+        return dynamic_cast<T*>(found);
+    }
 
     void SetOverlay(IOverlay* over){m_overlayStack.push_back(over);}
     void ResetOverlay(){if (!m_overlayStack.empty()) m_overlayStack.pop_back(); }
@@ -155,6 +171,7 @@ private:
     UICompId maxId{0}; 
     UIComponent* m_captured = nullptr;
     UIComponent* m_hovered = nullptr;
+    UIComponent* m_root = nullptr;
     UIContext() = default;
     UIContext(const UIContext&) = delete;
     UIContext& operator=(const UIContext&) = delete;

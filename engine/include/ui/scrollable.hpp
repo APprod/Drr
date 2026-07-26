@@ -3,6 +3,11 @@
 #include <functional>
 #include "input/events.hpp"
 
+enum class ScrollDirection{
+    Vertical,
+    Horizontal
+};
+
 struct Scrollable {
     bool OnEvent(const MyEvent& event);
     void OnUpdate(Rectangle drawRect, Vector2 contentSize);
@@ -14,6 +19,7 @@ struct Scrollable {
     float scrollOffset{0};
     float maxOffset{0};
     bool hovered{false};
-    bool atBottom{true};
+    bool atBottom{false};
     bool drawBorders{true};
+    ScrollDirection direction{ScrollDirection::Vertical};
 };

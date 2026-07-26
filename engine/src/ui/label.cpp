@@ -8,7 +8,9 @@ Label::Label(
     UIComponentSpec spec,
     TextAlign align
 ): UIComponent{spec}, m_text{std::move(text)}, m_textAlign{align}
-{}
+{
+    m_scroll.atBottom = true;
+}
 
 void Label::SetText(std::string text){
     m_text.SetText(std::move(text));
@@ -16,7 +18,7 @@ void Label::SetText(std::string text){
 
 bool Label::OnUpdate(float)
 {
-    auto r = GetDrawRect();
+    auto r = GetVisualRect();
     auto oldContent = m_contentDesiredSize;
     MeasureContent({r.width, r.height});
     m_scroll.OnUpdate(r,m_contentDesiredSize);
@@ -46,7 +48,7 @@ void Label::MeasureContent(Vector2 available){
 }
 
 void Label::OnDrawContent(){
-    auto rect = GetDrawRect();
+    auto rect = GetVisualRect();
     auto textSize = m_text.RealSize();
 
     auto drawCall = [this, rect, textSize](){

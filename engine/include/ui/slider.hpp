@@ -43,7 +43,7 @@ public:
     }
 
     void OnDrawContent() override {
-        auto rect = GetDrawRect();
+        auto rect = GetVisualRect();
         float centerY = rect.y + rect.height / 2.0f;
 
         float trackY = centerY - m_barHeight / 2.0f;
@@ -122,7 +122,7 @@ private:
 
     void updateValueFromPos(float mouseX) {
         if (!m_value) return;
-        auto rect = GetDrawRect();
+        auto rect = GetVisualRect();
         if (rect.width <= 0.0f) return;
 
         float norm = (mouseX - rect.x) / rect.width;

@@ -50,6 +50,7 @@ bool Layout::OnUpdate(float dt)
     }
     m_removalQueue.clear();
     for(auto& child : m_children){
+        child->positionOffset = this->positionOffset;
         dirty = child->OnUpdate(dt) || dirty;
     }
     return dirty;

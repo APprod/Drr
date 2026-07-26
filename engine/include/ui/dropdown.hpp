@@ -51,9 +51,10 @@ public:
         if (m_isOpen) closePopup();
         if (m_pendingClose) return;
 
-        float estimatedHeight = static_cast<float>(m_items.size()) * m_actual.height;
-        float spaceBelow = static_cast<float>(GetScreenHeight()) - (m_actual.y + m_actual.height);
-        float spaceAbove = m_actual.y;
+        auto actual = GetActualRect();
+        float estimatedHeight = static_cast<float>(m_items.size()) * actual.height;
+        float spaceBelow = static_cast<float>(GetScreenHeight()) - (actual.y + actual.height);
+        float spaceAbove = actual.y;
         OpenDirection dir = OpenDirection::Down;
         if (spaceBelow < estimatedHeight && spaceAbove >= estimatedHeight)
             dir = OpenDirection::Up;
@@ -70,7 +71,7 @@ public:
 
         m_popupId = GetUIContext().PushPopup(
             Popup(std::move(revealBase), UICSpec{})
-                .SetAnchor([this]() { return this->m_actual; })
+                .SetAnchor([this]() { return this->GetActualRect(); })
                 .ParentSize(true)
                 .Direction(dir)
         );

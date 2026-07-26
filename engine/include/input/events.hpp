@@ -1,7 +1,11 @@
 #pragma once
+#include <optional>
 #include <variant>
 #include "raylib.h"
 #include "utils/util.hpp"
+
+template<class... Ts>
+struct overloaded : Ts... { using Ts::operator()...; };
 
 
 struct CursorMoveEvent{
@@ -38,6 +42,7 @@ struct ActionEvent{
 
 struct ScrollEvent{
     Vector2 delta{};
+    Vector2 pos{};
 };
 
 using MyEvent = std::variant<CursorActionEvent, CursorMoveEvent, InputKeyEvent,
@@ -102,4 +107,13 @@ inline constexpr EventMask getEventType(const MyEvent& e){
     else if (std::holds_alternative<ScreenInterEvent>(e)) return EventType::ScreenInter;
     else if (std::holds_alternative<ScrollEvent>(e))       return EventType::Scroll;
     return 0;
+}
+
+inline std::optional<Vector2> getEventPos(const MyEvent& event){
+    return std::visit(overloaded{
+        [](const CursorMoveEvent& e)    -> std::optional<Vector2> { return e.pos; },
+        [](const CursorActionEvent& e)  -> std::optional<Vector2> { return e.pos; },
+        [](const ScreenInterEvent& e)   -> std::optional<Vector2> { return e.pos; },
+        [](const auto&)                 -> std::optional<Vector2> { return std::nullopt; }
+    }, event);
 }

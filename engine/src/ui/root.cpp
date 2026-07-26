@@ -1,20 +1,6 @@
 #include "ui/root.hpp"
 #include "utils/util.hpp"
 
-#include <stdexcept>
-
-template<class... Ts>
-struct overloaded : Ts... { using Ts::operator()...; };
-
-Vector2 Root::getPos(const MyEvent& event){
-    Vector2 res = std::visit(overloaded{
-        [](const CursorMoveEvent& e) -> Vector2 {return e.pos;},
-        [](const CursorActionEvent& e) -> Vector2 {return e.pos;},
-        [](const auto&) -> Vector2 {throw std::runtime_error("Required to get a position of an event without the position");}
-    }, event);
-    return res;
-}
-
 void Root::UpdateHover()
 {
     UIComponent* newHovered = nullptr;

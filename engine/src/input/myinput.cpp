@@ -23,8 +23,11 @@ std::vector<MyEvent> MyInput::pollEvents(){
                 m_events.push_back(CursorActionEvent{pos, btn, false});
         }   
         auto wheel = ::GetMouseWheelMoveV();
+        if ((wheel.x != 0 || wheel.y != 0) && (::IsKeyDown(KEY_LEFT_SHIFT) || ::IsKeyDown(KEY_RIGHT_SHIFT))) {
+            std::swap(wheel.x, wheel.y);
+        }
         if (wheel.x != 0 || wheel.y != 0){
-            m_events.push_back(ScrollEvent{ wheel });
+            m_events.push_back(ScrollEvent{ wheel, pos });
         }
 
         if (cursorOnScreen){

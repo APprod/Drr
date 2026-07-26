@@ -21,7 +21,7 @@ void TestScene::OnEnter(){
         auto buttonText = Text("Test", "button");
         auto spec = UICSpec().SetFlex({.growth = 1, .shrink = 1})
                     .MinSize({100,50});
-        auto row = std::make_unique<HorizontalLayout>(
+        auto row = std::make_unique<HorizontalScrollView>(
                     UICSpec{}.FillMaxWidth().SetPaddingPct({.left = 3, .right = 3}),
                     LayoutSpec{}.AlignCenter().CrossCenter().JustifyEvenly().Spacing(20)
                 );

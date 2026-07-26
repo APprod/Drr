@@ -10,7 +10,7 @@ public:
         : Clickable(), m_value(value), m_onChange(std::move(onChange)) {}
 
     void OnDrawContent() override {
-        auto rect = GetDrawRect();
+        auto rect = GetVisualRect();
         float yCenter = rect.y + rect.height / 2.0f;
 
         Rectangle box = {

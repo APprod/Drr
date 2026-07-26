@@ -47,7 +47,7 @@ bool Button::OnUpdate(float dt){
 void Button::OnDrawContent(){
     auto& manager = GetServices().resManager;
     auto texture = manager.getTexture(m_textureName);
-    auto target = GetDrawRect();
+    auto target = GetVisualRect();
     float s = m_scale.current;
     if (s != 1.0f) {
         target = {

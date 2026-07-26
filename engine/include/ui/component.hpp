@@ -24,11 +24,11 @@ public:
     virtual void OnDraw() final{
         OnDrawContent();
         if (GetServices().runtimeCfg.debug.showLayoutContentBounds){
-            auto rec = GetDrawRect();
+            auto rec = GetVisualRect();
             DrawRectangleLinesEx(rec,2,RED);
         }
         if (GetServices().runtimeCfg.debug.showLayoutBounds){
-            DrawRectangleLinesEx(m_actual,2,RAYWHITE);
+            DrawRectangleLinesEx(GetActualRect(),2,RAYWHITE);
         }
     }
     virtual void OnDrawContent(){}
@@ -67,7 +67,7 @@ public:
         ArrangeContent(inner);
     }
     virtual void ArrangeContent(Rectangle ) {}
-    virtual bool HitTest(Vector2 point) const {return CheckCollisionPointRec(point, m_actual) && CheckCollisionPointRec(point, {0,0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())});}
+    virtual bool HitTest(Vector2 point) const {Rectangle offsetRect{m_actual.x + positionOffset.x, m_actual.y + positionOffset.y, m_actual.width, m_actual.height}; return CheckCollisionPointRec(point, offsetRect) && CheckCollisionPointRec(point, {0,0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())});}
     virtual void OnHoverEnter(){}
     virtual void OnHoverExit(){}
     virtual UIComponent* FindTarget(Vector2 point);
@@ -76,6 +76,7 @@ public:
     Vector2 DesiredSize(){return m_desiredSize;}
     Rectangle FinalRect(){return m_actual;}
     UICompId id{0}; 
+    Vector2 positionOffset{0,0}; //Used for scrolling and non-only-visual changes that shouldn cause rearrange 
     bool recievesEvents = true;
     bool hitTesting = true;
     bool visible = true;
@@ -93,6 +94,13 @@ protected:
             m_actual.width - pad.left - pad.right,
             m_actual.height - pad.top - pad.bottom,
         };
+    }
+    Rectangle GetActualRect() const {
+        return {m_actual.x + positionOffset.x, m_actual.y + positionOffset.y, m_actual.width, m_actual.height};
+    }
+    Rectangle GetVisualRect() const {
+        auto base = GetDrawRect();
+        return {base.x + positionOffset.x, base.y + positionOffset.y, base.width, base.height};
     }
 };
 

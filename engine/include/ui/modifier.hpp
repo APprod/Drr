@@ -73,7 +73,7 @@ public:
         auto drawCall = [&texture, this](){::DrawTexturePro(
             texture,
             rect(texture),
-            m_actual,
+            GetActualRect(),
             {0,0}, 0.0f, m_style.tint
         );};
         if (m_style.processing) {
@@ -179,12 +179,13 @@ public:
 
     bool OnEvent(const MyEvent& event) override {
         auto inClip = [&](Vector2 pos) -> bool {
-            float h = m_actual.height * m_clipHeight.current;
+            auto actual = GetActualRect();
+            float h = actual.height * m_clipHeight.current;
             if (h <= 0.0f) return false;
             float clipY = (m_revealDirection == OpenDirection::Up)
-                ? m_actual.y + m_actual.height - h
-                : m_actual.y;
-            return CheckCollisionPointRec(pos, {m_actual.x, clipY, m_actual.width, h});
+                ? actual.y + actual.height - h
+                : actual.y;
+            return CheckCollisionPointRec(pos, {actual.x, clipY, actual.width, h});
         };
 
         if (auto* e = std::get_if<CursorActionEvent>(&event)) {
@@ -201,13 +202,14 @@ public:
     }
 
     void OnDrawContent() override {
-        float h = m_actual.height * m_clipHeight.current;
+        auto actual = GetActualRect();
+        float h = actual.height * m_clipHeight.current;
         float clipY = (m_revealDirection == OpenDirection::Up)
-            ? m_actual.y + m_actual.height - h
-            : m_actual.y;
+            ? actual.y + actual.height - h
+            : actual.y;
         BeginScissorMode(
-            static_cast<int>(m_actual.x), static_cast<int>(clipY),
-            static_cast<int>(m_actual.width), static_cast<int>(h)
+            static_cast<int>(actual.x), static_cast<int>(clipY),
+            static_cast<int>(actual.width), static_cast<int>(h)
         );
         Modifier::OnDrawContent();
         EndScissorMode();
@@ -216,12 +218,13 @@ public:
     void setPopupId(UICompId popupId) { m_popupId = popupId; }
 
     UIComponent* FindTarget(Vector2 point) override {
-        float h = m_actual.height * m_clipHeight.current;
+        auto actual = GetActualRect();
+        float h = actual.height * m_clipHeight.current;
         if (h <= 0.0f) return nullptr;
         float clipY = (m_revealDirection == OpenDirection::Up)
-            ? m_actual.y + m_actual.height - h
-            : m_actual.y;
-        Rectangle clipRect = {m_actual.x, clipY, m_actual.width, h};
+            ? actual.y + actual.height - h
+            : actual.y;
+        Rectangle clipRect = {actual.x, clipY, actual.width, h};
         if (!CheckCollisionPointRec(point, clipRect))
             return nullptr;
         return Modifier::FindTarget(point);

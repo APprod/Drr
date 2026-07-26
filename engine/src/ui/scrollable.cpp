@@ -1,12 +1,15 @@
 #include "ui/scrollable.hpp"
 #include <algorithm>
+#include <cmath>
 
 bool Scrollable::OnEvent(const MyEvent& event){
     if (auto* e = std::get_if<ScrollEvent>(&event)){
         if (!hovered){
             return false;
         }
-        scrollOffset -= scrollSpeed * e->delta.y;
+        float delta = direction == ScrollDirection::Vertical ? e->delta.y : e->delta.x;
+        float speed = scrollSpeed * (1.0f + std::sqrt(maxOffset) * 0.05f);
+        scrollOffset -= speed * delta;
         atBottom = (scrollOffset >= maxOffset);
         return true;
     }
@@ -14,7 +17,9 @@ bool Scrollable::OnEvent(const MyEvent& event){
 }
 
 void Scrollable::OnUpdate(Rectangle drawRect, Vector2 contentSize){
-    maxOffset = contentSize.y - drawRect.height;
+    auto contentDim = direction == ScrollDirection::Vertical ? &Vector2::y : &Vector2::x;
+    auto rectDim = direction == ScrollDirection::Vertical ? &Rectangle::height : &Rectangle::width;
+    maxOffset = contentSize.*contentDim - drawRect.*rectDim;
     maxOffset = std::max(0.0f, maxOffset);
     if (maxOffset > 0.0f && atBottom){
         scrollOffset = maxOffset;

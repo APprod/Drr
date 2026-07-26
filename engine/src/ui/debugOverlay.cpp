@@ -147,7 +147,7 @@ bool BindingsDisplay::OnUpdate(float dt){
 
 void DebugVerticalLayout::OnDrawContent(){
     if (GetServices().runtimeCfg.debug.showOverlayGradient) {
-        auto r = m_actual;
+        auto r = GetActualRect();
         GetServices().renderer.beginBlendMode(BlendMode::BLEND_MULTIPLIED);
         auto ir = irect(r); ::DrawRectangleGradientV(ir.x,ir.y,ir.width,ir.height, {0,0,50,100}, {25,0,0,50});
         GetServices().renderer.endBlendMode();
@@ -165,7 +165,7 @@ bool CfgDisplay::OnUpdate(float dt){
 
 void DebugHorizontalLayout::OnDrawContent(){
     if (GetServices().runtimeCfg.debug.showOverlayGradient) {
-        auto r = GetDrawRect();
+        auto r = GetVisualRect();
         auto ir2 = irect(r); ::DrawRectangleGradientV(ir2.x,ir2.y,ir2.width,ir2.height, {0,255,0,255}, {0,0,255,0});
     }
     for(auto& child : m_children){

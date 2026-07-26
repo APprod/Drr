@@ -3,7 +3,12 @@
 #include <memory>
 #include <vector>
 
+#include <type_traits>
+#include <utility>
+
 #include "ui/component.hpp"
+#include "ui/scrollable.hpp"
+#include "input/events.hpp"
 
 enum class Alignment{
     Beginning,
@@ -97,6 +102,72 @@ class HorizontalLayout: public Layout{
     virtual void MeasureContent(Vector2 available) override;
     virtual void ArrangeContent(Rectangle actualRect) override;
 };
+
+template<typename LayoutType>
+class ScrollView: public LayoutType{
+public:
+    template<typename... Ts>
+    ScrollView(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base, Ts&&... children)
+        : LayoutType(std::move(uiSpec), std::move(layoutSpec), std::forward<Ts>(children)...)
+    {
+        m_scroll.direction = sDir;
+    }
+
+    bool OnUpdate(float dt) override{
+        this->m_contentDesiredSize.*mainAxis = 0;
+        for (auto& child : this->m_children) {
+            this->m_contentDesiredSize.*mainAxis += child->DesiredSize().*mainAxis + this->m_layoutSpec.spacing;
+        }
+        if (!this->m_children.empty())
+            this->m_contentDesiredSize.*mainAxis -= this->m_layoutSpec.spacing;
+        m_scroll.OnUpdate(this->GetVisualRect(), this->m_contentDesiredSize);
+        if (!m_initialScrollApplied && m_scroll.maxOffset > 0){
+            if (this->m_layoutSpec.align == Alignment::End)
+                m_scroll.scrollOffset = m_scroll.maxOffset;
+            else if (this->m_layoutSpec.align == Alignment::Center)
+                m_scroll.scrollOffset = m_scroll.maxOffset * 0.5f;
+            m_initialScrollApplied = true;
+        }
+        float stored = this->positionOffset.*mainAxis;
+        if (m_scroll.maxOffset > 0)
+            this->positionOffset.*mainAxis = -m_scroll.scrollOffset;
+        bool dirty = LayoutType::OnUpdate(dt);
+        this->positionOffset.*mainAxis = stored;
+        return dirty;
+    }
+    bool OnEvent(const MyEvent& event) override {
+        m_scroll.OnUpdate(this->GetVisualRect(), this->m_contentDesiredSize);
+        if (auto* e = std::get_if<ScrollEvent>(&event)) {
+            m_scroll.hovered = CheckCollisionPointRec(e->pos, this->GetVisualRect());
+            if (m_scroll.hovered) return m_scroll.OnEvent(event);
+        }
+        return LayoutType::OnEvent(event);
+    }
+    void OnDrawContent() override{
+        m_scroll.DrawInside(
+            this->GetVisualRect(),
+            [this](){
+                LayoutType::OnDrawContent();
+            }
+        );
+    }
+    UIComponent* FindTarget(Vector2 point) override {
+        if (!CheckCollisionPointRec(point, this->GetVisualRect()))
+            return nullptr;
+        return LayoutType::FindTarget(point);
+    }
+private:
+    static constexpr auto sDir =
+        std::is_same_v<LayoutType, VerticalLayout> ? ScrollDirection::Vertical : ScrollDirection::Horizontal;
+    static constexpr auto mainAxis =
+        std::is_same_v<LayoutType, VerticalLayout> ? &Vector2::y : &Vector2::x;
+
+    Scrollable m_scroll;
+    bool m_initialScrollApplied = false;
+};
+
+using VerticalScrollView = ScrollView<VerticalLayout>;
+using HorizontalScrollView = ScrollView<HorizontalLayout>;
 
 class Stack: public Layout{
 public:

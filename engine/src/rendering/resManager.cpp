@@ -60,7 +60,7 @@ void ResourceManager::init()
 
 void ResourceManager::load()
 {
-    this->loadFont("TNR", "assets/TNR/timesnewromanpsmt.ttf");
+    this->loadFont("Inter", "assets/fonts/Inter/Inter_18pt-Regular.ttf");
     loadTextures();
 }
 

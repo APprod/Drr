@@ -25,7 +25,7 @@ public:
     std::string resolveFontName(const std::string& role) const;
 
     int m_currentSizeIndex{5};
-    std::string m_fontName = "TNR";
+    std::string m_fontName = "Inter";
 
 private:
     std::vector<int> m_fontSizes;

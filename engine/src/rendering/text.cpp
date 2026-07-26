@@ -142,6 +142,7 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 // Returns desired size;
 Vector2 Text::ReMeasure(Vector2 borders)
 {
+    m_dirtyFull = false;
     auto& theme = GetServices().runtimeCfg.user.theme;
     int curFontSize = theme.resolveSize(m_role);
     std::string curFontName = theme.resolveFontName(m_role);

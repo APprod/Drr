@@ -31,7 +31,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     left->Add(
         FPSDraw(Text("", "big header")),
-        CursorTrack(Text("", "text")),
+        CursorTrack(Text("", "text"), UICSpec{}.FillMaxWidth()),
         CfgDisplay(Text("", "text")),
         Checkbox(Text("Layout bounds", "text"), &cfg.debug.showLayoutBounds),
         Checkbox(Text("Content bounds", "text"), &cfg.debug.showLayoutContentBounds),

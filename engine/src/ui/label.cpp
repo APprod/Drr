@@ -39,6 +39,11 @@ bool Label::OnUpdate(float)
     return false;
 }
 
+void Label::ArrangeContent(Rectangle rect){
+    m_scroll.OnUpdate(GetVisualRect(), m_contentDesiredSize);
+    UIComponent::ArrangeContent(rect);
+}
+
 void Label::MeasureContent(Vector2 available){
     auto textSize = m_text.ReMeasure(available);
     m_contentDesiredSize = {

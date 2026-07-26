@@ -21,6 +21,7 @@ public:
     bool OnUpdate(float dt) override;
     EventMask getCaptureTypes() const override { return EventType::CursorAction | EventType::CursorMove; }
     void MeasureContent(Vector2 available) override;
+    void ArrangeContent(Rectangle inner) override;
     void OnDrawContent() override;
     virtual void OnHoverEnter() override {m_scroll.OnHover();}
     virtual void OnHoverExit() override {m_scroll.OnHoverExit();}

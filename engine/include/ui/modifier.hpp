@@ -1,7 +1,9 @@
 #pragma once
-#include "ui/component.hpp"
 #include <memory>
 #include <optional>
+
+#include "ui/component.hpp"
+#include "rendering/textureSpec.hpp"
 
 // Acts as a wrapper above single UIComponent, explicitly allows to draw additionally before and after draw calls of original UIComponent
 // Can override more functions for example to catch its events if needed, etc. 
@@ -59,50 +61,23 @@ protected:
     std::unique_ptr<UIComponent> m_child;
 };
 
-struct BackgroundStyle
-{
-    std::string texture{"default"};
-    Color tint{WHITE};
-    std::optional<ProcessingValues> processing{std::nullopt};
-};
-
 enum class OpenDirection { Down, Up, Auto };
 
 class Background: public Modifier{
 public:
     template<typename T>
     Background(
-        UIComponentSpec spec, 
-        BackgroundStyle style,
+        UIComponentSpec compSpec,
+        TextureSpec texSpec,
         T&& child
-    ): Modifier(std::forward<T&&>(child), spec),m_style{style}{}
+    ): Modifier(std::forward<T>(child), compSpec), m_spec{std::move(texSpec)} {}
 
     void OnDrawBefore() override {
-        auto& manager = GetServices().resManager;
-        auto texture = manager.getTexture(m_style.texture);
-        auto drawCall = [&texture, this](){::DrawTexturePro(
-            texture,
-            rect(texture),
-            GetActualRect(),
-            {0,0}, 0.0f, m_style.tint
-        );};
-        if (m_style.processing) {
-            auto& proc = m_style.processing.value();
-        useShaderUnchecked(
-            manager.getShaderProgram("processing"),
-            {{"brightness", proc.brightness},
-             {"contrast",   proc.contrast},
-             {"saturation", proc.saturation},
-             {"gamma",      proc.gamma},
-             {"alpha",      proc.alpha}},
-            drawCall);
-        } else {
-            drawCall();
-        }
+        m_spec.Draw(GetActualRect());
     }
-    void OnDrawAfter()override{};
+    void OnDrawAfter()override{}
 protected:
-    BackgroundStyle m_style;
+    TextureSpec m_spec;
 };
 
 class Popup: public Modifier{
@@ -225,8 +200,8 @@ public:
             ? actual.y + actual.height - h
             : actual.y;
         BeginScissorMode(
-            static_cast<int>(actual.x), static_cast<int>(clipY),
-            static_cast<int>(actual.width), static_cast<int>(h)
+            0, static_cast<int>(clipY),
+            GetScreenWidth(), static_cast<int>(h)
         );
         Modifier::OnDrawContent();
         EndScissorMode();

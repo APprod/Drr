@@ -4,10 +4,10 @@
 Button::Button(
     Text text,
     std::function<void()> onClick,
-    std::string textureName,
+    TextureSpec textureSpec,
     Vector2 targetSize,
     UIComponentSpec spec
-): Clickable(spec), m_onClick(std::move(onClick)), m_textureName(std::move(textureName)), m_text(std::move(text)) {
+): Clickable(spec), m_onClick(std::move(onClick)), m_textureSpec(std::move(textureSpec)), m_text(std::move(text)) {
     this->m_targetSize = targetSize;
 }
 
@@ -45,8 +45,6 @@ bool Button::OnUpdate(float dt){
 }
 
 void Button::OnDrawContent(){
-    auto& manager = GetServices().resManager;
-    auto texture = manager.getTexture(m_textureName);
     auto target = GetVisualRect();
     float s = m_scale.current;
     if (s != 1.0f) {
@@ -57,12 +55,13 @@ void Button::OnDrawContent(){
             target.height * s,
         };
     }
-    auto& shader = GetServices().resManager.getShaderProgram("processing");
-    useShaderUnchecked(shader,{{"brightness", m_brightness.current}},
-            [this, texture, target](){
-                ::DrawTexturePro(texture, rect(texture), target, {0,0}, 0.f, RAYWHITE);
-                m_text.DrawCentered(target);
-            }
-    );
 
+    auto spec = m_textureSpec;
+    spec.processing = ShaderEffect{
+        .programName = "processing",
+        .uniforms = {{"brightness", m_brightness.current}}
+    };
+    spec.Draw(target);
+
+    m_text.DrawCentered(target);
 }

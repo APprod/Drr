@@ -21,7 +21,7 @@ void SettingsScene::OnEnter(){
             
             Background(
                 UICSpec{}.SetFlex({0,1}), 
-BackgroundStyle{.texture = "button_default", .tint = WHITE, .processing = ProcessingValues{.saturation = 0} },
+                TextureSpec{.texture = "button_default", .slice = SliceMargins{19, 16, 17, 15}, .tint = WHITE, .processing = ShaderEffect{.uniforms = {{"saturation", 0.f}}}},
                 VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
                     Checkbox(Text("VSYNC", "text"), &usrCfg.vsync,
                         [](bool vsync){
@@ -41,7 +41,7 @@ BackgroundStyle{.texture = "button_default", .tint = WHITE, .processing = Proces
                 )
             ),
             Background(
-                UICSpec{}.SetFlex({0,1}), BackgroundStyle{.texture = "button_default", .tint = WHITE, .processing = ProcessingValues{.saturation = 0} },
+                UICSpec{}.SetFlex({0,1}), TextureSpec{.texture = "button_default", .slice = SliceMargins{19, 16, 17, 15}, .tint = WHITE, .processing = ShaderEffect{.uniforms = {{"saturation", 0.f}}}},
                 VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
                     Checkbox(Text("Show FPS", "text"), &usrCfg.showFPS,
                         [](bool){},UICSpec{}
@@ -106,7 +106,7 @@ BackgroundStyle{.texture = "button_default", .tint = WHITE, .processing = Proces
                     theme.m_currentSizeIndex = m_pendingSizeIndex;
                     theme.m_fontName = m_pendingFontName;
                 },
-                "button_default", {200,100},
+                TextureSpec{.texture = "button_default"}, {200,100},
                 UICSpec{}.SetFlex({0,1})
             )
         )

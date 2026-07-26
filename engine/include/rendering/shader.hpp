@@ -21,6 +21,11 @@ struct ShaderInput{
     Uniforms uniforms;
 };
 
+struct ShaderEffect {
+    std::string programName = "processing";
+    Uniforms uniforms;
+};
+
 //uses shader, checks for typos in uniforms names
 void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall);
 

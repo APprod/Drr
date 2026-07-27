@@ -20,7 +20,7 @@ void Button::MeasureContent(Vector2 available) {
 }
 
 bool Button::OnUpdate(float dt){
-    auto r = GetDrawRect();
+    auto r = GetVisualRect();
     m_text.ReMeasure({r.width, r.height});
     if (m_text.IsDirty()) {
         m_text.ClearDirty();
@@ -44,8 +44,19 @@ bool Button::OnUpdate(float dt){
     return false;
 }
 
+Padding Button::ResolvePadding(Vector2 dims) const {
+    auto pad = Clickable::ResolvePadding(dims);
+    if (m_textureSpec.slice) {
+        pad.left += m_textureSpec.slice->left;
+        pad.top += m_textureSpec.slice->top;
+        pad.right += m_textureSpec.slice->right;
+        pad.bottom += m_textureSpec.slice->bottom;
+    }
+    return pad;
+}
+
 void Button::OnDrawContent(){
-    auto target = GetVisualRect();
+    auto target = Clickable::GetActualRect();
     float s = m_scale.current;
     if (s != 1.0f) {
         target = {
@@ -59,5 +70,5 @@ void Button::OnDrawContent(){
     m_textureSpec.processing = BrightnessSh(m_brightness.current);
     m_textureSpec.Draw(target);
 
-    m_text.DrawCentered(target);
+    m_text.DrawCentered(GetVisualRect());
 }

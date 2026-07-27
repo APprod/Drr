@@ -16,12 +16,11 @@ void SettingsScene::OnEnter(){
     std::vector<std::pair<std::string, std::string>> fontItems;
     for (auto& f : fonts) fontItems.emplace_back(f, f);
     auto row = std::make_unique<HorizontalLayout>(
-        UICSpec{}.SetPaddingPct({.top = 10.0, .bottom =  10.0, .left = 10.0, .right = 10.0}).SetFlex({0,1}),
-        LayoutSpec{}.AlignEnd().CrossBegin(),
-        VerticalLayout( UICSpec{}.SetFlex({0,1}).FillMaxHeight(), LayoutSpec{}.AlignCenter().CrossEnd().UniformCross(),
-            
+        UICSpec{}.SetPaddingPct({.top = 4.0, .bottom =  4.0, .left = 10.0, .right = 10.0}).SetFlex({0,1}),
+        LayoutSpec{}.AlignCenter().CrossCenter().UniformCross().Spacing(20),
+        VerticalLayout( UICSpec{}.SetFlex({0,1}), LayoutSpec{}.AlignCenter().CrossBegin().UniformCross(),
             Background(
-                UICSpec{}.SetFlex({0,1}), 
+                UICSpec{}.SetFlex({1,1}), 
                 TextureSpec("button_default").Shader(ProcessingSh().saturation(0.0f)),
                 VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
                     Checkbox(Text("VSYNC", "text"), &usrCfg.vsync,
@@ -30,7 +29,7 @@ void SettingsScene::OnEnter(){
                             else {ClearWindowState(FLAG_VSYNC_HINT);}
                         }
                     ),
-                    HorizontalLayout( UICSpec{}.SetFlex({1,0}), LayoutSpec{}.AlignEnd(),
+                    HorizontalLayout( UICSpec{}.SetFlex({0,0}), LayoutSpec{}.AlignEnd(),
                         Slider<int>(&usrCfg.targetFPS, 0, 240, 
                             [](int value){
                                 SetTargetFPS(value);
@@ -42,12 +41,12 @@ void SettingsScene::OnEnter(){
                 )
             ),
             Background(
-                UICSpec{}.SetFlex({0,1}), TextureSpec("button_default").Shader(ProcessingSh().saturation(0.0f)),
+                UICSpec{}.SetFlex({1,1}), TextureSpec("button_default").Shader(ProcessingSh().saturation(0.0f)),
                 VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
                     Checkbox(Text("Show FPS", "text"), &usrCfg.showFPS,
                         [](bool){},UICSpec{}
                     ),
-                    HorizontalLayout( UICSpec{}.SetFlex({1,0}), LayoutSpec{}.AlignBegin(),
+                    HorizontalLayout( UICSpec{}.SetFlex({0,0}), LayoutSpec{}.AlignBegin(),
                         Slider<float>(&usrCfg.userBrightness, 0.1f, 3.0f, 
                             [](float ){}
                             , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget,{},usrCfg.userBrightness
@@ -55,7 +54,7 @@ void SettingsScene::OnEnter(){
                         ValueLabel<float>("Set Brightness: {:0.3f}", &usrCfg.userBrightness, Text("", "text"))
                     ),
                     ValueLabel<int>("Font size Current: {}", &usrCfg.theme.m_currentSizeIndex, Text("", "text")),
-                    HorizontalLayout( UICSpec{}.SetFlex({1,0}), LayoutSpec{}.AlignBegin(),
+                    HorizontalLayout( UICSpec{}.SetFlex({0,0}), LayoutSpec{}.AlignBegin(),
                         Slider<int>(&m_pendingSizeIndex, 0, 21,
                             [](int){}
                             , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 1
@@ -71,7 +70,9 @@ void SettingsScene::OnEnter(){
                         }
                     )
                 )
-            ),
+            )
+        ),
+        VerticalLayout( UICSpec{}.SetFlex({0,1}), LayoutSpec{}.AlignCenter().CrossBegin().UniformCross(),
             Label(
                 Text("Select Font:", "text"),
                 UICSpec{},TextAlign::Center
@@ -109,11 +110,18 @@ void SettingsScene::OnEnter(){
                 Text{"","button"},
                 UICSpec{}.SetFlex({0,1})
             ),
-            Button(Text("Apply Settings", "button"),
+            Button(Text("Apply Settings sdfaaaaaaaaaaaaa", "button"),
                 [this](){
                     auto& theme = GetServices().runtimeCfg.user.theme;
                     theme.m_currentSizeIndex = m_pendingSizeIndex;
                     theme.m_fontName = m_pendingFontName;
+                },
+                TextureSpec("button_default"), {200,100},
+                UICSpec{}.SetFlex({0,1})
+            ),
+            Button(Text("Back", "button"),
+                [this](){
+                    GetServices().sceneManager.QuePop();
                 },
                 TextureSpec("button_default"), {200,100},
                 UICSpec{}.SetFlex({0,1})

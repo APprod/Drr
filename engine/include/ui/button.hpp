@@ -16,6 +16,7 @@ public:
         Vector2 targetSize,
         UIComponentSpec spec = {}
     );
+    Padding ResolvePadding(Vector2 dims) const override;
     void OnDrawContent() override;
     bool OnUpdate(float dt) override;
     void MeasureContent(Vector2 available) override;

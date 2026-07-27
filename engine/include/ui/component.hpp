@@ -35,7 +35,7 @@ public:
     virtual void OnDrawContent(){}
 
     virtual void OnMeasure(Vector2 available) final{
-        auto pad = m_compSpec.ResolvePadding(available);
+        auto pad = ResolvePadding(available);
         auto vertPad = pad.top + pad.bottom;
         auto horPad = pad.left + pad.right;
         Vector2 innerAvailable{
@@ -77,6 +77,10 @@ public:
     }
     virtual EventMask getCaptureTypes() const {return 0;}
 
+    virtual Padding ResolvePadding(Vector2 dims) const {
+        return m_compSpec.ResolvePadding(dims);
+    }
+
     Vector2 DesiredSize(){return m_desiredSize;}
     Rectangle FinalRect(){return m_actual;}
     UICompId id{0}; 
@@ -92,7 +96,7 @@ protected:
     Vector2 m_targetSize{10,10};
 
     Rectangle GetDrawRect() const{
-        auto pad = m_compSpec.ResolvePadding({m_actual.width, m_actual.height});
+        auto pad = ResolvePadding({m_actual.width, m_actual.height});
         return {
             m_actual.x + pad.left, m_actual.y + pad.top,
             m_actual.width - pad.left - pad.right,

@@ -21,6 +21,28 @@ bool Scrollable::OnEvent(const MyEvent& event){
         return direction == ScrollDirection::Vertical ? r.height : r.width;
     };
 
+    if (auto* e = std::get_if<InputKeyEvent>(&event)){
+        if (!hovered) return false;
+        float jump = majorDim(m_lastViewport);
+        if (e->key == KEY_HOME) {
+            scrollOffset = 0;
+            atBottom = false;
+        } else if (e->key == KEY_END) {
+            scrollOffset = maxOffset;
+            atBottom = true;
+        } else if (e->key == KEY_PAGE_UP) {
+            scrollOffset -= jump;
+            atBottom = false;
+        } else if (e->key == KEY_PAGE_DOWN) {
+            scrollOffset += jump;
+        } else {
+            return false;
+        }
+        myClamp(scrollOffset, 0.0f, maxOffset);
+        if (scrollOffset >= maxOffset) atBottom = true;
+        return true;
+    }
+
     if (auto* e = std::get_if<CursorActionEvent>(&event)){
         if (e->button == CursorAction::MOUSE_BUTTON_LEFT){
             if (e->pressed){

@@ -33,6 +33,13 @@ bool Label::OnUpdate(float)
         default: break;
     }
 
+    auto clampToMin = [&](Vector2& v) {
+        if (m_compSpec.minSize.x > 0 && v.x < m_compSpec.minSize.x) v.x = m_compSpec.minSize.x;
+        if (m_compSpec.minSize.y > 0 && v.y < m_compSpec.minSize.y) v.y = m_compSpec.minSize.y;
+    };
+    clampToMin(effectiveOld);
+    clampToMin(effectiveNew);
+
     if (effectiveOld != effectiveNew) {
         return true;
     }
@@ -46,7 +53,7 @@ void Label::ArrangeContent(Rectangle rect){
 
 void Label::MeasureContent(Vector2 available){
     auto textSize = m_text.ReMeasure(available);
-    float desired = std::min(available.x, std::ceil(textSize.x));
+    float desired = std::ceil(textSize.x);
     m_contentDesiredSize = {desired, std::ceil(textSize.y)};
 
     float pad = static_cast<float>(m_text.GetFontSize()) * 0.25f;
@@ -67,6 +74,11 @@ void Label::OnDrawContent(){
     auto drawCall = [this, rect, textSize](){
         Vector2 pos;
         pos.y = rect.y - m_scroll.scrollOffset;
+        switch (m_text.GetVAlign()) {
+            case TextVAlign::Center: pos.y += (rect.height - textSize.y) * 0.5f; break;
+            case TextVAlign::Bottom: pos.y += rect.height - textSize.y; break;
+            default: break;
+        }
         switch (m_textAlign) {
             case TextAlign::Left:   pos.x = rect.x; break;
             case TextAlign::Center: pos.x = rect.x + (rect.width - textSize.x) / 2; break;

@@ -18,6 +18,8 @@ struct Line{
 std::vector<Line> splitLines(std::string& text);
 
 
+enum class TextVAlign { Top, Center, Bottom };
+
 class Text {
 public:
     Text() = default;
@@ -39,6 +41,10 @@ public:
     bool IsDirty() const { return m_dirtyFull; }
     void ClearDirty() { m_dirtyFull = false; }
     int GetFontSize() const { return m_lastFontSize; }
+    const std::string& GetRole() const { return m_role; }
+    float GetFontSpacing() const { return m_fontSpacing; }
+    void SetVAlign(TextVAlign align) { m_valign = align; }
+    TextVAlign GetVAlign() const { return m_valign; }
     Vector2 RealSize() { return m_lastMeasuredSize; }
 
 private:
@@ -53,6 +59,7 @@ private:
 
     std::vector<Line> m_lines;
     std::vector<Line> m_linesConstrained;
+    TextVAlign m_valign{TextVAlign::Top};
     bool m_dirtyText = false;
     bool m_dirtyFull = false;
     int m_lastFontSize = 0;

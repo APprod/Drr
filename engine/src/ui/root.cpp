@@ -56,7 +56,9 @@ bool Root::OnEvent(const MyEvent& event){
         return true;
     }
     { //Always
-        if (auto r = CheckCaptured(event)) return *r;
+        if (auto r = CheckCaptured(event)) {
+            if (*r) { UpdateHover(); return true; }
+        }
         bool result = Layout::OnEvent(event);
         UpdateHover();
         return result;

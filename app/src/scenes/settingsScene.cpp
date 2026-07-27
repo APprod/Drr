@@ -1,6 +1,7 @@
 #include "scenes/settingsScene.hpp"
 #include "ui.hpp"
 #include "ui/dropdown.hpp"
+#include "ui/textInputField.hpp"
 #include "userSettings.hpp"
 
 void SettingsScene::OnEnter(){
@@ -60,6 +61,14 @@ void SettingsScene::OnEnter(){
                             , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 1
                         ),
                         ValueLabel<int>("Font size index: {}", &m_pendingSizeIndex, Text("", "text"))
+                    ),
+                    Label(
+                        Text("Log message:", "text"), UICSpec{}, TextAlign::Left
+                    ),
+                    TextInputField("default", UICSpec{}.SetFlex({0,1}).MinSize({100,30}),
+                        [](std::string text){
+                            mylog::GetLogger().Info("TextInputField: {}", text);
+                        }
                     )
                 )
             ),

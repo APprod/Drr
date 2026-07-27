@@ -45,8 +45,12 @@ struct ScrollEvent{
     Vector2 pos{};
 };
 
+struct CharEvent{
+    int codepoint{};
+};
+
 using MyEvent = std::variant<CursorActionEvent, CursorMoveEvent, InputKeyEvent,
-    ActionEvent, ScreenInterEvent, ScrollEvent>;
+    ActionEvent, ScreenInterEvent, ScrollEvent, CharEvent>;
 using EventMask = uint32_t;
 
 namespace EventType{
@@ -57,6 +61,7 @@ enum EventType : uint32_t {
     Action       = BIT(3),
     ScreenInter  = BIT(4),
     Scroll       = BIT(5),
+    CharInput    = BIT(6),
 };
 }
 
@@ -106,6 +111,7 @@ inline constexpr EventMask getEventType(const MyEvent& e){
     else if (std::holds_alternative<ActionEvent>(e))       return EventType::Action;
     else if (std::holds_alternative<ScreenInterEvent>(e)) return EventType::ScreenInter;
     else if (std::holds_alternative<ScrollEvent>(e))       return EventType::Scroll;
+    else if (std::holds_alternative<CharEvent>(e))         return EventType::CharInput;
     return 0;
 }
 

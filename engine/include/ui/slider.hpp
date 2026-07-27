@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <optional>
 #include <type_traits>
 
 #include "ui/clickable.hpp"
@@ -18,13 +19,15 @@ public:
             float barHeight = 4.0f,
             float minThumbSize = 10.0f,
             float maxThumbSize = 30.0f,
-            Vector2 targetSize = {10,10},
-            T step = 0)
+             Vector2 targetSize = {10,10},
+             T step = 0,
+             std::optional<T> defaultValue = std::nullopt)
         : Clickable(spec)
         , m_value(value)
         , m_min(min)
         , m_max(max)
         , m_step(step)
+        , m_defaultValue(defaultValue)
         , m_onChange(std::move(onChange))
         , m_barHeight(barHeight)
         , m_minThumbSize(minThumbSize)
@@ -35,6 +38,7 @@ public:
     }
 
     bool OnUpdate(float dt) override {
+        m_doubleClickTimer += dt;
         m_visualNorm.setTarget(valueToNorm());
         m_thumbScale.setTarget(m_hover ? 1.3f : 1.0f);
         m_visualNorm.update(dt);
@@ -104,10 +108,22 @@ protected:
         }
     }
 
+    void OnClick() override {
+        if (m_defaultValue && m_doubleClickTimer < c_doubleClickTime) {
+            *m_value = *m_defaultValue;
+            m_visualNorm.setImmediate(valueToNorm());
+        }
+        m_doubleClickTimer = 0.0f;
+    }
+
 private:
+    static constexpr float c_doubleClickTime{0.3f};
+
     T* m_value;
     T m_min, m_max;
     T m_step;
+    std::optional<T> m_defaultValue;
+    float m_doubleClickTimer{0};
     std::function<void(T)> m_onChange;
     float m_barHeight;
     float m_minThumbSize, m_maxThumbSize;

@@ -49,7 +49,7 @@ void SettingsScene::OnEnter(){
                     HorizontalLayout( UICSpec{}.SetFlex({1,0}), LayoutSpec{}.AlignBegin(),
                         Slider<float>(&usrCfg.userBrightness, 0.1f, 3.0f, 
                             [](float ){}
-                            , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget
+                            , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget,{},usrCfg.userBrightness
                         ),
                         ValueLabel<float>("Set Brightness: {:0.3f}", &usrCfg.userBrightness, Text("", "text"))
                     ),

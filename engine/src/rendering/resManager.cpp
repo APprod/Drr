@@ -1,4 +1,5 @@
 #include "rendering/resManager.hpp"
+#include "services.hpp"
 #include "utils/util.hpp"
 #include "utils/log.hpp"
 #include "platform.hpp"
@@ -56,6 +57,8 @@ void ResourceManager::init()
             {"vignetteSoftness",  0.5f},
         }
     );
+
+    m_nPatchMap = GetServices().loader.loadMap<SliceMargins>("assets/texture-slices.json");
 }
 
 void ResourceManager::load()
@@ -211,6 +214,12 @@ bool ResourceManager::lazyLoad(std::string name)
         return false;
     }
     return true;
+}
+
+std::optional<SliceMargins> ResourceManager::getSliceData(const std::string& name) const {
+    auto it = m_nPatchMap.find(name);
+    if (it != m_nPatchMap.end()) return it->second;
+    return std::nullopt;
 }
 
 void ResourceManager::loadTextures()

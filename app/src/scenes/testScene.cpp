@@ -29,7 +29,7 @@ void TestScene::OnEnter(){
             row->Add(
                 Button(buttonText,
                     [j](){ mylog::GetLogger().Info(std::to_string(++counter), " Button"+ std::to_string(j) +" clicked!"); },
-                    TextureSpec{.texture = "button_default"},{200.f,100.f}, spec)
+                    TextureSpec("button_default"),{200.f,100.f}, spec)
             );
         }
         row->Add(
@@ -37,7 +37,7 @@ void TestScene::OnEnter(){
                 [](){ 
                     GetServices().sceneManager.QueTransitSus<SettingsScene>();
                 },
-                TextureSpec{.texture = "button_default"},{200.f,100.f}, spec)
+                TextureSpec("button_default"),{200.f,100.f}, spec)
         );
         column->AddChild(std::move(row));    
     }

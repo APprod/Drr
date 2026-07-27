@@ -15,13 +15,13 @@ void SettingsScene::OnEnter(){
     std::vector<std::pair<std::string, std::string>> fontItems;
     for (auto& f : fonts) fontItems.emplace_back(f, f);
     auto row = std::make_unique<HorizontalLayout>(
-        UICSpec{}.SetPaddingPct({.top =  10.0, .bottom =  10.0, .left = 10.0, .right = 10.0}).SetFlex({0,1}),
+        UICSpec{}.SetPaddingPct({.top = 10.0, .bottom =  10.0, .left = 10.0, .right = 10.0}).SetFlex({0,1}),
         LayoutSpec{}.AlignEnd().CrossBegin(),
         VerticalLayout( UICSpec{}.SetFlex({0,1}).FillMaxHeight(), LayoutSpec{}.AlignCenter().CrossEnd().UniformCross(),
             
             Background(
                 UICSpec{}.SetFlex({0,1}), 
-                TextureSpec{.texture = "button_default", .slice = SliceMargins{19, 16, 17, 15}, .tint = WHITE, .processing = ShaderEffect{.uniforms = {{"saturation", 0.f}}}},
+                TextureSpec("button_default").Shader(ProcessingSh().saturation(0.0f)),
                 VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
                     Checkbox(Text("VSYNC", "text"), &usrCfg.vsync,
                         [](bool vsync){
@@ -41,7 +41,7 @@ void SettingsScene::OnEnter(){
                 )
             ),
             Background(
-                UICSpec{}.SetFlex({0,1}), TextureSpec{.texture = "button_default", .slice = SliceMargins{19, 16, 17, 15}, .tint = WHITE, .processing = ShaderEffect{.uniforms = {{"saturation", 0.f}}}},
+                UICSpec{}.SetFlex({0,1}), TextureSpec("button_default").Shader(ProcessingSh().saturation(0.0f)),
                 VerticalLayout( UICSpec{}.SetPadding({20,20,60,60}).SetFlex({1,1}), LayoutSpec{}.AlignCenter().CrossBegin(),
                     Checkbox(Text("Show FPS", "text"), &usrCfg.showFPS,
                         [](bool){},UICSpec{}
@@ -69,7 +69,7 @@ void SettingsScene::OnEnter(){
             ),
             Dropdown<std::string>(
                 fontItems, &m_pendingFontName,
-                "button_default", {200,100}, nullptr,
+                TextureSpec("button_default"), {200,100}, nullptr,
                 Text("Font:", "button"),
                 UICSpec{}.SetFlex({0,1})
             ),
@@ -80,7 +80,7 @@ void SettingsScene::OnEnter(){
             Dropdown<WindowMode>(
                 {{"Fullscreen", WindowMode::Fullscreen},{"Windowed", WindowMode::Windowed},{"Borderless", WindowMode::Borderless}},
                 &GetServices().runtimeCfg.user.windowMode,
-                "button_default",
+                TextureSpec("button_default"),
                 {200,100},
                 [](WindowMode sel){
                     switch(sel){
@@ -106,7 +106,7 @@ void SettingsScene::OnEnter(){
                     theme.m_currentSizeIndex = m_pendingSizeIndex;
                     theme.m_fontName = m_pendingFontName;
                 },
-                TextureSpec{.texture = "button_default"}, {200,100},
+                TextureSpec("button_default"), {200,100},
                 UICSpec{}.SetFlex({0,1})
             )
         )

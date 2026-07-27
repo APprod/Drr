@@ -56,12 +56,8 @@ void Button::OnDrawContent(){
         };
     }
 
-    auto spec = m_textureSpec;
-    spec.processing = ShaderEffect{
-        .programName = "processing",
-        .uniforms = {{"brightness", m_brightness.current}}
-    };
-    spec.Draw(target);
+    m_textureSpec.processing = BrightnessSh(m_brightness.current);
+    m_textureSpec.Draw(target);
 
     m_text.DrawCentered(target);
 }

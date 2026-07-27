@@ -4,6 +4,7 @@
 #include "runtimeConfig.hpp"
 #include "scene/sceneManager.hpp"
 #include "rendering/renderer.hpp"
+#include "utils/loader.hpp"
 
 struct Services
 {
@@ -13,6 +14,7 @@ struct Services
     RuntimeConfig runtimeCfg;
     SceneManager sceneManager;
     Renderer renderer;
+    loader::Loader loader;
 
     static Services& Get(){
         static Services services;

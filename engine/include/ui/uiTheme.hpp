@@ -31,3 +31,11 @@ private:
     std::vector<int> m_fontSizes;
     std::unordered_map<std::string, RoleDef> m_roles;
 };
+
+// I want
+// 
+// TextSizeRole = "Button, header, text, caption" -> offset
+// TextFontRole = "MainFont", "SomeCustom font" -> fontname
+// Two separate maps
+// FontSpec{TExtSizeRole, TextFontRole} -> getFot(FontSpec) Every one who uses font uses FontSpec
+// 

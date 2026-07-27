@@ -6,6 +6,7 @@
 #include <vector>
 #include "raylib.h"
 #include "rendering/shader.hpp"
+#include "rendering/textureSpec.hpp"
 
 using FontMap = std::unordered_map<int, Font>;
 
@@ -29,7 +30,7 @@ public:
     void loadShader(std::string name, std::string filepath, const Uniforms& uniforms);
     ShaderProgram& getShaderProgram(std::string name);
 
-    // Loader loader;
+    std::optional<SliceMargins> getSliceData(const std::string& name) const;
 private:
     bool lazyLoad(std::string name);
     void loadTextures();
@@ -38,4 +39,5 @@ private:
 
     std::unordered_map<std::string, FontMap> m_fonts;
     std::unordered_map<std::string, ShaderProgram> m_shaders;
+    std::unordered_map<std::string, SliceMargins> m_nPatchMap;
 };

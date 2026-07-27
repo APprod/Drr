@@ -14,12 +14,12 @@ public:
     Dropdown(
         std::vector<std::pair<std::string, T>> items,
         T* selectedValue,
-        std::string textureName,
+        TextureSpec textureSpec,
         Vector2 targetSize,
         std::function<void(T)> onChange = nullptr,
         Text labelText = Text("", "button"),
         UIComponentSpec spec = {}
-    ): Button{labelText,[](){},TextureSpec{.texture = textureName, .slice = SliceMargins{19, 16, 17, 15}},targetSize,spec}, m_items{std::move(items)}, m_selected{selectedValue},
+    ): Button{labelText,[](){},std::move(textureSpec),targetSize,spec}, m_items{std::move(items)}, m_selected{selectedValue},
     m_onChange{onChange}{
         //Set starting state
         m_currentIdx = 0;
@@ -158,7 +158,7 @@ public:
                         if (ddl->m_onChange) ddl->m_onChange(ddl->m_items[i].second);
                         ddl->closePopup();
                     },
-                    TextureSpec{.texture = m_textureSpec.texture, .slice = SliceMargins{19, 16, 17, 15}},
+                    m_textureSpec,
                     {m_targetSize.x, m_actual.height},
                     UICSpec{}.FillMaxWidth()
                 )

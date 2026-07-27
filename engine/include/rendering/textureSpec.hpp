@@ -2,9 +2,9 @@
 #include <optional>
 #include <string>
 
+#include <nlohmann/json.hpp>
+
 #include "raylib.h"
-#include "services.hpp"
-#include "utils/util.hpp"
 #include "rendering/shader.hpp"
 
 struct SliceMargins {
@@ -12,36 +12,23 @@ struct SliceMargins {
     int top;
     int right;
     int bottom;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SliceMargins, left, top, right, bottom)
 };
 
-struct TextureSpec {
+class TextureSpec {
+public:
+    TextureSpec() = default;
+
+    explicit TextureSpec(const std::string& textureName);
+
+    TextureSpec& Shader(ShaderEffect e) { processing = std::move(e); return *this; }
+    TextureSpec& Slice(SliceMargins s) { slice = std::move(s); return *this; }
+
+    void Draw(Rectangle dest) const;
+
     std::string texture;
-    std::optional<SliceMargins> slice{std::nullopt};
+    std::optional<SliceMargins> slice;
     Color tint{WHITE};
-    std::optional<ShaderEffect> processing{std::nullopt};
-
-    void Draw(Rectangle dest) const {
-        auto tex = GetServices().resManager.getTexture(texture);
-
-        auto drawCall = [&, this]() {
-            if (slice) {
-                auto& s = *slice;
-                NPatchInfo npi = {
-                    rect(tex),
-                    s.left, s.top, s.right, s.bottom,
-                    NPATCH_NINE_PATCH
-                };
-                DrawTextureNPatch(tex, npi, dest, {0, 0}, 0, tint);
-            } else {
-                DrawTexturePro(tex, rect(tex), dest, {0, 0}, 0, tint);
-            }
-        };
-
-        if (processing) {
-            auto& p = *processing;
-            useShaderUnchecked(p.programName, p.uniforms, drawCall);
-        } else {
-            drawCall();
-        }
-    }
+    std::optional<ShaderEffect> processing;
 };

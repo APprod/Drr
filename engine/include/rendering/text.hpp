@@ -38,6 +38,7 @@ public:
 
     bool IsDirty() const { return m_dirtyFull; }
     void ClearDirty() { m_dirtyFull = false; }
+    int GetFontSize() const { return m_lastFontSize; }
     Vector2 RealSize() { return m_lastMeasuredSize; }
 
 private:

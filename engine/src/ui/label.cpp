@@ -46,10 +46,18 @@ void Label::ArrangeContent(Rectangle rect){
 
 void Label::MeasureContent(Vector2 available){
     auto textSize = m_text.ReMeasure(available);
-    m_contentDesiredSize = {
-        std::min(available.x, std::ceil(textSize.x)),
-        std::ceil(textSize.y)
-    };
+    float desired = std::min(available.x, std::ceil(textSize.x));
+    m_contentDesiredSize = {desired, std::ceil(textSize.y)};
+
+    float pad = static_cast<float>(m_text.GetFontSize()) * 0.25f;
+    if (desired > m_accumulatedWidth) {
+        m_accumulatedWidth = desired + pad;
+    } else {
+        float luft = static_cast<float>(m_text.GetFontSize()) * 2.0f;
+        if (m_accumulatedWidth - desired > luft)
+            m_accumulatedWidth = desired + pad;
+    }
+    m_contentDesiredSize.x = m_accumulatedWidth;
 }
 
 void Label::OnDrawContent(){

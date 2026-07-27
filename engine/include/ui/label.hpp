@@ -29,6 +29,7 @@ protected:
     Text m_text;
     TextAlign m_textAlign = TextAlign::Left;
     Scrollable m_scroll;
+    float m_accumulatedWidth{0};
 };
 
 class FPSDraw: public Label{

@@ -35,7 +35,6 @@ jobs:
       - uses: emscripten-core/setup-emsdk@v15
         with:
           version: 4.0.15
-          actions-cache-folder: emsdk-cache
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
@@ -64,6 +63,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
+          cache: false
           install: >-
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-gcc

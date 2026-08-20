@@ -22,12 +22,14 @@ bool Scrollable::OnEvent(const MyEvent& event){
     };
 
     if (auto* e = std::get_if<InputKeyEvent>(&event)){
-        if (!hovered) return false;
+        if (!hovered || !e->pressed) return false;
         float jump = majorDim(m_lastViewport);
         if (e->key == KEY_HOME) {
+            if (e->repeat) return false;
             scrollOffset = 0;
             atBottom = false;
         } else if (e->key == KEY_END) {
+            if (e->repeat) return false;
             scrollOffset = maxOffset;
             atBottom = true;
         } else if (e->key == KEY_PAGE_UP) {
@@ -55,8 +57,19 @@ bool Scrollable::OnEvent(const MyEvent& event){
                     return true;
                 }
                 if (CheckCollisionPointRec(e->pos, track)){
-                    float norm = (majorPos(e->pos) - majorPos({track.x, track.y})) / tSize;
+                    float vMajor = tSize;
+                    float visibleRatio = std::min(1.0f, vMajor / (vMajor + maxOffset));
+                    float thumbMajor = vMajor * visibleRatio;
+                    float maxThumbPos = tSize - thumbMajor;
+                    float trackPos = majorPos({track.x, track.y});
+                    float clickPos = majorPos(e->pos);
+                    float norm = 0.0f;
+                    if (maxThumbPos > 0.0f) {
+                        norm = (clickPos - trackPos - thumbMajor * 0.5f) / maxThumbPos;
+                        norm = std::clamp(norm, 0.0f, 1.0f);
+                    }
                     scrollOffset = norm * maxOffset;
+                    myClamp(scrollOffset, 0.0f, maxOffset);
                     atBottom = (scrollOffset >= maxOffset);
                     dragging = true;
                     m_dragStartMouse = majorPos(e->pos);

@@ -29,8 +29,11 @@ public:
     void RemovePopup(UICompId compId) override;
     void RemovePopupImmediate(UICompId compId) override;
     UIComponent* GetPopupById(UICompId id) override;
-    
+
+    bool OnEvent(const MyEvent& event) override;
+
 private:
+    void CloseTopPopup();
     HotkeysListener* m_listener{};
     std::vector<UICompId> ids;
 };

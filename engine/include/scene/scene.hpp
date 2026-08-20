@@ -65,7 +65,7 @@ public:
             PerfTester innerTester = GetServices().perfLog.log("Scene input.pollEvents");
             input.pollEvents();
         }
-        auto events = input.getEvents();
+        const auto& events = input.getEvents();
         for (auto& event: events){
             root.OnEvent(event); //updates states
         }

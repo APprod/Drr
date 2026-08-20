@@ -9,6 +9,7 @@ Button::Button(
     UIComponentSpec spec
 ): Clickable(spec), m_onClick(std::move(onClick)), m_textureSpec(std::move(textureSpec)), m_text(std::move(text)) {
     this->m_targetSize = targetSize;
+    m_textureSpec.processing = BrightnessSh(m_brightness.current);
 }
 
 void Button::MeasureContent(Vector2 available) {
@@ -67,7 +68,7 @@ void Button::OnDrawContent(){
         };
     }
 
-    m_textureSpec.processing = BrightnessSh(m_brightness.current);
+    if (m_textureSpec.processing) (*m_textureSpec.processing).uniforms["brightness"] = m_brightness.current;
     m_textureSpec.Draw(target);
 
     m_text.DrawCentered(GetVisualRect());

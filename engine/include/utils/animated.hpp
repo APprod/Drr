@@ -8,7 +8,6 @@
 
 using EasingFn = float(*)(float t);
 
-#pragma once
 #include <cmath>
 #include <numbers>
 

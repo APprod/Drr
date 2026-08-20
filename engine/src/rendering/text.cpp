@@ -48,7 +48,7 @@ std::vector<Line> splitLines(std::string& text)
         line.words.push_back({text.substr(start, i - start)});
     }
 
-    if (!line.words.empty())
+    if (!line.words.empty() || (!text.empty() && text.back() == '\n'))
         lines.push_back(std::move(line));
 
     return lines;
@@ -71,14 +71,45 @@ void Text::measureLines(){
             else first = false;
             linesize.y = std::max(size.y,linesize.y);
         }
+        // blank or pure-space lines keep no height from words — use fontSize
+        if (linesize.y == 0.0f) {
+            bool allSpaces = true;
+            for (auto& w : line.words) {
+                if (w.word.empty() || w.word[0] != ' ') { allSpaces = false; break; }
+            }
+            if (line.words.empty() || allSpaces)
+                linesize.y = static_cast<float>(fontSize);
+        }
         line.size = linesize;
     }
 }
 std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vector2 borders)
 {
     std::vector<Line> result;
+    auto& theme = GetServices().runtimeCfg.user.theme;
+    int fontSize = theme.resolveSize(m_role);
+    float blankHeight = static_cast<float>(fontSize);
 
     for (const auto& srcLine : lines){
+        // blank or pure-space source line — emit single empty line with font height
+        if (srcLine.words.empty()) {
+            Line blank;
+            blank.size = {0.0f, blankHeight};
+            blank.lineView = "";
+            result.push_back(std::move(blank));
+            continue;
+        }
+        {
+            bool allSpaces = true;
+            for (auto& w : srcLine.words) if (w.word.empty() || w.word[0] != ' ') { allSpaces = false; break; }
+            if (allSpaces) {
+                Line blank;
+                blank.size = {0.0f, blankHeight};
+                blank.lineView = "";
+                result.push_back(std::move(blank));
+                continue;
+            }
+        }
         Line current;
         float currentWidth = 0.0f;
 

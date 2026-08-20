@@ -30,6 +30,10 @@ void Renderer::beginShaderMode(const std::string& name, const Uniforms& uniforms
 
 void Renderer::endShaderMode(){
     ::EndShaderMode();
+    if (m_shaderStack.empty()) {
+        mylog::GetLogger().Error("Renderer::endShaderMode called but beginShaderMode wasn't registered. Maybe Used Raylib global function?");
+        return;
+    }
     m_shaderStack.pop_back();
     if (!m_shaderStack.empty()) {
         auto& [program, uniforms] = m_shaderStack.back();

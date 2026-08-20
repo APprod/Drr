@@ -128,8 +128,9 @@ public:
                 m_isOpen = false;
             }
         }
-        if (m_text.GetText() != m_items[m_currentIdx].first)
-            m_text.SetText(m_items[m_currentIdx].first);
+        if (!m_items.empty())
+            if (m_text.GetText() != m_items[m_currentIdx].first)
+                m_text.SetText(m_items[m_currentIdx].first);
         return Button::OnUpdate(dt);
     }
     void Toggle(){
@@ -137,6 +138,7 @@ public:
     }
     void OnClick() override { Toggle(); }
     void UpdateSelection(size_t idx){
+        if (!m_selected) return;
         *m_selected = m_items[idx].second;
         m_currentIdx = idx;
     }
@@ -159,7 +161,7 @@ public:
                         ddl->closePopup();
                     },
                     m_textureSpec,
-                    {m_targetSize.x, m_actual.height},
+                    {m_targetSize.x, GetDrawRect().height},
                     UICSpec{}.FillMaxWidth()
                 )
             );

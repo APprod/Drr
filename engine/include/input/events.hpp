@@ -32,6 +32,7 @@ using InputKey = KeyboardKey;
 struct InputKeyEvent{ //only for typying
     InputKey key{};
     bool pressed{};
+    bool repeat{}; // true only on auto-repeat (IsKeyPressedRepeat), never on fresh press/release
 };
 
 struct Action{}; // Shortcuts, etc

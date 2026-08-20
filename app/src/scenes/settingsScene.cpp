@@ -55,7 +55,7 @@ void SettingsScene::OnEnter(){
                     ),
                     ValueLabel<int>("Font size Current: {}", &usrCfg.theme.m_currentSizeIndex, Text("", "text")),
                     HorizontalLayout( UICSpec{}.SetFlex({0,0}), LayoutSpec{}.AlignBegin(),
-                        Slider<int>(&m_pendingSizeIndex, 0, 21,
+                        Slider<int>(&m_pendingSizeIndex, 0, usrCfg.theme.getFontSizesCount() - 1,
                             [](int){}
                             , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 1
                         ),
@@ -79,7 +79,7 @@ void SettingsScene::OnEnter(){
             ),
             Dropdown<std::string>(
                 fontItems, &m_pendingFontName,
-                TextureSpec("button_default"), {200,100}, nullptr,
+                TextureSpec("button_default"), {100,50}, nullptr,
                 Text("Font:", "button"),
                 UICSpec{}.SetFlex({0,1})
             ),

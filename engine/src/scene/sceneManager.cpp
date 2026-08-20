@@ -4,52 +4,49 @@
 #include "scene/sceneManager.hpp"
 #include "utils/log.hpp"
 
-Status::~Status() {};
+Pending::~Pending() {};
 SceneManager::SceneManager() = default;
 SceneManager::~SceneManager() = default;
 
 void SceneManager::QuePop(){
     //Ques to pop Scenes Stack aka return to previous Scene
-    if (m_status.action != SceneAction::Idle) {
+    if (m_state != TransitState::Idle || m_pending) {
         mylog::GetLogger().Warn("Transition already queued");
         return;
     }
-    m_status.action = SceneAction::Pop;
-    m_status.transitingScene.reset();
-    m_state = State::Exiting;
-}
-void SceneManager::ResolveTransitions(){
-    //called once per frame
-    switch (m_status.action)
-    {
-    case SceneAction::Idle:{
+    if (m_scenes.size()<=1){
+        mylog::GetLogger().Warn("Can't pop when <=1 scene left");
         return;
     }
-    case SceneAction::TransitSus:{
-        PerformSuspendAndTransit(std::move(m_status.transitingScene));
+    m_pending.emplace();
+    m_pending->type = TransitType::Pop;
+    m_pending->transitingScene.reset();
+    m_state = TransitState::Exiting; 
+}
+void SceneManager::ResolveTransitions(){
+    if (!m_pending) return;
+    switch (m_pending->type)
+    {
+    case TransitType::TransitSus:{
+        PerformSuspendAndTransit(std::move(m_pending->transitingScene));
         break;
     }
-    case SceneAction::Transit:{
-        PerformTransit(std::move(m_status.transitingScene));
+    case TransitType::Transit:{
+        PerformTransit(std::move(m_pending->transitingScene));
         break;
     }
-    case SceneAction::Pop:{
+    case TransitType::Pop:{
         PopScene();
         break;
     }
     }
-    m_status.action = SceneAction::Idle;
+    m_pending.reset();
 }
 void SceneManager::PopScene(){
-    if (m_scenes.size() == 1) {
-        mylog::GetLogger()
-            .Error("No scene left when trying to pop scene");
-        return;
-    }
     m_scenes.back()->OnExit();
     m_scenes.pop_back();
     m_scenes.back()->OnRestore();
-    m_state = State::Entering;
+    m_state = TransitState::Entering;
 }
 void SceneManager::PerformTransit(std::unique_ptr<IScene> scene){
     if (m_scenes.size() != 0) {
@@ -59,49 +56,42 @@ void SceneManager::PerformTransit(std::unique_ptr<IScene> scene){
     AddScene(std::move(scene));
 }
 void SceneManager::PerformSuspendAndTransit(std::unique_ptr<IScene> scene){
-    if (m_scenes.size() == 0) {
-        mylog::GetLogger()
-            .Error("No scene left when trying to transit");
-        return;
-    }
     m_scenes.back()->OnSuspend();
     AddScene(std::move(scene));
 }
 void SceneManager::AddScene(std::unique_ptr<IScene> scene){
     m_scenes.push_back(std::move(scene));
     m_scenes.back()->OnEnter();
-    m_state = State::Entering;
+    m_state = TransitState::Entering;
 }
 void SceneManager::Update(){
     float dt = GetFrameTime();
     
     if (m_scenes.empty()) {
-        ResolveTransitions();
+        if (m_pending) ResolveTransitions();
         if (m_scenes.empty()) {
             mylog::GetLogger().Error("Scene Stack is Empty");
             return;
         }
     }
     switch (m_state) {
-    case State::Idle:
+    case TransitState::Idle:
         m_scenes.back()->OnUpdate(dt);
         break;
-
-    case State::Entering:
+    case TransitState::Entering:
         if (m_scenes.back()->AnimateEnter(dt))
-            m_state = State::Idle;
+            m_state = TransitState::Idle;
         m_scenes.back()->OnUpdate(dt);
         break;
-
-    case State::Exiting: {
+    case TransitState::Exiting: {
         bool finished = m_scenes.back()->AnimateExit(dt);
         if (!finished) {
             m_scenes.back()->OnUpdate(dt);
         } else {
             ResolveTransitions();
-            if (m_state == State::Entering) {
+            if (m_state == TransitState::Entering) {
                 if (m_scenes.back()->AnimateEnter(dt))
-                    m_state = State::Idle;
+                    m_state = TransitState::Idle;
                 m_scenes.back()->OnUpdate(dt);
             }
         }

@@ -1,6 +1,7 @@
 #include "ui/overlay.hpp"
 #include "services.hpp"
 #include "ui/label.hpp"
+#include "ui/modifier.hpp"
 
 Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
@@ -41,9 +42,9 @@ Overlay::~Overlay(){
 }
 
 UICompId Overlay::PushPopup(std::unique_ptr<UIComponent> comp){
-    id = AddChild(std::move(comp));
-    ids.push_back(id);
-    return id;
+    auto newId = AddChild(std::move(comp));
+    ids.push_back(newId);
+    return newId;
 }
 
 UICompId Overlay::PopPopup(){
@@ -84,4 +85,30 @@ UIComponent* Overlay::GetPopupById(UICompId popupId){
         if (child->id == popupId) return child.get();
     }
     return nullptr;
+}
+
+bool Overlay::OnEvent(const MyEvent& event){
+    bool handled = Stack::OnEvent(event);
+    if (handled) return true;
+    if (auto* e = std::get_if<CursorActionEvent>(&event)){
+        if (e->pressed && !ids.empty()){
+            CloseTopPopup();
+            return true;
+        }
+    }
+    return false;
+}
+
+void Overlay::CloseTopPopup(){
+    if (ids.empty()) return;
+    UICompId top = ids.back();
+    if (auto* comp = GetPopupById(top)){
+        if (auto* popup = comp->GetAs<Popup>()){
+            if (auto* reveal = popup->GetChildAs<AnimatedReveal>()){
+                reveal->setOpen(false);
+                return;
+            }
+        }
+    }
+    RemovePopup(top);
 }

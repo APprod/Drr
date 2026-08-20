@@ -95,6 +95,7 @@ protected:
     Vector2 m_contentDesiredSize{0,0};
     Vector2 m_targetSize{10,10};
 
+    // Get actual rect without padding
     Rectangle GetDrawRect() const{
         auto pad = ResolvePadding({m_actual.width, m_actual.height});
         return {
@@ -103,9 +104,11 @@ protected:
             m_actual.height - pad.top - pad.bottom,
         };
     }
+    // Get actual arranged rect with the proper positionOffset
     Rectangle GetActualRect() const {
         return {m_actual.x + positionOffset.x, m_actual.y + positionOffset.y, m_actual.width, m_actual.height};
     }
+    // Get rect where the content should be displayed. Includes offsets
     Rectangle GetVisualRect() const {
         auto base = GetDrawRect();
         return {base.x + positionOffset.x, base.y + positionOffset.y, base.width, base.height};

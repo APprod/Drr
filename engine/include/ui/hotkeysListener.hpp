@@ -33,7 +33,7 @@ public:
 
     bool OnEvent(const MyEvent& event) override {
         if (auto* e = std::get_if<InputKeyEvent>(&event)) {
-            if (e->pressed && m_bindings.contains(e->key)) {
+            if (e->pressed && !e->repeat && m_bindings.contains(e->key)) {
                 if (GetServices().runtimeCfg.debug.debugFeaturesAllowed)
                     m_bindings[e->key].callback();
                 return true;

@@ -28,7 +28,8 @@ class PerformanceDisplay: public Label {
 };
 
 class DebugLogDisplay: public Label {
-    using Label::Label;
+public:
+    DebugLogDisplay(Text text, UIComponentSpec spec = {}) : Label(std::move(text), std::move(spec)) { setAtBottom(true); }
     bool OnUpdate(float dt) override;
 };
 

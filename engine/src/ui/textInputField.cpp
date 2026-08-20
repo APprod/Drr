@@ -59,9 +59,11 @@ bool TextInputField::OnEvent(const MyEvent& event) {
             case KEY_HOME:      cursorHome();   break;
             case KEY_END:       cursorEnd();    break;
             case KEY_ENTER:
+                if (e->repeat) return false; // submit only on first press, not while held
                 if (m_onSubmit) m_onSubmit(m_buffer);
                 [[fallthrough]];
             case KEY_ESCAPE:
+                if (e->repeat) return false;
                 m_focused = false;
                 GetUIContext().ReleaseCapture();
                 break;

@@ -53,6 +53,11 @@ bool Root::OnEvent(const MyEvent& event){
                 GetUIContext().SetHovered(nullptr);
             }
         }
+        else if (screen->action == ScreenInteraction::ENTER)
+        {
+            m_cursorPos = screen->pos;
+            UpdateHover();
+        }
         return true;
     }
     { //Always

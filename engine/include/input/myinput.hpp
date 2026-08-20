@@ -12,7 +12,7 @@ public:
     ~MyInput();
     std::vector<MyEvent> pollEvents();
     //Can be called after call. Retrieves all events between frames
-    std::vector<MyEvent> getEvents(){return m_events;}
+    const std::vector<MyEvent>& getEvents() const {return m_events;}
 
     bool IsKeyDown(InputKey key) const {
         return m_keyDown[key];

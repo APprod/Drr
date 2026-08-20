@@ -25,6 +25,8 @@ public:
     void OnDrawContent() override;
     virtual void OnHoverEnter() override {m_scroll.OnHover();}
     virtual void OnHoverExit() override {m_scroll.OnHoverExit();}
+    void setAtBottom(bool v) { m_scroll.atBottom = v; }
+    bool isAtBottom() const { return m_scroll.atBottom; }
 protected:
     Text m_text;
     TextAlign m_textAlign = TextAlign::Left;

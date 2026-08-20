@@ -4,6 +4,7 @@
 
 #include "ui/component.hpp"
 #include "rendering/textureSpec.hpp"
+#include "utils/animated.hpp"
 
 // Acts as a wrapper above single UIComponent, explicitly allows to draw additionally before and after draw calls of original UIComponent
 // Can override more functions for example to catch its events if needed, etc. 
@@ -125,19 +126,14 @@ public:
 
         if (m_direction == OpenDirection::Up) {
             desiredTarget.y = anchor.y - desiredTarget.height;
-            float topEdge = desiredTarget.y;
-            if (topEdge < available.y)
-                desiredTarget.y = available.y;
         } else if (m_direction == OpenDirection::Auto) {
             desiredTarget.y = anchorBottom;
-            float bottomEdge = desiredTarget.y + desiredTarget.height;
-            if (bottomEdge > availableBottom) {
+            if (desiredTarget.y + desiredTarget.height > availableBottom)
                 desiredTarget.y = anchor.y - desiredTarget.height;
-                myClamp(desiredTarget.y, available.y, desiredTarget.y);
-            }
         } else {
             desiredTarget.y = anchorBottom;
         }
+        myClamp(desiredTarget.y, available.y, available.y + available.height - desiredTarget.height);
 
         return desiredTarget;
     }

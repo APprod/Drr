@@ -9,7 +9,6 @@ Label::Label(
     TextAlign align
 ): UIComponent{spec}, m_text{std::move(text)}, m_textAlign{align}
 {
-    m_scroll.atBottom = true;
 }
 
 void Label::SetText(std::string text){

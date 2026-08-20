@@ -23,6 +23,7 @@ public:
     Font resolveFont(const std::string& role, int delta = 0) const;
     int  resolveSize(const std::string& role, int delta = 0) const;
     std::string resolveFontName(const std::string& role) const;
+    int  getFontSizesCount() const { return static_cast<int>(m_fontSizes.size()); }
 
     int m_currentSizeIndex{5};
     std::string m_fontName = "Inter";
@@ -31,11 +32,3 @@ private:
     std::vector<int> m_fontSizes;
     std::unordered_map<std::string, RoleDef> m_roles;
 };
-
-// I want
-// 
-// TextSizeRole = "Button, header, text, caption" -> offset
-// TextFontRole = "MainFont", "SomeCustom font" -> fontname
-// Two separate maps
-// FontSpec{TExtSizeRole, TextFontRole} -> getFot(FontSpec) Every one who uses font uses FontSpec
-// 

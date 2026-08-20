@@ -97,11 +97,11 @@ std::string toString(Ivec2 vec);
 std::string toString(Rectangle vec);
 
 template <class K, class V>
-std::vector<K> getKeys(std::unordered_map<K,V> map)
+std::vector<K> getKeys(const std::unordered_map<K,V>& map)
 {
     std::vector<K> keys;
     keys.reserve(map.size());
-    for (auto it: map)
+    for (const auto& it: map)
     {
         keys.push_back(it.first);
     }
@@ -112,6 +112,7 @@ std::vector<K> getKeys(std::unordered_map<K,V> map)
 template<class T>
 void myClamp(T &val, T min, T max)  
 {
+    if (min > max) { val = min; return; }
     if (val < min) val = min;
     if (val > max) val = max;
 }

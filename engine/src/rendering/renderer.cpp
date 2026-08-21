@@ -47,6 +47,10 @@ void Renderer::beginBlendMode(BlendMode mode){
 }
 
 void Renderer::endBlendMode(){
+    if (m_blendStack.empty()) {
+        mylog::GetLogger().Error("Renderer::endBlendMode called but beginBlendMode wasn't registered. Maybe Used Raylib global function?");
+        return;
+    }
     ::EndBlendMode();
     m_blendStack.pop_back();
     if (!m_blendStack.empty()) {

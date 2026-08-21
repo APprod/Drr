@@ -21,7 +21,7 @@ enum class TransitState{
 
 class Pending{
 public:
-    TransitType type;
+    TransitType type{TransitType::Transit};
     std::unique_ptr<IScene> transitingScene;
     ~Pending();
 };

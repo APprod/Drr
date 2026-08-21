@@ -3,6 +3,15 @@
 
 #include <cmath>
 
+namespace {
+// A line is blank when it has no words or only space tokens
+bool isBlankLine(const std::vector<Word>& words){
+    for (const auto& w : words)
+        if (w.word.empty() || w.word[0] != ' ') return false;
+    return true;
+}
+}
+
 Text::Text(std::string text, std::string role, float fontSpacing, Color color)
     : m_text{std::move(text)}, m_role{std::move(role)}, m_fontSpacing{fontSpacing}, m_color{color}
 {
@@ -72,14 +81,8 @@ void Text::measureLines(){
             linesize.y = std::max(size.y,linesize.y);
         }
         // blank or pure-space lines keep no height from words — use fontSize
-        if (linesize.y == 0.0f) {
-            bool allSpaces = true;
-            for (auto& w : line.words) {
-                if (w.word.empty() || w.word[0] != ' ') { allSpaces = false; break; }
-            }
-            if (line.words.empty() || allSpaces)
-                linesize.y = static_cast<float>(fontSize);
-        }
+        if (linesize.y == 0.0f && (line.words.empty() || isBlankLine(line.words)))
+            linesize.y = static_cast<float>(fontSize);
         line.size = linesize;
     }
 }
@@ -92,23 +95,12 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 
     for (const auto& srcLine : lines){
         // blank or pure-space source line — emit single empty line with font height
-        if (srcLine.words.empty()) {
+        if (srcLine.words.empty() || isBlankLine(srcLine.words)) {
             Line blank;
             blank.size = {0.0f, blankHeight};
             blank.lineView = "";
             result.push_back(std::move(blank));
             continue;
-        }
-        {
-            bool allSpaces = true;
-            for (auto& w : srcLine.words) if (w.word.empty() || w.word[0] != ' ') { allSpaces = false; break; }
-            if (allSpaces) {
-                Line blank;
-                blank.size = {0.0f, blankHeight};
-                blank.lineView = "";
-                result.push_back(std::move(blank));
-                continue;
-            }
         }
         Line current;
         float currentWidth = 0.0f;

@@ -8,6 +8,12 @@ enum class ScrollDirection{
     Horizontal
 };
 
+struct ScrollThumbGeometry {
+    Rectangle track{};      // full track rect (direction-aware)
+    Rectangle thumb{};      // current thumb rect at scrollOffset
+    float maxThumbPos{};    // trackMajor - thumbMajor (thumb travel range)
+};
+
 struct Scrollable {
     bool OnEvent(const MyEvent& event);
     void OnUpdate(Rectangle drawRect, Vector2 contentSize);
@@ -15,6 +21,7 @@ struct Scrollable {
     void OnHoverExit();
     void DrawInside(Rectangle actual, std::function<void()> drawCall);
     void DrawScrollbar(Rectangle viewport);
+    ScrollThumbGeometry thumbGeometry(Rectangle viewport) const;
 
     float scrollSpeed{20};
     float scrollOffset{0};

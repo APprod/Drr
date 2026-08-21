@@ -33,9 +33,17 @@ protected:
     void cursorHome();
     void cursorEnd();
 
+    void focus();
+    void blur();
+    void syncText();
+    float cursorX() const;
+    void updateViewShift();
+    void cursorToPos(float x);
+
     std::string m_buffer;
     std::function<void(std::string)> m_onSubmit;
     int m_cursorPos{0};
     bool m_focused{false};
     float m_cursorTimer{0};
+    float m_viewShift{0};
 };

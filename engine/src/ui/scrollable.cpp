@@ -49,7 +49,6 @@ bool Scrollable::OnEvent(const MyEvent& event){
         if (e->button == CursorAction::MOUSE_BUTTON_LEFT){
             if (e->pressed){
                 Rectangle track = m_lastViewport;
-                float tSize = majorDim(track);
                 if (CheckCollisionPointRec(e->pos, m_thumbRect)){
                     dragging = true;
                     m_dragStartMouse = majorPos(e->pos);
@@ -57,15 +56,13 @@ bool Scrollable::OnEvent(const MyEvent& event){
                     return true;
                 }
                 if (CheckCollisionPointRec(e->pos, track)){
-                    float vMajor = tSize;
-                    float visibleRatio = std::min(1.0f, vMajor / (vMajor + maxOffset));
-                    float thumbMajor = vMajor * visibleRatio;
-                    float maxThumbPos = tSize - thumbMajor;
+                    auto g = thumbGeometry(m_lastViewport);
                     float trackPos = majorPos({track.x, track.y});
                     float clickPos = majorPos(e->pos);
                     float norm = 0.0f;
-                    if (maxThumbPos > 0.0f) {
-                        norm = (clickPos - trackPos - thumbMajor * 0.5f) / maxThumbPos;
+                    if (g.maxThumbPos > 0.0f) {
+                        float thumbMajor = majorDim(g.thumb);
+                        norm = (clickPos - trackPos - thumbMajor * 0.5f) / g.maxThumbPos;
                         norm = std::clamp(norm, 0.0f, 1.0f);
                     }
                     scrollOffset = norm * maxOffset;
@@ -134,28 +131,33 @@ void Scrollable::DrawInside(Rectangle actual, std::function<void()> drawCall){
     EndScissorMode();
 }
 
-void Scrollable::DrawScrollbar(Rectangle viewport){
-    if (maxOffset <= 0 || !showScrollbar) return;
-
+ScrollThumbGeometry Scrollable::thumbGeometry(Rectangle viewport) const {
     float vMajor = direction == ScrollDirection::Vertical ? viewport.height : viewport.width;
     float visibleRatio = std::min(1.0f, vMajor / (vMajor + maxOffset));
     float thumbMajor = vMajor * visibleRatio;
 
+    ScrollThumbGeometry g;
     if (direction == ScrollDirection::Vertical){
-        Rectangle track{viewport.x + viewport.width - scrollbarWidth, viewport.y,
-                        scrollbarWidth, viewport.height};
-        float maxThumbPos = track.height - thumbMajor;
-        float thumbY = maxThumbPos > 0 ? track.y + (scrollOffset / maxOffset) * maxThumbPos : track.y;
-        m_thumbRect = {track.x, thumbY, track.width, thumbMajor};
-        ::DrawRectangleRec(track, trackColor);
+        g.track = {viewport.x + viewport.width - scrollbarWidth, viewport.y,
+                   scrollbarWidth, viewport.height};
+        g.maxThumbPos = g.track.height - thumbMajor;
+        float thumbY = g.maxThumbPos > 0 ? g.track.y + (scrollOffset / maxOffset) * g.maxThumbPos : g.track.y;
+        g.thumb = {g.track.x, thumbY, g.track.width, thumbMajor};
     } else {
-        Rectangle track{viewport.x, viewport.y + viewport.height - scrollbarWidth,
-                        viewport.width, scrollbarWidth};
-        float maxThumbPos = track.width - thumbMajor;
-        float thumbX = maxThumbPos > 0 ? track.x + (scrollOffset / maxOffset) * maxThumbPos : track.x;
-        m_thumbRect = {thumbX, track.y, thumbMajor, track.height};
-        ::DrawRectangleRec(track, trackColor);
+        g.track = {viewport.x, viewport.y + viewport.height - scrollbarWidth,
+                   viewport.width, scrollbarWidth};
+        g.maxThumbPos = g.track.width - thumbMajor;
+        float thumbX = g.maxThumbPos > 0 ? g.track.x + (scrollOffset / maxOffset) * g.maxThumbPos : g.track.x;
+        g.thumb = {thumbX, g.track.y, thumbMajor, g.track.height};
     }
+    return g;
+}
 
+void Scrollable::DrawScrollbar(Rectangle viewport){
+    if (maxOffset <= 0 || !showScrollbar) return;
+
+    auto g = thumbGeometry(viewport);
+    m_thumbRect = g.thumb;
+    ::DrawRectangleRec(g.track, trackColor);
     ::DrawRectangleRec(m_thumbRect, m_thumbHovered ? thumbHoverColor : thumbColor);
 }

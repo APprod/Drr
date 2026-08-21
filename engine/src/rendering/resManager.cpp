@@ -4,6 +4,20 @@
 #include "utils/log.hpp"
 #include "platform.hpp"
 
+namespace {
+// Glyphs baked into every loaded TTF: printable ASCII + full Cyrillic block
+const std::vector<int>& fontCodepoints()
+{
+    static const std::vector<int> cps = []{
+        std::vector<int> v;
+        v.reserve(95 + 256);
+        for (int c = 32; c <= 126; ++c) v.push_back(c);
+        for (int c = 0x0400; c <= 0x04FF; ++c) v.push_back(c);
+        return v;
+    }();
+    return cps;
+}
+}
 
 ResourceManager::ResourceManager()
 {
@@ -114,13 +128,12 @@ void ResourceManager::loadFont(std::string name, std::string filepath, std::vect
         return;
     }
     auto font = m_fonts.find(name);
-    if (font == m_fonts.end()){ 
+    if (font == m_fonts.end()){
         // Not found, load All
         FontMap newFontMap;
         auto anyLoaded = false;
         for (auto size: fontSizes){
-            Font newFont = ::LoadFontEx(filepath.c_str(), size, nullptr, 0);
-            ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_BILINEAR);
+            Font newFont = loadFontAtSize(filepath, size, TEXTURE_FILTER_BILINEAR);
             if (!::IsFontValid(newFont)){
                 mylog::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
                 continue;
@@ -140,8 +153,7 @@ void ResourceManager::loadFont(std::string name, std::string filepath, std::vect
             auto pos = fontMap.find(size);
             if (pos == fontMap.end()){
                 //Not found, load
-                Font newFont = ::LoadFontEx(filepath.c_str(), size, nullptr, 0);
-                ::SetTextureFilter(newFont.texture, ::TEXTURE_FILTER_TRILINEAR);
+                Font newFont = loadFontAtSize(filepath, size, TEXTURE_FILTER_TRILINEAR);
                 if (!::IsFontValid(newFont)){
                     mylog::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
                     continue;
@@ -152,6 +164,15 @@ void ResourceManager::loadFont(std::string name, std::string filepath, std::vect
             }
         }
     }
+}
+
+Font ResourceManager::loadFontAtSize(const std::string& filepath, int size, TextureFilter filter)
+{
+    const std::vector<int>& cps = fontCodepoints();
+    Font font = ::LoadFontEx(filepath.c_str(), size,
+                             const_cast<int*>(cps.data()), static_cast<int>(cps.size()));
+    ::SetTextureFilter(font.texture, filter);
+    return font;
 }
 
 std::vector<std::string > ResourceManager::getLoadedFonts(){

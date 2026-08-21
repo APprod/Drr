@@ -19,11 +19,14 @@ enum class TransitState{
     Entering
 };
 
+// shared_ptr owns IScene safely while it is only forward-declared here:
+// its deleter is type-erased, so including TUs never need sizeof(IScene)
+// (unique_ptr would require out-of-line special-member boilerplate or break
+// libc++/web builds with an incomplete type).
 class Pending{
 public:
     TransitType type{TransitType::Transit};
-    std::unique_ptr<IScene> transitingScene;
-    ~Pending();
+    std::shared_ptr<IScene> transitingScene;
 };
 
 class SceneManager{ //will be a part of Services so acessible everywhere
@@ -39,7 +42,7 @@ public:
             return;
         }
         m_pending.emplace();
-        m_pending->transitingScene = std::make_unique<T>(std::forward<Args>(args)...);
+        m_pending->transitingScene = std::make_shared<T>(std::forward<Args>(args)...);
         m_pending->type = TransitType::Transit;
         m_state = TransitState::Exiting;
     }
@@ -56,7 +59,7 @@ public:
             return;
         }
         m_pending.emplace();
-        m_pending->transitingScene = std::make_unique<T>(std::forward<Args>(args)...);
+        m_pending->transitingScene = std::make_shared<T>(std::forward<Args>(args)...);
         m_pending->type = TransitType::TransitSus;
         m_state = TransitState::Exiting;
     }
@@ -68,10 +71,12 @@ public:
 
 private:
     void PopScene();
-    void PerformTransit(std::unique_ptr<IScene> scene);
-    void PerformSuspendAndTransit(std::unique_ptr<IScene> scene);
-    void AddScene(std::unique_ptr<IScene> scene);
+    void PerformTransit(std::shared_ptr<IScene> scene);
+    void PerformSuspendAndTransit(std::shared_ptr<IScene> scene);
+    void AddScene(std::shared_ptr<IScene> scene);
     std::optional<Pending> m_pending;
     TransitState m_state{TransitState::Idle};
-    std::vector<std::unique_ptr<IScene>> m_scenes;
+    // shared_ptr (not unique_ptr): IScene is incomplete in this header, and its
+    // type-erased deleter lets implicit special members work in every TU
+    std::vector<std::shared_ptr<IScene>> m_scenes;
 };

@@ -1,6 +1,7 @@
 #include "ui/textInputField.hpp"
 #include "services.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 TextInputField::TextInputField(

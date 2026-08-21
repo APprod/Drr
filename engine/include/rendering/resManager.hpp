@@ -34,6 +34,7 @@ public:
 private:
     bool lazyLoad(std::string name);
     void loadTextures();
+    Font loadFontAtSize(const std::string& filepath, int size, TextureFilter filter);
     std::unordered_map<std::string, Texture2D> m_textures;
     std::unordered_set<std::string> m_failed_textures;
 

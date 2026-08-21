@@ -1,11 +1,35 @@
 #include "platform.hpp"
 
+#ifdef _WIN32
+// Exclusion macros keep windows.h from clashing with raylib declarations
+// (Rectangle, CloseWindow, ShowCursor) in TUs that include both
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOGDI
+#define NOGDI
+#endif
+#ifndef NOUSER
+#define NOUSER
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 #include <chrono>
 #include <ctime>
 #include <sstream>
 #include <iomanip>
 
 namespace platform {
+
+void SetupConsole()
+{
+#ifdef _WIN32
+    // Console interprets our narrow UTF-8 log output correctly (Cyrillic etc.)
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+}
 
 std::string CurrentDateTime()
 {

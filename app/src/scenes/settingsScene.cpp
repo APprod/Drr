@@ -9,8 +9,9 @@ void SettingsScene::OnEnter(){
     UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     auto& usrCfg = GetServices().runtimeCfg.user;
-    m_pendingSizeIndex = usrCfg.theme.m_currentSizeIndex;
-    m_pendingFontName = usrCfg.theme.m_fontName;
+    m_pendingSizeIndex = usrCfg.theme.getSelectedSize();
+    m_displayedSizeIndex = m_pendingSizeIndex;
+    m_pendingFontName = usrCfg.theme.getFontName(usrCfg.theme.getFontRole("default"));
 
     auto fonts = GetServices().resManager.getLoadedFonts();
     std::vector<std::pair<std::string, std::string>> fontItems;
@@ -53,9 +54,9 @@ void SettingsScene::OnEnter(){
                         ),
                         ValueLabel<float>("Set Brightness: {:0.3f}", &usrCfg.userBrightness, Text("", "text"))
                     ),
-                    ValueLabel<int>("Font size Current: {}", &usrCfg.theme.m_currentSizeIndex, Text("", "text")),
+                    ValueLabel<int>("Font size Current: {}", &m_displayedSizeIndex, Text("", "text")),
                     HorizontalLayout( UICSpec{}.SetFlex({0,0}), LayoutSpec{}.AlignBegin(),
-                        Slider<int>(&m_pendingSizeIndex, 0, usrCfg.theme.getFontSizesCount() - 1,
+                        Slider<int>(&m_pendingSizeIndex, 0, usrCfg.theme.getSizesCount() - 1,
                             [](int){}
                             , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 1
                         ),
@@ -113,8 +114,11 @@ void SettingsScene::OnEnter(){
             Button(Text("Apply Settings sdfaaaaaaaaaaaaa", "button"),
                 [this](){
                     auto& theme = GetServices().runtimeCfg.user.theme;
-                    theme.m_currentSizeIndex = m_pendingSizeIndex;
-                    theme.m_fontName = m_pendingFontName;
+                    theme.setSelectedSize(m_pendingSizeIndex);
+                    // raylib builtin atlas needs loose spacing, baked TTFs sit tight
+                    theme.setFontRole("default", m_pendingFontName,
+                        m_pendingFontName == "default" ? 2.0f : 1.0f);
+                    m_displayedSizeIndex = m_pendingSizeIndex;
                 },
                 TextureSpec("button_default"), {200,100},
                 UICSpec{}.SetFlex({0,1})

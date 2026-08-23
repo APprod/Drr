@@ -26,16 +26,16 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
     auto& cfg = GetServices().runtimeCfg;
-    Text valText("", "text");
+    Text valText("");
     UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     left->Add(
-        FPSDraw(Text("", "big header")),
-        CursorTrack(Text("", "text"), UICSpec{}.FillMaxWidth()),
-        CfgDisplay(Text("", "text")),
-        Checkbox(Text("Layout bounds", "text"), &cfg.debug.showLayoutBounds),
-        Checkbox(Text("Content bounds", "text"), &cfg.debug.showLayoutContentBounds),
-        Checkbox(Text("VSYNC", "text"), &cfg.user.vsync,
+        FPSDraw(Text("", "default", 4)),
+        CursorTrack(Text(""), UICSpec{}.FillMaxWidth()),
+        CfgDisplay(Text("")),
+        Checkbox(Text("Layout bounds"), &cfg.debug.showLayoutBounds),
+        Checkbox(Text("Content bounds"), &cfg.debug.showLayoutContentBounds),
+        Checkbox(Text("VSYNC"), &cfg.user.vsync,
             [](bool vsync){
                 mylog::GetLogger().LogFormat(mylog::Severity::DBGINFO, "Switching vsync: {}", vsync);
                 if (vsync) {SetWindowState(FLAG_VSYNC_HINT);}
@@ -49,7 +49,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
             }
             , sliderSpec, sBarH, sMinTh, sMaxTh, sTarget, 5),
         ValueLabel<int>("Target FPS: {}", &cfg.user.targetFPS, valText),
-        DebugLogDisplay(Text("", "text"),UICSpec{}.SetFlex({0,1}).FillMaxSize())
+        DebugLogDisplay(Text(""),UICSpec{}.SetFlex({0,1}).FillMaxSize())
     );
     auto right = std::make_unique<DebugVerticalLayout>(
         UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
@@ -61,7 +61,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         Slider<float>(&cfg.user.userBrightness, 0.1f, 3.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
         ValueLabel<int>("Log msgs: {}", &cfg.debug.debugMessagesCount, valText),
         Slider<int>(&cfg.debug.debugMessagesCount, 1, 50, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
-        BindingsDisplay(Text("", "text"), UICSpec{}.SetFlex({0,1}))
+        BindingsDisplay(Text(""), UICSpec{}.SetFlex({0,1}))
     );
     mainC->AddChild(std::move(left));
     mainC->AddChild(std::move(right));

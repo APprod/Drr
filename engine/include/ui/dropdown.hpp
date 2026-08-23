@@ -17,7 +17,7 @@ public:
         TextureSpec textureSpec,
         Vector2 targetSize,
         std::function<void(T)> onChange = nullptr,
-        Text labelText = Text("", "button"),
+        Text labelText = Text(""),
         UIComponentSpec spec = {}
     ): Button{labelText,[](){},std::move(textureSpec),targetSize,spec}, m_items{std::move(items)}, m_selected{selectedValue},
     m_onChange{onChange}{

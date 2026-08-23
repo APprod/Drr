@@ -12,10 +12,18 @@ bool isBlankLine(const std::vector<Word>& words){
 }
 }
 
-Text::Text(std::string text, std::string role, float fontSpacing, Color color)
-    : m_text{std::move(text)}, m_role{std::move(role)}, m_fontSpacing{fontSpacing}, m_color{color}
+Text::Text(std::string text, std::string role, int sizeDelta, Color color)
+    : m_text{std::move(text)}, m_role{std::move(role)}, m_sizeRole{0},
+      m_sizeDelta{sizeDelta}, m_color{color}
 {
+    auto& theme = GetServices().runtimeCfg.user.theme;
+    m_sizeRole = theme.getSizeRole(m_role);
     m_dirtyText = true;
+}
+
+FontData Text::fontData() const {
+    auto& theme = GetServices().runtimeCfg.user.theme;
+    return theme.getFont({m_sizeRole, 0}, m_sizeDelta);
 }
 
 std::vector<Line> splitLines(std::string& text)
@@ -65,15 +73,13 @@ std::vector<Line> splitLines(std::string& text)
 
 //Measures the m_lines words sizes
 void Text::measureLines(){
-    auto& theme = GetServices().runtimeCfg.user.theme;
-    auto font = theme.resolveFont(m_role);
-    int fontSize = theme.resolveSize(m_role);
-    float spaceSize = MeasureTextEx(font, " ", static_cast<float>(fontSize), m_fontSpacing).x;
+    auto fd = fontData();
+    float spaceSize = MeasureTextEx(fd.font, " ", fd.size, fd.spacing).x;
     for (auto& line: m_lines ){
         Vector2 linesize{0,0};
         bool first = true;
         for (auto& word: line.words){
-            auto size = MeasureTextEx(font, word.word.c_str(), static_cast<float>(fontSize), m_fontSpacing);
+            auto size = MeasureTextEx(fd.font, word.word.c_str(), fd.size, fd.spacing);
             word.size = size;
             linesize.x += size.x;
             if (!first) linesize.x += spaceSize;
@@ -82,16 +88,16 @@ void Text::measureLines(){
         }
         // blank or pure-space lines keep no height from words — use fontSize
         if (linesize.y == 0.0f && (line.words.empty() || isBlankLine(line.words)))
-            linesize.y = static_cast<float>(fontSize);
+            linesize.y = fd.size;
         line.size = linesize;
     }
+    m_lastFontSize = static_cast<int>(fd.size);
 }
 std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vector2 borders)
 {
     std::vector<Line> result;
-    auto& theme = GetServices().runtimeCfg.user.theme;
-    int fontSize = theme.resolveSize(m_role);
-    float blankHeight = static_cast<float>(fontSize);
+    auto fd = fontData();
+    float blankHeight = fd.size;
 
     for (const auto& srcLine : lines){
         // blank or pure-space source line — emit single empty line with font height
@@ -112,7 +118,7 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
                 continue;
 
             if (!current.words.empty() &&
-                currentWidth + token.size.x + current.words.size() * m_fontSpacing > borders.x &&
+                currentWidth + token.size.x + current.words.size() * fd.spacing > borders.x &&
                 !isSpaces){
                 while (!current.words.empty() &&
                        !current.words.back().word.empty() &&
@@ -123,7 +129,7 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 
                 current.size.x = currentWidth;
                 if (current.words.size() > 1)
-                    current.size.x += (current.words.size() - 1) * m_fontSpacing;
+                    current.size.x += (current.words.size() - 1) * fd.spacing;
                 result.push_back(std::move(current));
 
                 current = {};
@@ -145,7 +151,7 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
         if (!current.words.empty()){
             current.size.x = currentWidth;
             if (current.words.size() > 1)
-                current.size.x += (current.words.size() - 1) * m_fontSpacing;
+                current.size.x += (current.words.size() - 1) * fd.spacing;
             result.push_back(std::move(current));
         }
     }
@@ -166,15 +172,10 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 Vector2 Text::ReMeasure(Vector2 borders)
 {
     m_dirtyFull = false;
-    auto& theme = GetServices().runtimeCfg.user.theme;
-    int curFontSize = theme.resolveSize(m_role);
-    std::string curFontName = theme.resolveFontName(m_role);
-    bool fontChanged = curFontSize != m_lastFontSize || curFontName != m_lastFontName;
+    bool themeChanged = GetServices().runtimeCfg.user.theme.needsUpdate(m_themeVersion);
 
-    if (m_dirtyText || fontChanged)
+    if (m_dirtyText || themeChanged)
     {
-        m_lastFontSize = curFontSize;
-        m_lastFontName = curFontName;
         m_lines = splitLines(m_text);
         measureLines();
         m_desiredFullSize = {0,0};
@@ -183,7 +184,7 @@ Vector2 Text::ReMeasure(Vector2 borders)
             m_desiredFullSize.y += line.size.y;
         }
     }
-    if (borders != m_lastBorder || m_dirtyText || fontChanged){
+    if (borders != m_lastBorder || m_dirtyText || themeChanged){
         auto lastMeasured = m_lastMeasuredSize;
         m_linesConstrained = constructConstrained(m_lines, borders);
         m_lastMeasuredSize = {0,0};
@@ -205,13 +206,11 @@ void Text::Draw(Vector2 position)
 {
     position.x = std::round(position.x);
     position.y = std::round(position.y);
-    auto& theme = GetServices().runtimeCfg.user.theme;
-    auto font = theme.resolveFont(m_role);
-    int fontSize = theme.resolveSize(m_role);
+    auto fd = fontData();
     auto pos = position;
     for (auto& line: m_linesConstrained){
         
-        ::DrawTextEx(font, line.lineView.c_str(), pos, static_cast<float>(fontSize), m_fontSpacing, m_color);
+        ::DrawTextEx(fd.font, line.lineView.c_str(), pos, fd.size, fd.spacing, m_color);
         pos.y += line.size.y;
     }
     

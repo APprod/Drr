@@ -7,5 +7,6 @@ class SettingsScene:  public BaseScene{
     void OnUpdateState() override;
 private:
     int m_pendingSizeIndex{5};
+    int m_displayedSizeIndex{0};
     std::string m_pendingFontName;
 };

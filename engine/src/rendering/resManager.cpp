@@ -32,7 +32,7 @@ ResourceManager::~ResourceManager()
     }
     for (auto& [name, fontMap] : m_fonts)
     {
-        for (auto& [size, font] : fontMap)
+        for (auto& [size, font] : fontMap.map)
         {
             ::UnloadFont(font);
         }
@@ -45,7 +45,7 @@ void ResourceManager::init()
 {
     FontMap defFonts;
     defFonts[10] = ::GetFontDefault();
-    m_fonts["default"] = defFonts;
+    m_fonts["default"].map = defFonts;
 
     
 
@@ -142,26 +142,45 @@ void ResourceManager::loadFont(std::string name, std::string filepath, std::vect
             newFontMap[size] = newFont;
         }
         if (anyLoaded) {
-            m_fonts[name] = std::move(newFontMap);
+            auto& fontEntry = m_fonts[name];
+            fontEntry.map = std::move(newFontMap);
+            fontEntry.filepath = filepath;
         }
         else{
             mylog::GetLogger().Error("Failed to load font for all sizes: " + name +  " path: " + filepath);
         }
     }else{
-        auto& fontMap = font->second;
-        for (auto size: fontSizes){
-            auto pos = fontMap.find(size);
-            if (pos == fontMap.end()){
-                //Not found, load
-                Font newFont = loadFontAtSize(filepath, size, TEXTURE_FILTER_TRILINEAR);
-                if (!::IsFontValid(newFont)){
-                    mylog::GetLogger().Error("Failed to load font: " + name +  " path: " + filepath, "size: ", size);
-                    continue;
-                }
-                fontMap[size] = newFont;
-            }else{
-                mylog::GetLogger().DebugInfo("Font already loaded: ", name, " , size: ", size);
+        font->second.filepath = filepath;
+        loadFontSizes(name, fontSizes);
+    }
+}
+
+void ResourceManager::loadFontSizes(const std::string& name, const std::vector<int>& fontSizes)
+{
+    auto font = m_fonts.find(name);
+    if (font == m_fonts.end()){
+        mylog::GetLogger().Warn("Font not found, can't load sizes: ", name);
+        return;
+    }
+    auto& fontEntry = font->second;
+    if (fontEntry.filepath.empty()){
+        // e.g. the "default" raylib font: registered without a source file, cannot be rebaked
+        mylog::GetLogger().DebugInfo("Font has no source path, sizes kept as-is: ", name);
+        return;
+    }
+    mylog::GetLogger().Info("loading Font sizes: ", name, " path: ", fontEntry.filepath, " sizes: ", fontSizes);
+    for (auto size: fontSizes){
+        auto pos = fontEntry.map.find(size);
+        if (pos == fontEntry.map.end()){
+            //Not found, load
+            Font newFont = loadFontAtSize(fontEntry.filepath, size, TEXTURE_FILTER_TRILINEAR);
+            if (!::IsFontValid(newFont)){
+                mylog::GetLogger().Error("Failed to load font: " + name +  " path: " + fontEntry.filepath, "size: ", size);
+                continue;
             }
+            fontEntry.map[size] = newFont;
+        }else{
+            mylog::GetLogger().DebugInfo("Font already loaded: ", name, " , size: ", size);
         }
     }
 }
@@ -179,10 +198,10 @@ std::vector<std::string > ResourceManager::getLoadedFonts(){
     return getKeys(m_fonts);
 }
 
-Font ResourceManager::getFont(std::string name, int fontSize)
+Font ResourceManager::getFont(const std::string& name, int fontSize)
 {
     if (name == "default") {
-        return m_fonts.at("default").begin()->second;
+        return m_fonts.at("default").map.begin()->second;
     }
 
     auto fontIter = m_fonts.find(name);
@@ -192,8 +211,8 @@ Font ResourceManager::getFont(std::string name, int fontSize)
         return getFont("default", fontSize);
     }else{
         auto& fontMap = fontIter->second;
-        auto fontSizeIter = fontMap.find(fontSize);
-        if (fontSizeIter == fontMap.end()){
+        auto fontSizeIter = fontMap.map.find(fontSize);
+        if (fontSizeIter == fontMap.map.end()){
             mylog::GetLogger().Error("Font size not found: ", fontSize, " for font: ", name);
             return getFont("default", fontSize);
         }else{
@@ -202,7 +221,7 @@ Font ResourceManager::getFont(std::string name, int fontSize)
     }
 }
 
-Texture2D ResourceManager::getTexture(std::string name)
+Texture2D ResourceManager::getTexture(const std::string& name)
 {
     if (m_failed_textures.count(name) != 0)  //this texture not found
     {
@@ -273,7 +292,7 @@ void ResourceManager::loadShader(std::string shaderName, std::string filepath,
     }
     m_shaders[shaderName] = program;
 }
-ShaderProgram& ResourceManager::getShaderProgram(std::string name){
+ShaderProgram& ResourceManager::getShaderProgram(const std::string& name){
     auto iter = m_shaders.find(name);
     if (iter == m_shaders.end()){
         mylog::GetLogger().Fatal("Couldn't find shader, can't execute future shader draw calls");

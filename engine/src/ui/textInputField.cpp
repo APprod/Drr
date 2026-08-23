@@ -106,19 +106,16 @@ void TextInputField::OnDrawContent() {
     m_scroll.DrawInside(rect, drawCall);
 
     if (m_focused && fmodf(m_cursorTimer, 0.5f) < 0.25f) {
-        auto& theme = GetServices().runtimeCfg.user.theme;
-        auto font = theme.resolveFont(m_text.GetRole());
-        int fontSize = theme.resolveSize(m_text.GetRole());
-        float spacing = m_text.GetFontSpacing();
+        const auto fd = m_text.fontData();
 
         float textH = textSize.y;
-        if (textH <= 0) textH = static_cast<float>(fontSize);
+        if (textH <= 0) textH = fd.size;
         float cursorY = rect.y + (rect.height - textH) * 0.5f;
 
         std::string prefix = m_buffer.substr(0, m_cursorPos);
         float cursorX = rect.x - m_viewShift;
         if (!prefix.empty()) {
-            cursorX += MeasureTextEx(font, prefix.c_str(), static_cast<float>(fontSize), spacing).x;
+            cursorX += MeasureTextEx(fd.font, prefix.c_str(), fd.size, fd.spacing).x;
         }
         DrawRectangle(static_cast<int>(cursorX), static_cast<int>(cursorY),
                       2, static_cast<int>(textH), WHITE);
@@ -145,13 +142,10 @@ void TextInputField::syncText(){
 }
 
 float TextInputField::cursorX() const {
-    auto& theme = GetServices().runtimeCfg.user.theme;
-    auto font = theme.resolveFont(m_text.GetRole());
-    int fontSize = theme.resolveSize(m_text.GetRole());
-    float spacing = m_text.GetFontSpacing();
+    const auto fd = m_text.fontData();
     std::string prefix = m_buffer.substr(0, m_cursorPos);
     if (prefix.empty()) return 0.0f;
-    return MeasureTextEx(font, prefix.c_str(), static_cast<float>(fontSize), spacing).x;
+    return MeasureTextEx(fd.font, prefix.c_str(), fd.size, fd.spacing).x;
 }
 
 void TextInputField::updateViewShift(){
@@ -177,10 +171,7 @@ void TextInputField::updateViewShift(){
 }
 
 void TextInputField::cursorToPos(float x){
-    auto& theme = GetServices().runtimeCfg.user.theme;
-    auto font = theme.resolveFont(m_text.GetRole());
-    int fontSize = theme.resolveSize(m_text.GetRole());
-    float spacing = m_text.GetFontSpacing();
+    const auto fd = m_text.fontData();
 
     float localX = x - GetVisualRect().x + m_viewShift;
     int best = 0;
@@ -191,8 +182,8 @@ void TextInputField::cursorToPos(float x){
         GetCodepointNext(m_buffer.c_str() + i, &cpSize);
         if (cpSize <= 0) break;
         i = std::min(i + cpSize, static_cast<int>(m_buffer.size()));
-        float w = MeasureTextEx(font, m_buffer.substr(0, i).c_str(),
-                                static_cast<float>(fontSize), spacing).x;
+        float w = MeasureTextEx(fd.font, m_buffer.substr(0, i).c_str(),
+                                fd.size, fd.spacing).x;
         float dist = std::abs(localX - w);
         if (dist < bestDist) { bestDist = dist; best = i; }
         else break;

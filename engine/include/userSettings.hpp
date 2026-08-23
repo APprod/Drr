@@ -1,7 +1,8 @@
 #pragma once
 
+#include <vector>
+
 #include "raylib.h"
-#include "ui/uiTheme.hpp"
 #include "utils/util.hpp"
 
 struct ProcessingValues {
@@ -26,7 +27,7 @@ public:
     WindowMode windowMode{WindowMode::Windowed};
     Ivec2 windowSize{};
     Ivec2 windowPos{};
-    UITheme theme;
+    std::vector<int> fontSizes{12,14,16,18,20,22,24,26,28,32,36,40,44,48,52,56,60,64,72,80,88,96};
 };
 
 

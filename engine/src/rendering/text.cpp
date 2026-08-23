@@ -16,13 +16,13 @@ Text::Text(std::string text, std::string role, int sizeDelta, Color color)
     : m_text{std::move(text)}, m_role{std::move(role)}, m_sizeRole{0},
       m_sizeDelta{sizeDelta}, m_color{color}
 {
-    auto& theme = GetServices().runtimeCfg.user.theme;
+    auto& theme = GetServices().theme;
     m_sizeRole = theme.getSizeRole(m_role);
     m_dirtyText = true;
 }
 
 FontData Text::fontData() const {
-    auto& theme = GetServices().runtimeCfg.user.theme;
+    auto& theme = GetServices().theme;
     return theme.getFont({m_sizeRole, 0}, m_sizeDelta);
 }
 
@@ -172,7 +172,7 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 Vector2 Text::ReMeasure(Vector2 borders)
 {
     m_dirtyFull = false;
-    bool themeChanged = GetServices().runtimeCfg.user.theme.needsUpdate(m_themeVersion);
+    bool themeChanged = GetServices().theme.needsUpdate(m_themeVersion);
 
     if (m_dirtyText || themeChanged)
     {

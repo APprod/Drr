@@ -5,10 +5,12 @@
 #include "scene/sceneManager.hpp"
 #include "rendering/renderer.hpp"
 #include "utils/loader.hpp"
+#include "ui/uiTheme.hpp"
 
 struct Services
 {
     ResourceManager resManager;
+    UITheme theme;
     MyInput input;
     PerformanceLog perfLog{60};
     RuntimeConfig runtimeCfg;

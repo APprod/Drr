@@ -49,6 +49,7 @@ void Engine::init(){
     m_app->initPreOpenGl();
     auto startConf = m_app->getStartConfig();
     auto& usr = GetServices().runtimeCfg.user = startConf;
+    GetServices().theme.setSizes(usr.fontSizes);
     setupDebugConfig();
     
     mylog::GetLogger().Info("App init \n");
@@ -75,6 +76,7 @@ void Engine::init(){
     auto& resManager = GetServices().resManager;
     resManager.init();
     resManager.load();
+    GetServices().theme.warmup(); // RM is loaded; pre-bake the whole ladder to avoid a first-draw hitch
     SetExitKey(0); //TODO: remove at some point
 }
 

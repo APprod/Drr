@@ -9,9 +9,10 @@ void SettingsScene::OnEnter(){
     UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     auto& usrCfg = GetServices().runtimeCfg.user;
-    m_pendingSizeIndex = usrCfg.theme.getSelectedSize();
+    auto& th = GetServices().theme;
+    m_pendingSizeIndex = th.getSelectedSize();
     m_displayedSizeIndex = m_pendingSizeIndex;
-    m_pendingFontName = usrCfg.theme.getFontName(usrCfg.theme.getFontRole("default"));
+    m_pendingFontName = th.getFontName(th.getFontRole("default"));
 
     auto fonts = GetServices().resManager.getLoadedFonts();
     std::vector<std::pair<std::string, std::string>> fontItems;
@@ -56,7 +57,7 @@ void SettingsScene::OnEnter(){
                     ),
                     ValueLabel<int>("Font size Current: {}", &m_displayedSizeIndex, Text("", "text")),
                     HorizontalLayout( UICSpec{}.SetFlex({0,0}), LayoutSpec{}.AlignBegin(),
-                        Slider<int>(&m_pendingSizeIndex, 0, usrCfg.theme.getSizesCount() - 1,
+                        Slider<int>(&m_pendingSizeIndex, 0, th.getSizesCount() - 1,
                             [](int){}
                             , UICSpec{}.SetFlex({0,1}).MinSize({50,0}), sBarH, sMinTh, sMaxTh, sTarget, 1
                         ),
@@ -113,7 +114,7 @@ void SettingsScene::OnEnter(){
             ),
             Button(Text("Apply Settings sdfaaaaaaaaaaaaa", "button"),
                 [this](){
-                    auto& theme = GetServices().runtimeCfg.user.theme;
+                    auto& theme = GetServices().theme;
                     theme.setSelectedSize(m_pendingSizeIndex);
                     // raylib builtin atlas needs loose spacing, baked TTFs sit tight
                     theme.setFontRole("default", m_pendingFontName,

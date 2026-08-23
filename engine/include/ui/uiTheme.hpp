@@ -30,8 +30,6 @@ struct FontSpec{
     FontRoleId fontRole{0}; //Has spacing included with it //Add default params maybe explicitly
 };  
 
-// Only default
-
 class UITheme{
 public:
     UITheme();

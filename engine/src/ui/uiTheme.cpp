@@ -124,7 +124,7 @@ FontData UITheme::getFont(FontSpec spec, int sizeDelta){
     auto& fonts = fontRole.fonts;
     if (fonts.size() < m_fontSizes.size()) fonts.resize(m_fontSizes.size());
     Font& font = fonts[sizeIdx];
-    if (!IsFontValid(font)){ // not baked yet -> ensure RM has this px (needs a stored filepath), then fetch
+    if (!IsFontValid(font)){
         auto& rm = GetServices().resManager;
         rm.loadFontSizes(fontRole.fontName, {static_cast<int>(size)});
         font = rm.getFont(fontRole.fontName, static_cast<int>(size));

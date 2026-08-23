@@ -16,7 +16,6 @@ TestScene::TestScene()
 
 void TestScene::OnEnter(){
     static int counter{0};
-    GetServices().runtimeCfg.user.theme.warmup(); // RM is loaded by now; pre-bake ladder to avoid first-draw hitch
     auto column= std::make_unique<VerticalLayout>(UIComponentSpec{},LayoutSpec{Alignment::End});
     for(int i = 0; i < 1; i++){
         auto buttonText = Text("Test", "button");

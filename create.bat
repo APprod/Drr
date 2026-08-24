@@ -51,7 +51,6 @@ if errorlevel 1 (
 )
 
 set COPIED_ROOT_CMAKE=0
-set COPIED_ROOT_BAT=0
 for %%F in (CMakeLists.txt build.bat run.bat build.sh .gitignore) do (
     if exist "%TEMPLATE_DIR%\%%F" (
         if exist "%%F" (
@@ -60,7 +59,6 @@ for %%F in (CMakeLists.txt build.bat run.bat build.sh .gitignore) do (
             copy "%TEMPLATE_DIR%\%%F" ".\" >nul
             echo [create] Copied %%F to repo root.
             if /I "%%F"=="CMakeLists.txt" set COPIED_ROOT_CMAKE=1
-            if /I "%%F"=="build.bat"     set COPIED_ROOT_BAT=1
         )
     )
 )
@@ -74,14 +72,9 @@ if "%COPIED_ROOT_CMAKE%"=="0" (
     )
 )
 
-rem Bake the app name into the fresh copies so scripts and CMake just work.
-powershell -NoProfile -Command "(Get-Content 'apps\%APP_NAME%\CMakeLists.txt') -replace 'add_ap_project\(template\)', 'add_ap_project(%APP_NAME%)' | Set-Content 'apps\%APP_NAME%\CMakeLists.txt'"
-
+rem Fresh root CMakeLists still points at the template folder - retarget it.
 if "%COPIED_ROOT_CMAKE%"=="1" (
     powershell -NoProfile -Command "(Get-Content 'CMakeLists.txt') -replace 'apps/template', 'apps/%APP_NAME%' -replace 'project\(AppTest\)', 'project(%APP_NAME%)' | Set-Content 'CMakeLists.txt'"
-)
-if "%COPIED_ROOT_BAT%"=="1" (
-    powershell -NoProfile -Command "(Get-Content 'build.bat') -replace 'set \"APP_NAME=\"', 'set \"APP_NAME=%APP_NAME%\"' | Set-Content 'build.bat'"
 )
 
 :ci_only

@@ -51,7 +51,6 @@ mkdir -p "apps"
 cp -r "$TEMPLATE_DIR/app" "apps/$APP_NAME"
 
 COPIED_ROOT_CMAKE=0
-COPIED_ROOT_BAT=0
 for F in CMakeLists.txt build.bat run.bat build.sh .gitignore; do
     if [ -f "$TEMPLATE_DIR/$F" ]; then
         if [ -f "$F" ]; then
@@ -60,7 +59,6 @@ for F in CMakeLists.txt build.bat run.bat build.sh .gitignore; do
             cp "$TEMPLATE_DIR/$F" "./$F"
             echo "[create] Copied $F to repo root."
             if [ "$F" = "CMakeLists.txt" ]; then COPIED_ROOT_CMAKE=1; fi
-            if [ "$F" = "build.bat" ]; then COPIED_ROOT_BAT=1; fi
         fi
     fi
 done
@@ -74,18 +72,10 @@ if [ "$COPIED_ROOT_CMAKE" = "0" ]; then
     fi
 fi
 
-# Bake the app name into the fresh copies so scripts and CMake just work.
-if [ -f "apps/$APP_NAME/CMakeLists.txt" ]; then
-    # replace add_ap_project(template) -> add_ap_project(<name>)
-    sed -i "s/add_ap_project(template)/add_ap_project($APP_NAME)/" "apps/$APP_NAME/CMakeLists.txt"
-fi
-
+# Fresh root CMakeLists still points at the template folder - retarget it.
 if [ "$COPIED_ROOT_CMAKE" = "1" ]; then
     sed -i "s|apps/template|apps/$APP_NAME|g" "CMakeLists.txt"
     sed -i "s/project(AppTest)/project($APP_NAME)/" "CMakeLists.txt"
-fi
-if [ "$COPIED_ROOT_BAT" = "1" ]; then
-    sed -i "s/set \"APP_NAME=\"/set \"APP_NAME=$APP_NAME\"/" "build.bat"
 fi
 fi
 

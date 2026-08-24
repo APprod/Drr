@@ -1,11 +1,11 @@
 
 FILE(GLOB_RECURSE MyCPPSources ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
-add_executable(app ${MyCPPSources})
+add_executable(demo ${MyCPPSources})
 
-target_include_directories(app PRIVATE include/)
+target_include_directories(demo PRIVATE include/)
 
 
-target_link_libraries(app PRIVATE ApEngine)
+target_link_libraries(demo PRIVATE ApEngine)
 
 
 if(CMAKE_CONFIGURATION_TYPES)
@@ -20,13 +20,13 @@ add_custom_target(copy-assets
         "${ASSETS_DIR}"
     COMMENT "Copying assets to build directory"
 )
-add_dependencies(app copy-assets)
+add_dependencies(demo copy-assets)
 
 # Web Configurations
 if (EMSCRIPTEN)
     # Tell Emscripten to build an example.html file.
-    set_target_properties(app PROPERTIES SUFFIX ".html")
-    target_link_options(app 
+    set_target_properties(demo PROPERTIES SUFFIX ".html")
+    target_link_options(demo 
     PRIVATE -sUSE_GLFW=3 
     PRIVATE --preload-file assets
     PRIVATE -sGL_ENABLE_GET_PROC_ADDRESS=1
@@ -40,7 +40,7 @@ endif()
 
 # Checks if OSX and links appropriate frameworks (Only required on MacOS)
 if (APPLE)
-    target_link_libraries(app "-framework IOKit")
-    target_link_libraries(app "-framework Cocoa")
-    target_link_libraries(app "-framework OpenGL")
+    target_link_libraries(demo "-framework IOKit")
+    target_link_libraries(demo "-framework Cocoa")
+    target_link_libraries(demo "-framework OpenGL")
 endif()

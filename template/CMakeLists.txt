@@ -31,5 +31,5 @@ if(IS_STATIC AND NOT EMSCRIPTEN)
 endif()
 
 # Engine ships its own dependency fetching (raylib/json anchored inside ApEngine/)
-add_subdirectory(ApEngine/engine)
+add_subdirectory(ApEngine)
 add_subdirectory(apps/template)

@@ -29,7 +29,7 @@ jobs:
           name: windows-msvc-profile-${{ inputs.build_type }}
           path: |
             _build/msvc-${{ inputs.build_type }}/engine/${{ inputs.build_type }}/ApEngine.lib
-            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/app.exe
-            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/app.pdb
+            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/demo.exe
+            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/demo.pdb
             _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/assets/
           retention-days: 1

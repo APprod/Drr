@@ -29,7 +29,7 @@ jobs:
           name: linux-desktop
           path: |
             _build/${{ inputs.build_type }}/engine/libApEngine.a
-            _build/${{ inputs.build_type }}/examples/demo/app
+            _build/${{ inputs.build_type }}/examples/demo/demo
             _build/${{ inputs.build_type }}/examples/demo/assets/
             _build/${{ inputs.build_type }}/apps/templateApp/templateApp
             _build/${{ inputs.build_type }}/apps/templateApp/assets/
@@ -59,10 +59,10 @@ jobs:
           name: linux-web
           path: |
             _build/Web/engine/libApEngine.a
-            _build/Web/examples/demo/app.html
-            _build/Web/examples/demo/app.js
-            _build/Web/examples/demo/app.wasm
-            _build/Web/examples/demo/app.data
+            _build/Web/examples/demo/demo.html
+            _build/Web/examples/demo/demo.js
+            _build/Web/examples/demo/demo.wasm
+            _build/Web/examples/demo/demo.data
             _build/Web/apps/templateApp/templateApp.html
             _build/Web/apps/templateApp/templateApp.js
             _build/Web/apps/templateApp/templateApp.wasm
@@ -95,7 +95,7 @@ jobs:
           name: windows-mingw
           path: |
             _build/${{ inputs.build_type }}/engine/libApEngine.a
-            _build/${{ inputs.build_type }}/examples/demo/app.exe
+            _build/${{ inputs.build_type }}/examples/demo/demo.exe
             _build/${{ inputs.build_type }}/examples/demo/assets/
             _build/${{ inputs.build_type }}/apps/templateApp/templateApp.exe
             _build/${{ inputs.build_type }}/apps/templateApp/assets/
@@ -118,7 +118,7 @@ jobs:
           name: windows-msvc
           path: |
             _build/msvc-${{ inputs.build_type }}/engine/${{ inputs.build_type }}/ApEngine.lib
-            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/app.exe
+            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/demo.exe
             _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/assets/
             _build/msvc-${{ inputs.build_type }}/apps/templateApp/${{ inputs.build_type }}/templateApp.exe
             _build/msvc-${{ inputs.build_type }}/apps/templateApp/${{ inputs.build_type }}/assets/

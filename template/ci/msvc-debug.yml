@@ -41,5 +41,5 @@ jobs:
         with:
           name: windows-msvc-profile-${{ inputs.build_type }}
           path: |
-            _build/msvc-${{ inputs.build_type }}/apps/
+            _build/msvc-${{ inputs.build_type }}/apps/*/${{ inputs.build_type }}/
           retention-days: 1

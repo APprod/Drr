@@ -28,7 +28,10 @@ jobs:
         with:
           name: linux-desktop
           path: |
-            _build/${{ inputs.build_type }}/apps/
+            _build/${{ inputs.build_type }}/apps/**/*
+            !_build/${{ inputs.build_type }}/apps/**/CMakeFiles/**
+            !_build/${{ inputs.build_type }}/apps/**/cmake_install.cmake
+            !_build/${{ inputs.build_type }}/apps/**/Makefile
           retention-days: 1
 
   linux-web:
@@ -54,7 +57,10 @@ jobs:
         with:
           name: linux-web
           path: |
-            _build/Web/apps/
+            _build/Web/apps/**/*
+            !_build/Web/apps/**/CMakeFiles/**
+            !_build/Web/apps/**/cmake_install.cmake
+            !_build/Web/apps/**/Makefile
           retention-days: 1
 
   windows-mingw:
@@ -81,7 +87,10 @@ jobs:
         with:
           name: windows-mingw
           path: |
-            _build/${{ inputs.build_type }}/apps/
+            _build/${{ inputs.build_type }}/apps/**/*
+            !_build/${{ inputs.build_type }}/apps/**/CMakeFiles/**
+            !_build/${{ inputs.build_type }}/apps/**/cmake_install.cmake
+            !_build/${{ inputs.build_type }}/apps/**/Makefile
           retention-days: 1
 
   windows-msvc:
@@ -99,5 +108,5 @@ jobs:
         with:
           name: windows-msvc
           path: |
-            _build/msvc-${{ inputs.build_type }}/apps/
+            _build/msvc-${{ inputs.build_type }}/apps/*/${{ inputs.build_type }}/
           retention-days: 1

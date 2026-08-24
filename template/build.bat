@@ -7,11 +7,13 @@ set "BUILD_DIR=Debug"
 set "WEB=False"
 set "MSVC=False"
 set "PROFILE=OFF"
+set "APP_NAME="
 
 set "START_TIME=%TIME%"
 
 :parse
 if "%1"=="" goto :endparse
+if /I "%1"=="--target" (set "APP_NAME=%2" & shift & shift & goto :parse)
 if /I "%1"=="release" set "BUILD_TYPE=Release" & set "BUILD_DIR=Release" & shift & goto :parse
 if /I "%1"=="debug" set "BUILD_TYPE=Debug" & set "BUILD_DIR=Debug" & shift & goto :parse
 if /I "%1"=="static" set "STATIC_LINKING=ON" & shift & goto :parse
@@ -20,6 +22,9 @@ if /I "%1"=="web" set "WEB=True" & set "BUILD_DIR_BASE=_build\Web\" & shift & go
 if /I "%1"=="msvc" set "MSVC=True" & shift & goto :parse
 if /I "%1"=="profile" set "PROFILE=ON" & shift & goto :parse
 :endparse
+
+set "TARGET_ARGS="
+if not "%APP_NAME%"=="" set "TARGET_ARGS=--target %APP_NAME%"
 
 if "%MSVC%"=="True" set "BUILD_DIR=msvc-%BUILD_DIR%"
 if "%WEB%"=="True" goto :webBuild
@@ -36,7 +41,7 @@ if defined EMSDK (
     emcmake cmake -S . -B %BUILD_DIR_BASE%%BUILD_DIR% -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DPLATFORM=Web
 )
 if %errorlevel% neq 0 exit /b %errorlevel%
-cmake --build %BUILD_DIR_BASE%%BUILD_DIR% --target app --parallel
+cmake --build %BUILD_DIR_BASE%%BUILD_DIR% %TARGET_ARGS% --parallel
 if %errorlevel% neq 0 exit /b %errorlevel%
 goto :endBuild
 
@@ -45,7 +50,7 @@ goto :endBuild
 echo Building %BUILD_TYPE% configuration... MSVC
 cmake -S . -B %BUILD_DIR_BASE%%BUILD_DIR% -G "Visual Studio 17 2022" -A x64 -DIS_STATIC=%STATIC_LINKING% -DPROFILE=%PROFILE%
 if %errorlevel% neq 0 exit /b %errorlevel%
-cmake --build %BUILD_DIR_BASE%%BUILD_DIR% --config %BUILD_TYPE% --parallel
+cmake --build %BUILD_DIR_BASE%%BUILD_DIR% %TARGET_ARGS% --config %BUILD_TYPE% --parallel
 if %errorlevel% neq 0 exit /b %errorlevel%
 goto :endBuild
 
@@ -56,7 +61,7 @@ echo Building %BUILD_TYPE% configuration...
 cmake -S . -B%BUILD_DIR_BASE%%BUILD_DIR% -G "MinGW Makefiles" -DIS_STATIC=%STATIC_LINKING%  -DCMAKE_BUILD_TYPE=%BUILD_TYPE%  -DPROFILE=%PROFILE%
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake --build %BUILD_DIR_BASE%%BUILD_DIR% --config %BUILD_TYPE% --parallel
+cmake --build %BUILD_DIR_BASE%%BUILD_DIR% %TARGET_ARGS% --config %BUILD_TYPE% --parallel
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 :endBuild

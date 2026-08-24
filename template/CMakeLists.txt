@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 cmake_policy(SET CMP0135 NEW)
 cmake_policy(SET CMP0091 NEW)
-project(ApEngine)
+project(AppTest)
 
 option(IS_STATIC "option static" OFF)
 
@@ -30,13 +30,6 @@ if(IS_STATIC AND NOT EMSCRIPTEN)
     message("building static")
 endif()
 
-# FILE(GLOB_RECURSE MyCPPSources ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/include/*.hpp)
-
-# add_executable(app ${MyCPPSources})
-
-add_subdirectory(engine)
-
-option(BUILD_DEMO "build bundled demo example" OFF)
-if(BUILD_DEMO)
-    add_subdirectory(examples/demo)
-endif()
+# Engine ships its own dependency fetching (raylib/json anchored inside ApEngine/)
+add_subdirectory(ApEngine/engine)
+add_subdirectory(apps/template)

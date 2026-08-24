@@ -19,20 +19,14 @@ jobs:
             libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev \
             libxinerama-dev libxi-dev libxext-dev libxfixes-dev \
             libwayland-dev libxkbcommon-dev
-      - name: Scaffold templateApp (consumer)
-        run: chmod +x create.sh && ./create.sh templateApp
       - name: Build all targets via build.sh
-        run: chmod +x build.sh && ./build.sh ${{ inputs.build_type }} static demo
+        run: chmod +x build.sh && ./build.sh ${{ inputs.build_type }} static
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
           name: linux-desktop
           path: |
-            _build/${{ inputs.build_type }}/engine/libApEngine.a
-            _build/${{ inputs.build_type }}/examples/demo/app
-            _build/${{ inputs.build_type }}/examples/demo/assets/
-            _build/${{ inputs.build_type }}/apps/templateApp/templateApp
-            _build/${{ inputs.build_type }}/apps/templateApp/assets/
+            _build/${{ inputs.build_type }}/apps/
           retention-days: 1
 
   linux-web:
@@ -49,24 +43,14 @@ jobs:
             libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev \
             libxinerama-dev libxi-dev libxext-dev libxfixes-dev \
             libwayland-dev libxkbcommon-dev
-      - name: Scaffold templateApp (consumer)
-        run: chmod +x create.sh && ./create.sh templateApp
       - name: Build all targets via build.sh (web)
-        run: chmod +x build.sh && ./build.sh ${{ inputs.build_type }} web static demo
+        run: chmod +x build.sh && ./build.sh ${{ inputs.build_type }} web static
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
           name: linux-web
           path: |
-            _build/Web/engine/libApEngine.a
-            _build/Web/examples/demo/app.html
-            _build/Web/examples/demo/app.js
-            _build/Web/examples/demo/app.wasm
-            _build/Web/examples/demo/app.data
-            _build/Web/apps/templateApp/templateApp.html
-            _build/Web/apps/templateApp/templateApp.js
-            _build/Web/apps/templateApp/templateApp.wasm
-            _build/Web/apps/templateApp/templateApp.data
+            _build/Web/apps/
           retention-days: 1
 
   windows-mingw:
@@ -84,21 +68,14 @@ jobs:
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-make
-      - name: Scaffold templateApp (consumer)
-        run: create.bat templateApp
-        shell: cmd
       - name: Build all targets via build.bat (mingw)
-        run: ./build.bat ${{ inputs.build_type }} static demo
+        run: ./build.bat ${{ inputs.build_type }} static
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
           name: windows-mingw
           path: |
-            _build/${{ inputs.build_type }}/engine/libApEngine.a
-            _build/${{ inputs.build_type }}/examples/demo/app.exe
-            _build/${{ inputs.build_type }}/examples/demo/assets/
-            _build/${{ inputs.build_type }}/apps/templateApp/templateApp.exe
-            _build/${{ inputs.build_type }}/apps/templateApp/assets/
+            _build/${{ inputs.build_type }}/apps/
           retention-days: 1
 
   windows-msvc:
@@ -106,20 +83,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
-      - name: Scaffold templateApp (consumer)
-        run: .\create.bat templateApp
-        shell: cmd
       - name: Build all targets via build.bat (msvc)
-        run: .\build.bat msvc ${{ inputs.build_type }} static demo
+        run: .\build.bat msvc ${{ inputs.build_type }} static
         shell: cmd
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
           name: windows-msvc
           path: |
-            _build/msvc-${{ inputs.build_type }}/engine/${{ inputs.build_type }}/ApEngine.lib
-            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/app.exe
-            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/assets/
-            _build/msvc-${{ inputs.build_type }}/apps/templateApp/${{ inputs.build_type }}/templateApp.exe
-            _build/msvc-${{ inputs.build_type }}/apps/templateApp/${{ inputs.build_type }}/assets/
+            _build/msvc-${{ inputs.build_type }}/apps/
           retention-days: 1

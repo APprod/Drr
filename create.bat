@@ -2,17 +2,30 @@
 setlocal
 
 rem Creates a ready app project from the ApEngine template.
-rem Usage (run from your project repo root): <path-to-ApEngine>\create.bat <appName>
+rem Usage (run from your project repo root): <path-to-ApEngine>\create.bat [<appName>] [--ci]
 
-if "%~1"=="" (
-    echo Usage: create.bat ^<appName^>
+set "APP_NAME="
+set "CI=0"
+set "TEMPLATE_DIR=%~dp0template"
+
+:parse_args
+if "%~1"=="" goto :end_parse_args
+if /I "%~1"=="--ci" set "CI=1" & shift & goto :parse_args
+if "%APP_NAME%"=="" set "APP_NAME=%~1" & shift & goto :parse_args
+echo [create] Unknown argument "%~1"
+shift
+goto :parse_args
+:end_parse_args
+
+if "%APP_NAME%"=="" (
+    if "%CI%"=="1" goto :ci_only
+    echo Usage: create.bat ^<appName^> [--ci]
     echo Run from your project repo root. Creates .\apps\^<appName^> from the
     echo ApEngine template and copies root scripts only where they are missing.
+    echo Use --ci to also copy GitHub CI workflows from template\ci.
+    echo Use --ci alone to only copy CI workflows without creating an app.
     exit /b 1
 )
-
-set "APP_NAME=%~1"
-set "TEMPLATE_DIR=%~dp0template"
 
 echo %APP_NAME%| findstr /R /C:"^[A-Za-z0-9_-]*$" >nul
 if errorlevel 1 (
@@ -71,6 +84,27 @@ if "%COPIED_ROOT_BAT%"=="1" (
     powershell -NoProfile -Command "(Get-Content 'build.bat') -replace 'set \"APP_NAME=\"', 'set \"APP_NAME=%APP_NAME%\"' | Set-Content 'build.bat'"
 )
 
-echo [create] Done: apps\%APP_NAME%
-echo [create] Build it with:  build.bat debug static --target %APP_NAME%
+:ci_only
+if "%CI%"=="1" (
+    if not exist "%TEMPLATE_DIR%\ci" (
+        echo [create] --ci requested but template\ci not found - skipping.
+    ) else (
+        if not exist ".github\workflows" mkdir ".github\workflows" 2>nul
+        for %%F in ("%TEMPLATE_DIR%\ci\*") do (
+            if exist ".github\workflows\%%~nxF" (
+                echo [create] .github\workflows\%%~nxF already exists - keeping yours.
+            ) else (
+                copy "%%F" ".github\workflows\" >nul
+                echo [create] Copied ci\%%~nxF to .github\workflows\
+            )
+        )
+    )
+)
+
+if not "%APP_NAME%"=="" (
+    echo [create] Done: apps\%APP_NAME%
+    echo [create] Build it with:  build.bat debug static --target %APP_NAME%
+) else (
+    echo [create] Done: CI workflows installed.
+)
 endlocal

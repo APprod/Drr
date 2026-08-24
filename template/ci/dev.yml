@@ -2,7 +2,7 @@ name: Dev
 
 on:
   push:
-    branches: [dev, refactor]  # TODO: remove refactor eventually
+    branches: [main, dev]
 
 jobs:
   matrix:

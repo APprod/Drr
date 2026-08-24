@@ -11,6 +11,11 @@ on:
         options:
           - Debug
           - Release
+      target:
+        description: 'App to build (empty = all apps)'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   windows-msvc-profile:
@@ -20,7 +25,13 @@ jobs:
 
       - uses: ilammy/msvc-dev-cmd@v1
 
-      - run: .\template\build.bat msvc ${{ inputs.build_type }} static profile demo
+      - name: Build (all or single target)
+        run: |
+          if "${{ inputs.target }}"=="" (
+            .\build.bat msvc ${{ inputs.build_type }} static profile
+          ) else (
+            .\build.bat msvc ${{ inputs.build_type }} static profile --target ${{ inputs.target }}
+          )
         shell: cmd
 
       - uses: actions/upload-artifact@v4
@@ -28,8 +39,5 @@ jobs:
         with:
           name: windows-msvc-profile-${{ inputs.build_type }}
           path: |
-            _build/msvc-${{ inputs.build_type }}/engine/${{ inputs.build_type }}/ApEngine.lib
-            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/app.exe
-            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/app.pdb
-            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/assets/
+            _build/msvc-${{ inputs.build_type }}/apps/
           retention-days: 1

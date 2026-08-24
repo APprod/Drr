@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
@@ -33,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: emscripten-core/setup-emsdk@v15
         with:
           version: 4.0.15
@@ -60,6 +64,8 @@ jobs:
         shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
@@ -82,6 +88,8 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Build all targets via build.bat (msvc)
         run: .\build.bat msvc ${{ inputs.build_type }} static

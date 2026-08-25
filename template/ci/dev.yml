@@ -1,0 +1,11 @@
+name: Dev
+
+on:
+  push:
+    branches: [main, dev]
+
+jobs:
+  matrix:
+    uses: ./.github/workflows/_build-matrix.yml
+    with:
+      build_type: Debug

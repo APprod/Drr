@@ -1,0 +1,112 @@
+name: Build Matrix
+
+on:
+  workflow_call:
+    inputs:
+      build_type:
+        required: true
+        type: string
+
+jobs:
+  linux-desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev \
+            libxinerama-dev libxi-dev libxext-dev libxfixes-dev \
+            libwayland-dev libxkbcommon-dev
+      - name: Build all targets via build.sh
+        run: chmod +x build.sh && ./build.sh ${{ inputs.build_type }} static
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: linux-desktop
+          path: |
+            _build/${{ inputs.build_type }}/apps/**/*
+            !_build/${{ inputs.build_type }}/apps/**/CMakeFiles/**
+            !_build/${{ inputs.build_type }}/apps/**/cmake_install.cmake
+            !_build/${{ inputs.build_type }}/apps/**/Makefile
+          retention-days: 1
+
+  linux-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 4.0.15
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev \
+            libxinerama-dev libxi-dev libxext-dev libxfixes-dev \
+            libwayland-dev libxkbcommon-dev
+      - name: Build all targets via build.sh (web)
+        run: chmod +x build.sh && ./build.sh ${{ inputs.build_type }} web static
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: linux-web
+          path: |
+            _build/Web/apps/**/*
+            !_build/Web/apps/**/CMakeFiles/**
+            !_build/Web/apps/**/cmake_install.cmake
+            !_build/Web/apps/**/Makefile
+          retention-days: 1
+
+  windows-mingw:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          cache: false
+          install: >-
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-make
+      - name: Build all targets via build.bat (mingw)
+        run: ./build.bat ${{ inputs.build_type }} static
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: windows-mingw
+          path: |
+            _build/${{ inputs.build_type }}/apps/**/*
+            !_build/${{ inputs.build_type }}/apps/**/CMakeFiles/**
+            !_build/${{ inputs.build_type }}/apps/**/cmake_install.cmake
+            !_build/${{ inputs.build_type }}/apps/**/Makefile
+          retention-days: 1
+
+  windows-msvc:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Build all targets via build.bat (msvc)
+        run: .\build.bat msvc ${{ inputs.build_type }} static
+        shell: cmd
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: windows-msvc
+          path: |
+            _build/msvc-${{ inputs.build_type }}/apps/*/${{ inputs.build_type }}/
+          retention-days: 1

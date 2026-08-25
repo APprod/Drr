@@ -1,0 +1,45 @@
+name: Build MSVC Profile (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build configuration'
+        required: true
+        default: 'Debug'
+        type: choice
+        options:
+          - Debug
+          - Release
+      target:
+        description: 'App to build (empty = all apps)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  windows-msvc-profile:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build (all or single target)
+        run: |
+          if "${{ inputs.target }}"=="" (
+            .\build.bat msvc ${{ inputs.build_type }} static profile
+          ) else (
+            .\build.bat msvc ${{ inputs.build_type }} static profile --target ${{ inputs.target }}
+          )
+        shell: cmd
+
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: windows-msvc-profile-${{ inputs.build_type }}
+          path: |
+            _build/msvc-${{ inputs.build_type }}/apps/*/${{ inputs.build_type }}/
+          retention-days: 1

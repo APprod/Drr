@@ -1,5 +1,6 @@
 *build/
-third-party/raylib/
+third-party/*
 Todo.md
 .vscode/
-
+*log*.txt*
+_deps-cache

@@ -1,0 +1,35 @@
+name: Build MSVC Profile (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build configuration'
+        required: true
+        default: 'Debug'
+        type: choice
+        options:
+          - Debug
+          - Release
+
+jobs:
+  windows-msvc-profile:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - run: .\template\build.bat msvc ${{ inputs.build_type }} static profile demo
+        shell: cmd
+
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: windows-msvc-profile-${{ inputs.build_type }}
+          path: |
+            _build/msvc-${{ inputs.build_type }}/engine/${{ inputs.build_type }}/ApEngine.lib
+            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/demo.exe
+            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/demo.pdb
+            _build/msvc-${{ inputs.build_type }}/examples/demo/${{ inputs.build_type }}/assets/
+          retention-days: 1

@@ -1,0 +1,107 @@
+name: Build
+
+permissions:
+  contents: write
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  matrix:
+    uses: ./.github/workflows/_build-matrix.yml
+    with:
+      build_type: Release
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [matrix]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-desktop
+          path: release/linux-desktop
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-web
+          path: release/linux-web
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-mingw
+          path: release/windows-mingw
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-msvc
+          path: release/windows-msvc
+
+      - name: Package linux-desktop (engine only)
+        run: |
+          mkdir -p stage/linux-desktop
+          cp -r engine/include stage/linux-desktop/include
+          mkdir -p stage/linux-desktop/cmake
+          cp -r cmake stage/linux-desktop/ 2>/dev/null || true
+          lib=$(find release/linux-desktop -type f -name "libApEngine.a" | head -n1)
+          if [ -z "$lib" ]; then echo "linux-desktop lib not found"; find release/linux-desktop -type f | head -n 20; exit 1; fi
+          cp "$lib" stage/linux-desktop/
+          cd stage/linux-desktop
+          zip -r ../../linux-desktop.zip .
+          cd -
+
+      - name: Package linux-web (engine only)
+        run: |
+          mkdir -p stage/linux-web
+          cp -r engine/include stage/linux-web/include
+          mkdir -p stage/linux-web/cmake
+          cp -r cmake stage/linux-web/ 2>/dev/null || true
+          lib=$(find release/linux-web -type f -name "libApEngine.a" | head -n1)
+          if [ -z "$lib" ]; then echo "linux-web lib not found"; find release/linux-web -type f | head -n 20; exit 1; fi
+          cp "$lib" stage/linux-web/
+          cd stage/linux-web
+          zip -r ../../linux-web.zip .
+          cd -
+
+      - name: Package windows-mingw (engine only)
+        run: |
+          mkdir -p stage/windows-mingw
+          cp -r engine/include stage/windows-mingw/include
+          mkdir -p stage/windows-mingw/cmake
+          cp -r cmake stage/windows-mingw/ 2>/dev/null || true
+          lib=$(find release/windows-mingw -type f -name "libApEngine.a" | head -n1)
+          if [ -z "$lib" ]; then echo "windows-mingw lib not found"; find release/windows-mingw -type f | head -n 20; exit 1; fi
+          cp "$lib" stage/windows-mingw/
+          cd stage/windows-mingw
+          zip -r ../../windows-mingw.zip .
+          cd -
+
+      - name: Package windows-msvc (engine only)
+        run: |
+          mkdir -p stage/windows-msvc
+          cp -r engine/include stage/windows-msvc/include
+          mkdir -p stage/windows-msvc/cmake
+          cp -r cmake stage/windows-msvc/ 2>/dev/null || true
+          lib=$(find release/windows-msvc -type f -name "ApEngine.lib" | head -n1)
+          if [ -z "$lib" ]; then echo "windows-msvc lib not found"; find release/windows-msvc -type f | head -n 20; exit 1; fi
+          cp "$lib" stage/windows-msvc/
+          cd stage/windows-msvc
+          zip -r ../../windows-msvc.zip .
+          cd -
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: "Automated release with engine library + headers per platform."
+          files: |
+            linux-desktop.zip
+            linux-web.zip
+            windows-mingw.zip
+            windows-msvc.zip
+          draft: false
+          prerelease: false

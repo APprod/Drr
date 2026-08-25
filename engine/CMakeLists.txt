@@ -130,6 +130,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options( ApEngine PUBLIC -Wchanges-meaning)
   endif()
+  target_link_options(ApEngine PUBLIC $<$<CONFIG:Release>:-s>)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_compile_options( ApEngine PUBLIC
     $<$<CONFIG:Debug>:

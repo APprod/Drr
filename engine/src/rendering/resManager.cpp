@@ -5,7 +5,6 @@
 #include "platform.hpp"
 
 namespace {
-// Glyphs baked into every loaded TTF: printable ASCII + full Cyrillic block
 const std::vector<int>& fontCodepoints()
 {
     static const std::vector<int> cps = []{
@@ -43,41 +42,30 @@ ResourceManager::~ResourceManager()
 
 void ResourceManager::init()
 {
+    //Default for every project
     FontMap defFonts;
     defFonts[10] = ::GetFontDefault();
     m_fonts["default"].map = defFonts;
 
-    
-
+    //Shaders required by the engine itself: Scene::OnDrawToScreen uses "processing",
+    //Button hover animation uses "brightness"
     loadShader("brightness", platform::getShaderPath("brightness.fs"),
                             {{"brightness",{1.0f}}});
-    loadShader(
-    "processing",
-    platform::getShaderPath("processing.fs"),
-    {
-        {"brightness", 1.0f},
-        {"contrast",   1.0f},
-        {"saturation", 1.0f},
-        {"gamma",      1.0f},
-        {"tint",       Vector3{1.0f, 1.0f, 1.0f}},
-        {"alpha",      1.0f}
-    }
-);
-    loadShader("vignette",
-        platform::getShaderPath("vignette.fs"),
+    loadShader("processing",
+        platform::getShaderPath("processing.fs"),
         {
-            {"vignetteIntensity", 0.5f},
-            {"vignetteRoundness", 0.5f},
-            {"vignetteSoftness",  0.5f},
+            {"brightness", 1.0f},
+            {"contrast",   1.0f},
+            {"saturation", 1.0f},
+            {"gamma",      1.0f},
+            {"tint",       Vector3{1.0f, 1.0f, 1.0f}},
+            {"alpha",      1.0f}
         }
     );
-
-    m_nPatchMap = GetServices().loader.loadMap<SliceMargins>("assets/texture-slices.json");
 }
 
 void ResourceManager::load()
 {
-    this->loadFont("Inter", "assets/fonts/Inter/Inter_18pt-Regular.ttf");
     loadTextures();
 }
 
@@ -262,12 +250,14 @@ std::optional<SliceMargins> ResourceManager::getSliceData(const std::string& nam
     return std::nullopt;
 }
 
+void ResourceManager::loadNPatchData(std::string path)
+{
+    m_nPatchMap = GetServices().loader.loadMap<SliceMargins>(path);
+}
+
 void ResourceManager::loadTextures()
 {
     loadTexture("default");
-    loadTexture("button_default");
-    loadTexture("button_wide");
-    loadTexture("menu");
 }
 
 void ResourceManager::loadShader(std::string shaderName, std::string filepath, 

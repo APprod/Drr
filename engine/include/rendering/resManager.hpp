@@ -43,6 +43,7 @@ public:
     ShaderProgram& getShaderProgram(const std::string& name);
 
     std::optional<SliceMargins> getSliceData(const std::string& name) const;
+    void loadNPatchData(std::string path);
 private:
     bool lazyLoad(std::string name);
     void loadTextures();

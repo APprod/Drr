@@ -16,7 +16,7 @@ enum class Alignment{
     End
 };
 
-enum class JustifyContent{
+enum class JustifyContent{ // Spacing between elements in layout
     SpaceEvenly,
     None,
 };
@@ -46,16 +46,18 @@ struct LayoutSpec{
     LayoutSpec& Spacing(int s) { spacing = s; return *this; }
 };
 
-inline LayoutSpec base{Alignment::Beginning};
+inline LayoutSpec basicLayout{Alignment::Beginning};
 
+// basic layout, derive it or one of the descendants for custom behaviour
 class Layout: public UIComponent{
 public:
+    // UISpec - controls layouts own features, LayoutSpec - controls contents distributuion
     template<typename... Ts>
-    Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base, Ts&&... children)
+    Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = basicLayout, Ts&&... children)
     : UIComponent(uiSpec), m_layoutSpec(layoutSpec) {
         (AddChild(std::make_unique<std::decay_t<Ts>>(std::forward<Ts>(children))), ...);
     }
-    Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base)
+    Layout(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = basicLayout)
     : UIComponent(uiSpec), m_layoutSpec(layoutSpec){
     }
     
@@ -70,8 +72,11 @@ public:
     }
     UICompId AddChild(std::unique_ptr<UIComponent>&& child);
     void QueueRemoveChild(UICompId id);
+    // Pass calls to children
     void OnDrawContent() override;
+    // Pass calls to children
     bool OnUpdate(float dt) override;
+    // Pass evnt to children
     bool OnEvent(const MyEvent& event) override;
     const std::vector<std::unique_ptr<UIComponent>>& getChildren() const {return m_children;}
     virtual UIComponent* FindTarget(Vector2 point) override;
@@ -82,21 +87,23 @@ public:
         }
         return nullptr;
     }
-protected:
+    protected:
     LayoutSpec m_layoutSpec;
     std::vector<std::unique_ptr<UIComponent>> m_children;
     std::vector<UICompId> m_removalQueue;
     bool m_needsRemeasure = false;
-
+    
+    // functions for axial layouts
     using Axis = float Vector2::*;
-    void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis);
+    void MeasureAxialLayout(Vector2 available, Axis mainAxis, Axis crossAxis); // functions for axial layouts
     void ArrangeAxialLayout(Rectangle actualRect, Axis mainAxis, Axis crossAxis);
 
+    // helper calcualtes vector of final sizes after flex is applied
     std::vector<Vector2> CalculateFlex(Vector2 available, Axis mainAxis, Axis crossAxis, float& spare);
     void ResolveFlex(std::vector<Vector2>& sizes, Vector2 innerDim, Axis mainAxis, float& spare,
         float Flex::*flexField, Vector2 UIComponentSpec::*limitField, float tolerance);
     bool RemoveChild(UICompId id);
-};
+    };
 
 class VerticalLayout: public Layout{
     using Layout::Layout;
@@ -110,11 +117,20 @@ class HorizontalLayout: public Layout{
     virtual void ArrangeContent(Rectangle actualRect) override;
 };
 
+// Layout where all the components take up all the available place and stack over the same place independenty
+class Stack: public Layout{
+public:
+    using Layout::Layout;
+    virtual void MeasureContent(Vector2 available) override;
+    virtual void ArrangeContent(Rectangle rect) override;
+};
+
+//Layout that allows to scrlll on both axises
 template<typename LayoutType>
 class ScrollView: public LayoutType{
 public:
     template<typename... Ts>
-    ScrollView(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base, Ts&&... children)
+    ScrollView(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = basicLayout, Ts&&... children)
         : LayoutType(std::move(uiSpec), std::move(layoutSpec), std::forward<Ts>(children)...)
     {
         m_scroll.direction = sDir;
@@ -192,9 +208,3 @@ private:
 using VerticalScrollView = ScrollView<VerticalLayout>;
 using HorizontalScrollView = ScrollView<HorizontalLayout>;
 
-class Stack: public Layout{
-public:
-    using Layout::Layout;
-    virtual void MeasureContent(Vector2 available) override;
-    virtual void ArrangeContent(Rectangle rect) override;
-};

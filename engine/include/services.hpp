@@ -5,18 +5,26 @@
 #include "scene/sceneManager.hpp"
 #include "rendering/renderer.hpp"
 #include "utils/loader.hpp"
+#include "utils/perf.hpp"
 #include "ui/uiTheme.hpp"
+#include "userSettings.hpp"
 
+void setupDebugConfig();
+
+//Service locator singleton
 struct Services
 {
+    // Helper services
     ResourceManager resManager;
     UITheme theme;
     MyInput input;
     PerformanceLog perfLog{60};
-    RuntimeConfig runtimeCfg;
     SceneManager sceneManager;
     Renderer renderer;
     loader::Loader loader;
+    // Data
+    DebugFlags debugFlags;
+    UserSettings userSettings;
 
     static Services& Get(){
         static Services services;

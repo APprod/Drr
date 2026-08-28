@@ -22,9 +22,10 @@ class App: public IApp{
         th.registerSizeRole("header", 2);
         th.registerSizeRole("big header", 4);
         th.registerFontRole("default", "Inter", 1);
-        GetServices().sceneManager.QueTransit<TestScene>();
     };
+    virtual std::unique_ptr<IScene> createScene() {return std::make_unique<TestScene>();};
     virtual void close() override {};
+
 };
 
 std::unique_ptr<IApp> createApp();

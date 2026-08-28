@@ -1,5 +1,5 @@
 #pragma once
-#include "scene/scene.hpp"
+#include "scene/baseScene.hpp"
 
 class SettingsScene:  public BaseScene{
     void OnEnter() override;

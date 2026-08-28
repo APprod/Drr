@@ -6,7 +6,7 @@
 
 #include "raylib.h"
 #include "rendering/shader.hpp"
-
+// Data for 9-Patch texture rendering
 struct SliceMargins {
     int left;
     int top;
@@ -15,7 +15,8 @@ struct SliceMargins {
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(SliceMargins, left, top, right, bottom)
 };
-
+// Class defines a texture that is drawn 
+// Adds helpers to simplify the use
 class TextureSpec {
 public:
     TextureSpec() = default;

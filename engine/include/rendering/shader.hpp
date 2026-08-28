@@ -6,16 +6,17 @@
 #include <functional>
 #include "raylib.h"
 
-using UniformValue = std::variant<float, int, Vector2, Vector3, Vector4>;
 
+using UniformValue = std::variant<float, int, Vector2, Vector3, Vector4>;
 using Uniforms = std::unordered_map<std::string, UniformValue>;
 
+// Main persistent description of shader
 struct ShaderProgram{
     Shader shader;
     std::unordered_map<std::string, int> locations;
     Uniforms defaults;
 };
-
+// Description of shader for shader draw call, has actual uniforms.
 struct ShaderInput{
     ShaderProgram program;
     Uniforms uniforms;
@@ -26,6 +27,7 @@ struct ShaderEffect {
     Uniforms uniforms;
 };
 
+/* Premade shader helpers */
 class ProcessingSh {
 public:
     ProcessingSh() = default;
@@ -51,6 +53,7 @@ private:
     Uniforms m_uniforms;
 };
 
+
 //uses shader, checks for typos in uniforms names
 void useShader(const ShaderProgram& program, const Uniforms& uniforms, std::function<void()> drawCall);
 
@@ -62,5 +65,6 @@ void useShaderUnchecked(const ShaderProgram& program, const Uniforms& uniforms, 
 
 //uses shader without checking for typos in uniforms names
 void useShaderUnchecked(std::string name, const Uniforms& uniforms, std::function<void()> drawCall);
-
+// Starts shader mode + sets uniforms without shades stack from renderer
+// Breaks shader stacking
 void setShaderUnchecked(const ShaderProgram& program, const Uniforms& uniforms);

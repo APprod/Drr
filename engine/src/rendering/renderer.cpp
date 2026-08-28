@@ -23,6 +23,9 @@ void Renderer::beginShaderMode(const ShaderProgram& program, const Uniforms& uni
     setShaderUnchecked(program, uniforms);
     m_shaderStack.push_back({program, uniforms});
 }
+void Renderer::beginShaderMode(const ShaderInput& input){
+    beginShaderMode(input.program, input.uniforms);
+}
 
 void Renderer::beginShaderMode(const std::string& name, const Uniforms& uniforms){
     beginShaderMode(GetServices().resManager.getShaderProgram(name), uniforms);

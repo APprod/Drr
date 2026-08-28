@@ -4,6 +4,8 @@
 
 #include "raylib.h"
 
+// paddings stack 
+// padding in pixels 
 struct Padding
 {
     int top = 0;
@@ -12,6 +14,7 @@ struct Padding
     int right = 0;
 };
 
+// padding in percent
 struct PaddingPct
 {
     float top = 0.0f;
@@ -26,7 +29,7 @@ enum class FillMode {
     FillMaxSize,
     ByTargetSize
 };
-
+// weight for how much the component can give up space or use space space
 struct Flex{
     float growth{0};
     float shrink{0};

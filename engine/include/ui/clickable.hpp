@@ -2,6 +2,7 @@
 
 #include "ui/component.hpp"
 
+// Helper calss. handles click registering. inherit if you need click behaviour
 class Clickable : public UIComponent {
 public:
     Clickable(UIComponentSpec spec = {});
@@ -16,6 +17,7 @@ protected:
     bool m_hold = false;
     bool m_hover = false;
 
+    // called in Onevent automatically //
     virtual void OnPressed()  {}
     virtual void OnReleased() {}
     virtual void OnClick()    {}

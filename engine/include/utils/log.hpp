@@ -1,3 +1,4 @@
+/* logger for the app*/
 #pragma once
 
 #include <string>
@@ -54,17 +55,21 @@ public:
     void Write(const MyMessage& message) override;
 };
 
+// allows to print any object with << defined
 template<class T>
 concept Streamable = requires(std::ostream& os, const T& t){
     { os << t } -> std::same_as<std::ostream&>;
 };
 
+// Singleton
 class Logger
 {
 public:
     static Logger& GetLogger();
+    void AddSink(std::unique_ptr<ISink> sink);
+    void SetMinSeverity(Severity s);
 
-    template<typename... Args> //supports <format>
+    template<typename... Args> //Logs, supports <format>
     void LogFormat(Severity s, std::format_string<Args...> fmt, Args&&... args) {
         Log(s, std::format(fmt, std::forward<Args>(args)...));
     }
@@ -115,9 +120,7 @@ public:
     }
 
     void Log(Severity s, std::string message);
-    void AddSink(std::unique_ptr<ISink> sink);
-    void SetMinSeverity(Severity s);
-
+   
     const std::vector<MyMessage>& GetMessages() const;
 
 private:

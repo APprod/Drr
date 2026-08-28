@@ -30,9 +30,14 @@ struct FontSpec{
     FontRoleId fontRole{0}; //Has spacing included with it //Add default params maybe explicitly
 };  
 
+// Handles fonts in the app
+// allows to use font roles (eg. MainFont, AdditionalFont, etc)
+// and size roles (eg. caption, text, header, etc) 
+// all roles besudes default sshould be defined by user
 class UITheme{
 public:
     UITheme();
+    // retrieves font with specifed font role and size role
     FontData getFont(FontSpec spec, int sizeDelta = 0);
     // Pre-bakes every registered font at every ladder size; call once after RM.load() to avoid a first-draw hitch
     void warmup();

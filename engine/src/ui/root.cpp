@@ -1,5 +1,6 @@
 #include "ui/root.hpp"
 #include "utils/util.hpp"
+#include "services.hpp"
 
 void Root::UpdateHover()
 {

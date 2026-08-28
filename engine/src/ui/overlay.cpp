@@ -1,39 +1,41 @@
 #include "ui/overlay.hpp"
 #include "services.hpp"
 #include "ui/label.hpp"
-#include "ui/modifier.hpp"
+#include "ui/popup.hpp"
 
 Overlay::Overlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 : Stack(uiSpec, layoutSpec) {
 
-    auto listener = std::make_unique<HotkeysListener>();
-    m_listener = listener.get();
+    auto listener = std::make_unique<DebugHotkeysListener>();
     listener->Bind(InputKey::KEY_F1, []{
-        GetServices().runtimeCfg.debug.showDebugOverlay ^= true;
+        GetServices().debugFlags.showDebugOverlay ^= true;
     }, "overlay");
     listener->Bind(InputKey::KEY_F2, []{
-        GetServices().runtimeCfg.debug.showLayoutBounds ^= true;
+        GetServices().debugFlags.showLayoutBounds ^= true;
     }, "layout");
     listener->Bind(InputKey::KEY_F3, []{
-        GetServices().runtimeCfg.debug.showLayoutContentBounds ^= true;
+        GetServices().debugFlags.showLayoutContentBounds ^= true;
     }, "content");
     listener->Bind(InputKey::KEY_F4, []{
-        GetServices().runtimeCfg.user.showFPS ^= true;
+        GetServices().userSettings.showFPS ^= true;
     }, "fps");
     listener->Bind(InputKey::KEY_F5, []{
-        GetServices().runtimeCfg.debug.showCursorPos ^= true;
+        GetServices().debugFlags.showCursorPos ^= true;
     }, "cursor");
     listener->Bind(InputKey::KEY_F6, []{
-        GetServices().runtimeCfg.debug.showPerformance ^= true;
+        GetServices().debugFlags.showPerformance ^= true;
     }, "perf");
     listener->Bind(InputKey::KEY_F7, []{
-        GetServices().runtimeCfg.debug.showDebugLog ^= true;
+        GetServices().debugFlags.showDebugLog ^= true;
     }, "log");
     listener->Bind(InputKey::KEY_F9, []{
-        GetServices().runtimeCfg.debug.showOverlayGradient ^= true;
+        GetServices().debugFlags.showOverlayGradient ^= true;
     }, "gradient");
     AddChild(std::move(listener));
-    Add(FPSDraw(Text("FPS: ", "default", 4)));
+    auto listener2 = std::make_unique<HotkeysListener>();
+    m_listener = listener2.get();
+    AddChild(std::move(listener2));
+    Add(FPSDraw(Text("FPS: ", "default", "default", 4)));
     GetUIContext().SetOverlay(this);
 }
 

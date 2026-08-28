@@ -8,7 +8,7 @@ void SettingsScene::OnEnter(){
     m_transitionTime = 0.2f;    
     UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
-    auto& usrCfg = GetServices().runtimeCfg.user;
+    auto& usrCfg = GetServices().userSettings;
     auto& th = GetServices().theme;
     m_pendingSizeIndex = th.getSelectedSize();
     m_displayedSizeIndex = m_pendingSizeIndex;
@@ -91,7 +91,7 @@ void SettingsScene::OnEnter(){
             ),
             Dropdown<WindowMode>(
                 {{"Fullscreen", WindowMode::Fullscreen},{"Windowed", WindowMode::Windowed},{"Borderless", WindowMode::Borderless}},
-                &GetServices().runtimeCfg.user.windowMode,
+                &GetServices().userSettings.windowMode,
                 TextureSpec("button_default"),
                 {200,100},
                 [](WindowMode sel){

@@ -1,5 +1,5 @@
 #pragma once
-#include "scene/scene.hpp"
+#include "scene/baseScene.hpp"
 #include "rendering/resManager.hpp"
 #include "utils/animated.hpp"
 

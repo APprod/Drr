@@ -1,5 +1,16 @@
 #include "ui/component.hpp"
-#include "ui/overlay.hpp"
+#include "services.hpp"
+
+void UIComponent::OnDraw(){
+    OnDrawContent();
+    if (GetServices().debugFlags.showLayoutContentBounds){
+        auto rec = GetVisualRect();
+        DrawRectangleLinesEx(rec,2,RED);
+    }
+    if (GetServices().debugFlags.showLayoutBounds){
+        DrawRectangleLinesEx(GetActualRect(),2,RAYWHITE);
+    }
+}
 
 UIComponent* UIComponent::FindTarget(Vector2 point){
     if (HitTest(point)) return this;

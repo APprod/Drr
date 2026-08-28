@@ -4,15 +4,16 @@
 #include <unordered_map>
 
 #include "input/events.hpp"
-#include "ui/hotkeysListener.hpp"
+#include "ui/debugHotkeysListener.hpp"
 #include "ui/layout.hpp"
 #include "utils/log.hpp"
 
 
-
+// basic overlay implementation. derive for custom functionality 
+// adds keybindings, popup handling
 class Overlay : public Stack, public IOverlay {
 public:
-    Overlay(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = base); 
+    Overlay(UIComponentSpec uiSpec = {}, LayoutSpec layoutSpec = basicLayout); 
     virtual ~Overlay();
 
     void Bind(InputKey key, std::function<void()> cb, std::string label = "") {

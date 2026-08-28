@@ -1,5 +1,6 @@
 #include "ui/layout.hpp"
 #include "utils/util.hpp"
+#include "utils/log.hpp"
 
 #include <algorithm>
 #include <numeric>

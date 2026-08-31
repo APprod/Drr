@@ -1,4 +1,4 @@
-### ApEngine
+## ApEngine
 ApEngine is a small library engine/wrapper built around raylib  that implements some additional features like Texture management, retained UI layout, event system, Scene system and some utils to speed up and simplify process of making small games.
 - [Overview](#overview)
 	- [Features](#features)
@@ -27,8 +27,8 @@ ApEngine is a small library engine/wrapper built around raylib  that implements 
 		- [UITheme](#uitheme)
 		- [Creating Custom UiComponents](#creating-custom-uicomponents)
 --- 
-### Overview
-#### Features:
+## Overview
+### Features:
 - Expandable retained mode UI System
 - Simple scene system
 - Input abstraction level (Work in progress)
@@ -43,18 +43,20 @@ ApEngine is a small library engine/wrapper built around raylib  that implements 
 - Tracy integration
 - Additional utils
 - Build scripts
-#### Planned:
+### Planned:
 - Audio manager
 - Thread pool
 --- 
-### Install/Build
-#### Prerequisites
+## Install/Build
+### Prerequisites
 Cmake is the only supported build system as of now. 
 You need Cmake >=3.14
 C++ Compiler supporting C++ 20 or higher standard
 Current supported compilers - (Linux) GCC, (Win) MinGW(ucrt), (Win) MSVC. Clang wasn't tested
 Emscripten installed in your PATH is needed for Web build 
-#### Installation process/Quick Start
+
+---
+### Installation process/Quick Start
 Currently engine's intended way of installing is by adding it as submodule, but it may be changed in the future.
 1.  Create a git repository 
 ```
@@ -123,8 +125,8 @@ See step 4 - create project
 running create.bat or bat.sh with a new project name appends existing CmakeLists files so no edditional steps needed. Select build target with --target
 
 --- 
-### User Guide
-#### Filestructure of Engine
+## User Guide
+### Filestructure of Engine
 ```
 .github // internal CI scripts             
 assets // assets distributed with engine
@@ -140,7 +142,7 @@ CMakeLists // engine level smake
 create.bat // project creating scripts
 create.sh // project creating scripts
 ```
-#### Create scripts
+### Create scripts
 create.bat / create.sh scripts are used to simplify project creation
 Create script when invoked the first time copies following files
 ```
@@ -171,7 +173,8 @@ Uploads created executables as artifacts with 1 day retention. All builds are De
 **Manually dispatched scripts**:
 - build.yml - Builds release configuration, creates release (prerelease, draft set to true) when dispatched from v* tag
 - msvc-debug.yml - builds projects with msvc and **Tracy** enabled, you can select debug/release, includes pdb. Main purpose - create a build that can be used with Tracy
-#### Root build scripts
+---
+### Root build scripts
 Lets u build and run project with one line call.
 usage:
 ```
@@ -187,9 +190,10 @@ usage:
 - demo builds examples/demo in addition
 - msvc for msvc build, to enable msvc flags instead of gcc ones
 ./run.bat runs ./build.bat under the hood + runs the built exe/ linux executable, or starts emrun.
----
 All dependencies (Raylib, nlohmann::json, Tracy) are automatically installed into ApEngine/third-party folder and are exposed to user.
-#### Project File structure
+
+---
+### Project File structure
 Project created with create script has following structure by default:
 ```
 assets //     folder for your assets
@@ -202,14 +206,16 @@ src/mainApp.cpp
 Cmake handles getting project name from folder name and uses engine/cmake/ function to handle all necessary for build code.
 Everything else is up to user.
 assets folder will be copied near final binary so everything should be put here. It is also copied as well as engine level assets, so no need to add engine assets to it , or vice versa, both are merged.
-#### Customizing build
+
+---
+### Customizing build
 If you want to customize build scripts for project, copy contents from ApEngine/cmake/add_ap_project.cmake, set ${target} variable to your project name, you can add whatever other changes you need then.
 Or you can change build.bat\/sh\/run if it is needed
 
 ---
-#### Basic ApEngine app principles.
+### Basic ApEngine app principles.
 This part covers basic architecture and principles of programm using ApEngine
-##### Creating and registering App to Engine
+#### Creating and registering App to Engine
 `#include "app.hpp"`
 Entry point to your code is function 
 `std::unique_ptr<IApp> createApp();`
@@ -222,7 +228,9 @@ std::unique_ptr<IApp> createApp(){
 }
 ```
 Functions of IApp will be called in their definition order and can be used if you need some initialization or loading before the first scene.
-##### Creating Scene
+
+---
+#### Creating Scene
 `#include "scene/scene.hpp"` or 
 `#include "scene/baseScene.hpp"`
 IApp should implement createScene to return your first Scene. Example:
@@ -240,21 +248,24 @@ Implement OnUpdateState with your game logic and OnDrawContent with screen conte
 Add your UI elements to the UI tree and they will be updated automatically.
 Call `root.OnDraw();` to draw the UI.
 Use override OnDrawToScreen for custom post processing. (OnDrawContent is rendered to a RenderTarget that can be used for post-processing).
-##### Services
+
+---
+#### Services
 `#include "services.hpp"`
 Services is a global singleton containing Engine services. Main place to interact with the Engine.
 Contents:
-- [SceneManager](Readme.md#scene-transitions-and-lifecycle)
-- [ResourceManager](Readme.md#resourcemanager)
-- [Input manager (MyInput)](Readme.md#myinput)
-- [Renderer](Readme.md#renderer)
+- [SceneManager](scene-transitions-and-lifecycle)
+- [ResourceManager](resourcemanager)
+- [Input manager (MyInput)](myinput)
+- [Renderer](renderer)
 - loader::Loader
 - PerformanceLog
-- [UITheme](Readme.md#uitheme)
-- [UserSettings](Readme.md#usersettings)
+- [UITheme](uitheme)
+- [UserSettings](usersettings)
 - DebugFlags
 call `GetServices();`
-##### Scene Transitions and lifecycle
+---
+#### Scene Transitions and lifecycle
 `#include "services.hpp"` (to get SceneManager)
 SceneManager in Services handles scenes Stack and transitions.
 Mainloop is handled by engine. For each frame or step Engine calls OnUpdate() and OnDraw() for the current scene in Scene stack.
@@ -272,7 +283,8 @@ In order to transit between scenes SceneManager has functions
 - QueTransitSus # suspend + transit, current scene kept in stack
 - QuePop # return to previous scene in scene stack, current is deleted
 If Transition is called before the last one was performed it will be ignored
-##### UI Layout
+---
+#### UI Layout
 `#include "ui/component.hpp"
 `#include "ui/layout.hpp"` and others in ui/*
 If you are using baseScene
@@ -302,7 +314,9 @@ Base class for components - UIComponent
 Specify fill mode, padding, flex, min/max size for any component with UIComponentSpec passed into constructor.
 Base class for layout - Layout, you can pass LayoutSpec to specify content arrangement, and UIComponentSpec to specify Layout component itself to any Layout component.
 Once Component added to UI tree ( aka added to  Root or another layout, that is held by some amount of other layouts that eventually reach root) it will automatically recieve OnUpdate,  OnDraw, OnEvent calls. Arrangement and resizing is handled automatically.
-##### ResourceManager
+
+---
+#### ResourceManager
 `#include "services.hpp"`
 Handles texture, font, shader loading.
 All Resources stored through string aliases. Texture loaded under the name "texture123" can be retrieved with getTexture("texture123")
@@ -315,7 +329,9 @@ std::optional<SliceMargins> getSliceData(const std::string& name) const;
 void loadNPatchData(std::string path);
 ```
 are used to load and use 9-Patch data for textures that want to use it.
-##### Renderer
+
+---
+#### Renderer
 Helper class that keeps stack of Texture targets, shader and blending modes.
 It is Recommended to use its functions
     void beginTextureMode(RenderTexture2D& target);
@@ -327,27 +343,31 @@ It is Recommended to use its functions
     void beginBlendMode(BlendMode mode);
     void endBlendMode();
 instead of Raylib onse because it allows to have multiple nested Render targets and custom UI Components to have their own render targets if needed.
-##### MyInput
+
+---
+#### MyInput
 ``#include "services.hpp"``
 Abstracts input from differnet devices Creates list of events. Should be polled each fram, which is done by baseScene. All event are disptched by baseScene automatically.
 All events are presented in ``#include "input/events.hpp"``
-##### UserSettings 
+#### UserSettings 
 ``#include "services.hpp"`` or
 `#include "userSettings.hpp"`
 userSettings are used at startup and can be a place where current state of Screen and app stored.
-##### loader::Loader
+#### loader::Loader
 provides functions to parse data from json.
-##### Utils.
+#### Utils.
 `#include "utils/util.hpp"` Provides overriden math operations for Ralibprimitives abnd a few other helpers. 
 `#include "utils/util.hpp"` Adds logging to the programm.
 use GetLogger().Info/Warn, etc. or .WarnFmt .. etc. for std::format formatting. Add your custom Sink with AddSink if you need to log to more places. Supports any data type with ostream << overriden.
 `#include "utils/animated.hpp"` Adds Animated\<T> class that animates a value and some math animation functions.
-##### UITheme
+
+---
+#### UITheme
 `#include "services.hpp"``
 Handles fonts in the app. allows to use font roles (eg. MainFont, AdditionalFont, etc). and size roles (eg. caption, text, header, etc). 
 Each are stored as string keys and retrieved with specified size role and font role keys.
 Allows to registed font roles and size roles as well as change them. 
-##### Creating Custom UiComponents
+#### Creating Custom UiComponents
 There are helper classes for creating new Components. And you can always derive from already existing one, override the logic, or add new one on top of existing.
 All components  have following:
 - OnUpdate - if it returns true, triggers rearrange of whole Ui tree.

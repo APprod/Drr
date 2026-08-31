@@ -192,6 +192,8 @@ usage:
 ./run.bat runs ./build.bat under the hood + runs the built exe/ linux executable, or starts emrun.
 All dependencies (Raylib, nlohmann::json, Tracy) are automatically installed into ApEngine/third-party folder and are exposed to user.
 
+Provide -DSHELL_PATH=<path to shell file>
+if you want to use custom shell
 ---
 ### Project File structure
 Project created with create script has following structure by default:

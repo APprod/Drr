@@ -11,6 +11,9 @@ function(add_ap_project target)
     target_include_directories(${target} PRIVATE include/)
     target_link_libraries(${target} PRIVATE ApEngine)
 
+    if (NOT SHELL_PATH)
+        set(SHELL_PATH ${APENGINE_WEB_DIR}/minshell.html)
+    endif()
     if(CMAKE_CONFIGURATION_TYPES)
         set(ASSETS_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/assets")
     else()
@@ -46,7 +49,7 @@ function(add_ap_project target)
         PRIVATE -sWASM=1
         PRIVATE -sMAX_WEBGL_VERSION=2
         PRIVATE -sALLOW_MEMORY_GROWTH=1
-        PRIVATE --shell-file ${APENGINE_WEB_DIR}/minshell.html
+        PRIVATE --shell-file ${SHELL_PATH}
         )
     endif()
     # Checks if OSX and links appropriate frameworks (Only required on MacOS)

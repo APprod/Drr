@@ -10,6 +10,7 @@ APP_TARGET=""
 BUILD_DIR_BASE="_build/"
 BUILD_DIR=Debug
 WEB=False
+CLANG=False
 CMAKE_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -19,6 +20,7 @@ while [[ $# -gt 0 ]]; do
         static) STATIC_LINKING=ON; shift ;;
         dynamic) STATIC_LINKING=OFF; shift ;;
         web|Web) WEB=True; BUILD_DIR=Web; shift ;;
+        clang|Clang) CLANG=True; shift ;;
         profile) PROFILE=ON; shift ;;
         demo) BUILD_DEMO=ON; shift ;;
         --target)
@@ -50,6 +52,10 @@ else
     echo "Building $BUILD_TYPE configuration..."
 
     CMAKE_ARGS_BASE=(-S . -B "${BUILD_DIR_BASE}${BUILD_DIR}" -G "Unix Makefiles" "-DIS_STATIC=$STATIC_LINKING" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE")
+
+    if [[ "$CLANG" == "True" ]]; then
+        CMAKE_ARGS_BASE+=("-DCMAKE_C_COMPILER=clang" "-DCMAKE_CXX_COMPILER=clang++")
+    fi
 
     cmake "${CMAKE_ARGS_BASE[@]}" "${CMAKE_ARGS[@]}"
     cmake --build "${BUILD_DIR_BASE}${BUILD_DIR}" "${TARGET_ARGS[@]}" --config "$BUILD_TYPE" --parallel

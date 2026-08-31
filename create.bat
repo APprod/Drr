@@ -72,11 +72,6 @@ if "%COPIED_ROOT_CMAKE%"=="0" (
     )
 )
 
-rem Fresh root CMakeLists still points at the template folder - retarget it.
-if "%COPIED_ROOT_CMAKE%"=="1" (
-    powershell -NoProfile -Command "(Get-Content 'CMakeLists.txt') -replace 'apps/template', 'apps/%APP_NAME%' -replace 'project\(AppTest\)', 'project(%APP_NAME%)' | Set-Content 'CMakeLists.txt'"
-)
-
 :ci_only
 if "%CI%"=="1" (
     if not exist "%TEMPLATE_DIR%\ci" (

@@ -161,7 +161,7 @@ public:
                         ddl->closePopup();
                     },
                     m_textureSpec,
-                    {m_targetSize.x, GetDrawRect().height},
+                    {m_targetSize.x, GetVisualWithoutOffset().height},
                     UICSpec{}.FillMaxWidth()
                 )
             );

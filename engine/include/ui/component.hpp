@@ -58,7 +58,7 @@ public:
     // Arrange pass
     virtual void OnArrange(Rectangle actualRect) final {
         m_actual = actualRect;
-        Rectangle inner = GetDrawRect();
+        Rectangle inner = GetVisualWithoutOffset();
         ArrangeContent(inner);
     }
     // Arrange all the inner content if needed
@@ -104,7 +104,7 @@ protected:
     Vector2 m_targetSize{10,10};
 
     // Get actual rect with padding substracted
-    Rectangle GetDrawRect() const{
+    Rectangle GetVisualWithoutOffset() const{
         auto pad = ResolvePadding({m_actual.width, m_actual.height});
         return {
             m_actual.x + pad.left, m_actual.y + pad.top,
@@ -118,7 +118,7 @@ protected:
     }
     // Get rect where the content should be displayed. Includes offsets
     Rectangle GetVisualRect() const {
-        auto base = GetDrawRect();
+        auto base = GetVisualWithoutOffset();
         return {base.x + positionOffset.x, base.y + positionOffset.y, base.width, base.height};
     }
 };

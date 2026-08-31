@@ -58,6 +58,7 @@ jobs:
           cd -
 
       - name: Create Release
+        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
@@ -68,5 +69,5 @@ jobs:
             linux-web.zip
             windows-mingw.zip
             windows-msvc.zip
-          draft: false
-          prerelease: false
+          draft: true
+          prerelease: true

@@ -23,7 +23,7 @@ class App: public IApp{
         th.registerSizeRole("big header", 4);
         th.registerFontRole("default", "Inter", 1);
     };
-    virtual std::unique_ptr<IScene> createScene() {return std::make_unique<TestScene>();};
+    std::unique_ptr<IScene> createScene() override {return std::make_unique<TestScene>();};
     virtual void close() override {};
 
 };

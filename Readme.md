@@ -237,7 +237,7 @@ Functions of IApp will be called in their definition order and can be used if yo
 `#include "scene/baseScene.hpp"`
 IApp should implement createScene to return your first Scene. Example:
 ```
-virtual std::unique_ptr<IScene> createScene() override {
+std::unique_ptr<IScene> createScene() override {
 	return std::make_unique<HelloScene>();
 };
 ```

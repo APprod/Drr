@@ -90,45 +90,29 @@ add_library(ApEngine STATIC ${MyCPPSources})
 target_include_directories(ApEngine PUBLIC include/)
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND NOT EMSCRIPTEN)
-  target_compile_options( ApEngine PUBLIC
-  $<$<CONFIG:Debug>:-g -gdwarf-4 
-    -Wall -Wextra -Wpedantic
-    -Wshadow
-    -Wnon-virtual-dtor
-    -Wold-style-cast
-    -Wcast-align
-    -Woverloaded-virtual
-    -Wformat=2
-    -Wmisleading-indentation
-    -Wduplicated-cond
-    -Wduplicated-branches
-    -Wlogical-op
-    -Wnull-dereference
-    -Wdouble-promotion
-    -Wfloat-conversion
-    -Wuseless-cast
-    -Werror
-    >
-  $<$<CONFIG:Release>:-O3
-    -Wall -Wextra -Wpedantic
-    -Wshadow
-    -Wnon-virtual-dtor
-    -Wold-style-cast
-    -Wcast-align
-    -Woverloaded-virtual
-    -Wformat=2
-    -Wmisleading-indentation
-    -Wduplicated-cond
-    -Wduplicated-branches
-    -Wlogical-op
-    -Wnull-dereference
-    -Wdouble-promotion
-    -Wfloat-conversion
-    -Wuseless-cast
-    >
-  )
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options( ApEngine PUBLIC -Wchanges-meaning)
+    target_compile_options(ApEngine PUBLIC
+        $<$<CONFIG:Debug>:
+            -g -gdwarf-4
+            -Wall -Wextra -Wpedantic
+            -Wshadow -Wnon-virtual-dtor -Wold-style-cast
+            -Wcast-align -Woverloaded-virtual -Wformat=2
+            -Wmisleading-indentation -Wnull-dereference
+            -Wdouble-promotion -Wfloat-conversion -Werror
+        >
+        $<$<CONFIG:Release>:
+            -O3
+            -Wall -Wextra -Wpedantic
+            -Wshadow -Wnon-virtual-dtor -Wold-style-cast
+            -Wcast-align -Woverloaded-virtual -Wformat=2
+            -Wmisleading-indentation -Wnull-dereference
+            -Wdouble-promotion -Wfloat-conversion
+        >
+    )
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(ApEngine PUBLIC
+            -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wuseless-cast
+            -Wchanges-meaning
+        )
   endif()
   target_link_options(ApEngine PUBLIC $<$<CONFIG:Release>:-s>)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

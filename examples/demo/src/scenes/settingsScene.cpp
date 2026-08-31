@@ -6,7 +6,6 @@
 
 void SettingsScene::OnEnter(){
     m_transitionTime = 0.2f;    
-    UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     auto& usrCfg = GetServices().userSettings;
     auto& th = GetServices().theme;
@@ -125,7 +124,7 @@ void SettingsScene::OnEnter(){
                 UICSpec{}.SetFlex({0,1})
             ),
             Button(Text("Back", "button"),
-                [this](){
+                [](){
                     GetServices().sceneManager.QuePop();
                 },
                 TextureSpec("button_default"), {200,100},

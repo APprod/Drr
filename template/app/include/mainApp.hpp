@@ -39,7 +39,7 @@ class App : public IApp {
     };
     virtual void initPostOpenGl() override {
     };
-    virtual std::unique_ptr<IScene> createScene(){
+    virtual std::unique_ptr<IScene> createScene() override  {
         return std::make_unique<HelloScene>();
     }
     virtual void close() override {};

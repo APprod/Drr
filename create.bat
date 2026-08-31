@@ -51,7 +51,7 @@ if errorlevel 1 (
 )
 
 set COPIED_ROOT_CMAKE=0
-for %%F in (CMakeLists.txt build.bat run.bat build.sh .gitignore) do (
+for %%F in (CMakeLists.txt build.bat build.ps1 run.bat run.ps1 build.sh .gitignore) do (
     if exist "%TEMPLATE_DIR%\%%F" (
         if exist "%%F" (
             echo [create] Root %%F already exists - keeping yours.

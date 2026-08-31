@@ -1,5 +1,6 @@
 #include "ui/label.hpp"
 #include "utils/util.hpp"
+#include "services.hpp"
 
 #include <cmath>
 
@@ -101,7 +102,7 @@ bool Label::OnEvent(const MyEvent& event){
 }
 
 bool FPSDraw::OnUpdate(float dt){
-    if (GetServices().runtimeCfg.user.showFPS)
+    if (GetServices().userSettings.showFPS)
         SetText(std::to_string(GetFPS()) + " FPS");
     else
         SetText("");

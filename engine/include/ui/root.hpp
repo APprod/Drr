@@ -2,6 +2,7 @@
 
 #include "ui/layout.hpp"
 
+// Root component for UI Tree, Handles event propagation, hovering, capturing
 class Root: public Stack{
 public:
     Root() { GetUIContext().SetRoot(this); }

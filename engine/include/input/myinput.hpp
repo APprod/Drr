@@ -10,8 +10,10 @@ class MyInput
 public:
     MyInput();
     ~MyInput();
+    // resets old events and polls new events after last frame
     std::vector<MyEvent> pollEvents();
-    //Can be called after call. Retrieves all events between frames
+    // Can be called multiple times, doesnt reset local copy.
+    // Returns all events after last frame
     const std::vector<MyEvent>& getEvents() const {return m_events;}
 
     bool IsKeyDown(InputKey key) const {

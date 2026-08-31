@@ -8,7 +8,7 @@
 
 struct Binding {
     std::function<void()> callback;
-    std::string label;
+    std::string description;
 };
 
 class HotkeysListener : public UIComponent {
@@ -18,11 +18,11 @@ public:
         hitTesting = false;
     }
 
-    void Bind(InputKey key, std::function<void()> cb, std::string label = "") {
-        m_bindings[key] = {std::move(cb), std::move(label)};
+    void Bind(InputKey key, std::function<void()> cb, std::string description = "") {
+        m_bindings[key] = {std::move(cb), std::move(description)};
     }
-    void Bind(InputKeyEvent event, std::function<void()> cb, std::string label = "") {
-        Bind(event.key, std::move(cb), std::move(label));
+    void Bind(InputKeyEvent event, std::function<void()> cb, std::string description = "") {
+        Bind(event.key, std::move(cb), std::move(description));
     }
     void Unbind(InputKey key) { m_bindings.erase(key); }
     void UnbindAll()          { m_bindings.clear(); }
@@ -34,7 +34,6 @@ public:
     bool OnEvent(const MyEvent& event) override {
         if (auto* e = std::get_if<InputKeyEvent>(&event)) {
             if (e->pressed && !e->repeat && m_bindings.contains(e->key)) {
-                if (GetServices().runtimeCfg.debug.debugFeaturesAllowed)
                     m_bindings[e->key].callback();
                 return true;
             }
@@ -42,6 +41,6 @@ public:
         return false;
     }
 
-private:
+protected:
     std::unordered_map<InputKey, Binding> m_bindings;
 };

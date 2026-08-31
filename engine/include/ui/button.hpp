@@ -4,9 +4,9 @@
 
 #include "ui/clickable.hpp"
 #include "rendering/text.hpp"
-#include "rendering/textureSpec.hpp"
 #include "utils/animated.hpp"
 
+// Basic button implementation, has animation 
 class Button: public Clickable{
 public:
     Button(
@@ -16,11 +16,11 @@ public:
         Vector2 targetSize,
         UIComponentSpec spec = {}
     );
+    void MeasureContent(Vector2 available) override;
+    bool OnUpdate(float dt) override;
+protected:
     Padding ResolvePadding(Vector2 dims) const override;
     void OnDrawContent() override;
-    bool OnUpdate(float dt) override;
-    void MeasureContent(Vector2 available) override;
-protected:
     void OnClick() override { m_onClick(); }
     std::function<void()> m_onClick;
     TextureSpec m_textureSpec;

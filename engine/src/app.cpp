@@ -3,7 +3,7 @@
 #include "utils/log.hpp"
 #include "utils/util.hpp"
 #include "services.hpp"
-
+#include "platform.hpp"
 
 #include <memory>
 
@@ -16,15 +16,16 @@
 
 void setupDebugConfig() {
 #ifndef NDEBUG
-    GetServices().runtimeCfg.debug = defaultDebugFlags;
+    GetServices().debugFlags = defaultDebugFlags;
     #else
-    GetServices().runtimeCfg.debug = defaultReleaseFlags;
+    GetServices().debugFlags = defaultReleaseFlags;
     mylog::GetLogger().SetMinSeverity(mylog::Severity::INFO);
 #endif
 }
 
 static void initPlatform()
 {
+    platform::SetupConsole();
 #ifndef __EMSCRIPTEN__
     mylog::GetLogger().AddSink(
         std::make_unique<mylog::FileSink>(mylog::FileSink("mylog.txt")));
@@ -48,7 +49,7 @@ void Engine::init(){
     //App + config
     m_app->initPreOpenGl();
     auto startConf = m_app->getStartConfig();
-    auto& usr = GetServices().runtimeCfg.user = startConf;
+    auto& usr = GetServices().userSettings = startConf;
     GetServices().theme.setSizes(usr.fontSizes);
     setupDebugConfig();
     
@@ -76,8 +77,9 @@ void Engine::init(){
     auto& resManager = GetServices().resManager;
     resManager.init();
     resManager.load();
-    GetServices().theme.warmup(); // RM is loaded; pre-bake the whole ladder to avoid a first-draw hitch
-    SetExitKey(0); //TODO: remove at some point
+    GetServices().theme.warmup(); //Loads all fontsizes
+    // SetExitKey(0);
+    GetServices().sceneManager.QueTransit(m_app->createScene());
 }
 
 void Engine::frame(){
@@ -95,7 +97,6 @@ void Engine::frame(){
         manager.Draw();
     }            
     GetServices().perfLog.update();
-    // dt = 1000.0f/GetFPS();
 }
 
 static void runPlatform(Engine* app)

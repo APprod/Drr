@@ -1,5 +1,5 @@
 #include <memory>
-
+#include "raylib.h"
 #include "scene/scene.hpp"
 #include "scene/sceneManager.hpp"
 #include "utils/log.hpp"
@@ -47,18 +47,18 @@ void SceneManager::PopScene(){
     m_scenes.back()->OnRestore();
     m_state = TransitState::Entering;
 }
-void SceneManager::PerformTransit(std::shared_ptr<IScene> scene){
+void SceneManager::PerformTransit(std::unique_ptr<IScene> scene){
     if (m_scenes.size() != 0) {
         m_scenes.back()->OnExit();
         m_scenes.pop_back();
     }
     AddScene(std::move(scene));
 }
-void SceneManager::PerformSuspendAndTransit(std::shared_ptr<IScene> scene){
+void SceneManager::PerformSuspendAndTransit(std::unique_ptr<IScene> scene){
     m_scenes.back()->OnSuspend();
     AddScene(std::move(scene));
 }
-void SceneManager::AddScene(std::shared_ptr<IScene> scene){
+void SceneManager::AddScene(std::unique_ptr<IScene> scene){
     m_scenes.push_back(std::move(scene));
     m_scenes.back()->OnEnter();
     m_state = TransitState::Entering;

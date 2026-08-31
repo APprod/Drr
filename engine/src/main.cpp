@@ -1,6 +1,6 @@
+/* Entry point */
 #include "app.hpp"
 #include "utils/log.hpp"
-#include "platform.hpp"
 
 #include <iostream>
 
@@ -10,7 +10,6 @@
 
 int main(void)
 {
-    platform::SetupConsole();
     auto app = createApp();
     Engine engine{std::move(app)};
 

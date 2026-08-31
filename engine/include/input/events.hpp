@@ -1,3 +1,4 @@
+/* All events in the UI tree and available thorug myinput*/
 #pragma once
 #include <optional>
 #include <variant>
@@ -39,7 +40,7 @@ struct Action{}; // Shortcuts, etc
 struct ActionEvent{
     Action key{};
     bool pressed{};
-};
+}; // Not used
 
 struct ScrollEvent{
     Vector2 delta{};

@@ -2,8 +2,13 @@
 #include "services.hpp"
 #include "utils/log.hpp"
 #include "utils/util.hpp"
-#include "ui/label.hpp"
 #include "ui/overlay.hpp"
+
+#include "ui/checkbox.hpp"
+#include "ui/slider.hpp"
+#include "ui/valueLabel.hpp"
+#include "ui/hotkeysListener.hpp"
+
 #include <format>
 
 DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
@@ -25,30 +30,30 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
         UICSpec{}.SetPaddingPct(padBase).SetFlex({1,1}).FillMaxSize(),
         LayoutSpec{}.AlignBegin().CrossBegin()
     );
-    auto& cfg = GetServices().runtimeCfg;
+    auto& srv = GetServices();
     Text valText("");
     UICSpec sliderSpec;
     auto [sBarH, sMinTh, sMaxTh, sTarget] = std::make_tuple(4.0f, 5.0f, 10.0f, Vector2{200,10});
     left->Add(
-        FPSDraw(Text("", "default", 4)),
+        FPSDraw(Text("", "default", "default", 4)),
         CursorTrack(Text(""), UICSpec{}.FillMaxWidth()),
         CfgDisplay(Text("")),
-        Checkbox(Text("Layout bounds"), &cfg.debug.showLayoutBounds),
-        Checkbox(Text("Content bounds"), &cfg.debug.showLayoutContentBounds),
-        Checkbox(Text("VSYNC"), &cfg.user.vsync,
+        Checkbox(Text("Layout bounds"), &srv.debugFlags.showLayoutBounds),
+        Checkbox(Text("Content bounds"), &srv.debugFlags.showLayoutContentBounds),
+        Checkbox(Text("VSYNC"), &srv.userSettings.vsync,
             [](bool vsync){
                 mylog::GetLogger().LogFormat(mylog::Severity::DBGINFO, "Switching vsync: {}", vsync);
                 if (vsync) {SetWindowState(FLAG_VSYNC_HINT);}
                 else {ClearWindowState(FLAG_VSYNC_HINT);}
             }
         ),
-        Slider<int>(&cfg.user.targetFPS, 0, 240, 
+        Slider<int>(&srv.userSettings.targetFPS, 0, 240, 
             [](int value){
-                mylog::GetLogger().LogFormat(mylog::Severity::DBGINFO, "Switching FPS: {}. cfg.user.targetFPS: {}", value, GetServices().runtimeCfg.user.targetFPS);
+                mylog::GetLogger().LogFormat(mylog::Severity::DBGINFO, "Switching FPS: {}. srv.userSettings.targetFPS: {}", value, GetServices().userSettings.targetFPS);
                 SetTargetFPS(value);
             }
             , sliderSpec, sBarH, sMinTh, sMaxTh, sTarget, 5),
-        ValueLabel<int>("Target FPS: {}", &cfg.user.targetFPS, valText),
+        ValueLabel<int>("Target FPS: {}", &srv.userSettings.targetFPS, valText),
         DebugLogDisplay(Text(""),UICSpec{}.SetFlex({0,1}).FillMaxSize())
     );
     auto right = std::make_unique<DebugVerticalLayout>(
@@ -57,10 +62,10 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 
     right->Add(
         PerformanceDisplay(valText, UICSpec{}.SetFlex({0,1})),
-        ValueLabel<float>("Brightness: {:.2f}", &cfg.user.userBrightness, valText),
-        Slider<float>(&cfg.user.userBrightness, 0.1f, 3.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
-        ValueLabel<int>("Log msgs: {}", &cfg.debug.debugMessagesCount, valText),
-        Slider<int>(&cfg.debug.debugMessagesCount, 1, 50, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
+        ValueLabel<float>("Brightness: {:.2f}", &srv.userSettings.userBrightness, valText),
+        Slider<float>(&srv.userSettings.userBrightness, 0.1f, 3.0f, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
+        ValueLabel<int>("Log msgs: {}", &srv.debugFlags.debugMessagesCount, valText),
+        Slider<int>(&srv.debugFlags.debugMessagesCount, 1, 50, nullptr, sliderSpec, sBarH, sMinTh, sMaxTh, sTarget),
         BindingsDisplay(Text(""), UICSpec{}.SetFlex({0,1}))
     );
     mainC->AddChild(std::move(left));
@@ -76,7 +81,7 @@ DebugOverlay::DebugOverlay(UIComponentSpec uiSpec, LayoutSpec layoutSpec)
 }
 
 bool DebugOverlay::OnUpdate(float dt){
-    visible = GetServices().runtimeCfg.debug.showDebugOverlay;
+    visible = GetServices().debugFlags.showDebugOverlay;
     hitTesting = recievesEvents = visible;
     return Stack::OnUpdate(dt);
 }
@@ -92,7 +97,7 @@ bool CursorTrack::OnEvent(const MyEvent& event){
 
 
 bool CursorTrack::OnUpdate(float dt){
-    if (GetServices().runtimeCfg.debug.showCursorPos)
+    if (GetServices().debugFlags.showCursorPos)
         SetText(std::format("Cursor pos: {:04d} {:04d}",
             static_cast<int>(m_pos.x), static_cast<int>(m_pos.y)));
     else
@@ -101,7 +106,7 @@ bool CursorTrack::OnUpdate(float dt){
 }
 
 bool PerformanceDisplay::OnUpdate(float dt){
-    if (!GetServices().runtimeCfg.debug.showPerformance) {
+    if (!GetServices().debugFlags.showPerformance) {
         SetText(""); return Label::OnUpdate(dt);
     }
     std::string out;
@@ -113,10 +118,10 @@ bool PerformanceDisplay::OnUpdate(float dt){
 }
 
 bool DebugLogDisplay::OnUpdate(float dt){
-    if (!GetServices().runtimeCfg.debug.showDebugLog) {
+    if (!GetServices().debugFlags.showDebugLog) {
         SetText(""); return Label::OnUpdate(dt);
     }
-    int count = GetServices().runtimeCfg.debug.debugMessagesCount;
+    int count = GetServices().debugFlags.debugMessagesCount;
     const auto& messages = mylog::GetLogger().GetMessages();
     std::string out;
     int shown = 0;
@@ -135,8 +140,8 @@ bool BindingsDisplay::OnUpdate(float dt){
     std::string out;
     for (auto& [key, binding] : overlay->GetBindings()) {
         auto keyStr = GetInputKeyName(key);
-        if (!binding.label.empty())
-            out += std::format("{}: {}\n", keyStr, binding.label);
+        if (!binding.description.empty())
+            out += std::format("{}: {}\n", keyStr, binding.description);
         else
             out += std::format("{}\n", keyStr);
     }
@@ -146,7 +151,7 @@ bool BindingsDisplay::OnUpdate(float dt){
 }
 
 void DebugVerticalLayout::OnDrawContent(){
-    if (GetServices().runtimeCfg.debug.showOverlayGradient) {
+    if (GetServices().debugFlags.showOverlayGradient) {
         auto r = GetActualRect();
         GetServices().renderer.beginBlendMode(BlendMode::BLEND_MULTIPLIED);
         auto ir = irect(r); ::DrawRectangleGradientV(ir.x,ir.y,ir.width,ir.height, {0,0,50,100}, {25,0,0,50});
@@ -158,13 +163,13 @@ void DebugVerticalLayout::OnDrawContent(){
     }
 }
 bool CfgDisplay::OnUpdate(float dt){
-    auto& cfg = GetServices().runtimeCfg;
-    SetText(std::format("brightness: {:.2f}", cfg.user.userBrightness));
+    auto& srv = GetServices();
+    SetText(std::format("brightness: {:.2f}", srv.userSettings.userBrightness));
     return Label::OnUpdate(dt);
 }
 
 void DebugHorizontalLayout::OnDrawContent(){
-    if (GetServices().runtimeCfg.debug.showOverlayGradient) {
+    if (GetServices().debugFlags.showOverlayGradient) {
         auto r = GetVisualRect();
         auto ir2 = irect(r); ::DrawRectangleGradientV(ir2.x,ir2.y,ir2.width,ir2.height, {0,255,0,255}, {0,0,255,0});
     }

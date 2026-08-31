@@ -1,6 +1,6 @@
 #pragma once
 
-#include "userSettings.hpp"
+
 
 struct DebugFlags {
     bool showLayoutBounds{false};
@@ -38,9 +38,3 @@ inline const DebugFlags defaultReleaseFlags{
     .showOverlayGradient = false,
 };
 
-struct RuntimeConfig {
-    DebugFlags debug;
-    UserSettings user;
-};
-
-void setupDebugConfig();

@@ -1,20 +1,28 @@
-/* all functionality in this class */
+/* Main class that contains all functionality*/
 #pragma once
 #include "userSettings.hpp"
+#include "scene/scene.hpp"
 
 class IApp{
 public:
-    IApp() = default; //Methods in their call order
-    virtual void initPreOpenGl() = 0; 
+    IApp() = default;
+    //Methods will be called in the following order
+
+    virtual void initPreOpenGl() = 0;
+    // This config will be set at startup  
     virtual UserSettings getStartConfig() = 0;
-    virtual void initPostOpenGl() = 0; //Transition to the first scene
+    virtual void initPostOpenGl() = 0;
+    //Return first scene
+    virtual std::unique_ptr<IScene> createScene() = 0;
     virtual void close() = 0;
     virtual ~IApp() = default;    
 };
 
-//Implement to return your App class
+// Standalone Forward declared function without implementation
+// Implement to return your derived App class
 std::unique_ptr<IApp> createApp();
 
+//Main class handles setup and mainloop
 class Engine
 {
 public:

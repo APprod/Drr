@@ -1,8 +1,7 @@
 #include "platform.hpp"
 
 #ifdef _WIN32
-// Exclusion macros keep windows.h from clashing with raylib declarations
-// (Rectangle, CloseWindow, ShowCursor) in TUs that include both
+
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOGDI
 #define NOGDI

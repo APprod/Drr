@@ -3,11 +3,10 @@
 #include "raylib.h"
 #include "ui/spec.hpp"
 #include "input/events.hpp"
-#include "services.hpp"
 
 
 using UICompId = size_t;
-
+// base for any UIComponent in the layout/UITree. Derive to create custom component
 class UIComponent{
 public:
     UIComponent(UIComponentSpec spec = {}): m_compSpec{spec}{}
@@ -18,22 +17,15 @@ public:
     const UIComponentSpec& Spec() const {
         return m_compSpec;
     }
-    template<typename T>
-    T* GetAs(){return dynamic_cast<T*>(this);}
+    // return true to mark that the relayout is needed
     virtual bool OnUpdate(float){ return false; }
+    // returns true if evens is handled to stop propagation
     virtual bool OnEvent(const MyEvent& ){ return false;}
-    virtual void OnDraw() final{
-        OnDrawContent();
-        if (GetServices().runtimeCfg.debug.showLayoutContentBounds){
-            auto rec = GetVisualRect();
-            DrawRectangleLinesEx(rec,2,RED);
-        }
-        if (GetServices().runtimeCfg.debug.showLayoutBounds){
-            DrawRectangleLinesEx(GetActualRect(),2,RAYWHITE);
-        }
-    }
+    virtual void OnDraw() final;
+    // Override to draw custom content
     virtual void OnDrawContent(){}
 
+    // Measure pass - sets desired size, handles padding
     virtual void OnMeasure(Vector2 available) final{
         auto pad = ResolvePadding(available);
         auto vertPad = pad.top + pad.bottom;
@@ -56,27 +48,43 @@ public:
         myClamp(m_desiredSize.x, m_compSpec.minSize.x, m_compSpec.maxSize.x);
         myClamp(m_desiredSize.y, m_compSpec.minSize.y, m_compSpec.maxSize.y);
     }
+    // Measure pass - sets size neede purely for content (padding excluded)
     virtual void MeasureContent(Vector2 available) {
         m_contentDesiredSize = {
             std::min(available.x, m_targetSize.x),
             std::min(available.y, m_targetSize.y)
         };
     }
+    // Arrange pass
     virtual void OnArrange(Rectangle actualRect) final {
         m_actual = actualRect;
-        Rectangle inner = GetDrawRect();
+        Rectangle inner = GetVisualWithoutOffset();
         ArrangeContent(inner);
     }
+    // Arrange all the inner content if needed
     virtual void ArrangeContent(Rectangle ) {}
+    template<typename T>
+    T* GetAs(){return dynamic_cast<T*>(this);}
+    // defines whether event with certain point overlaps with component pos.
+    // Should include offset from position offset  
     virtual bool HitTest(Vector2 point) const {Rectangle offsetRect{m_actual.x + positionOffset.x, m_actual.y + positionOffset.y, m_actual.width, m_actual.height}; return CheckCollisionPointRec(point, offsetRect) && CheckCollisionPointRec(point, {0,0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())});}
+    // Every component revieves when mouse enters componens content
     virtual void OnHoverEnter(){}
+    // Every component revieves when mouse exits componens content
     virtual void OnHoverExit(){}
+    // expected: Returns UIComponent that is under the point, or nullptr if none are
+    // override for custom behaviour
     virtual UIComponent* FindTarget(Vector2 point);
+    // allows full search of specific component
     virtual UIComponent* FindById(UICompId searchId) {
         return (this->id == searchId) ? this : nullptr;
     }
+    // return whatever Events should be captured by your component after RequireCapture
+    // all events of specified types will be first routed to this component after it cals RequireCapture
     virtual EventMask getCaptureTypes() const {return 0;}
 
+    // defines how padding is calculated
+    // override if you want custom padding calculation (dynamically updated for example)
     virtual Padding ResolvePadding(Vector2 dims) const {
         return m_compSpec.ResolvePadding(dims);
     }
@@ -95,8 +103,8 @@ protected:
     Vector2 m_contentDesiredSize{0,0};
     Vector2 m_targetSize{10,10};
 
-    // Get actual rect without padding
-    Rectangle GetDrawRect() const{
+    // Get actual rect with padding substracted
+    Rectangle GetVisualWithoutOffset() const{
         auto pad = ResolvePadding({m_actual.width, m_actual.height});
         return {
             m_actual.x + pad.left, m_actual.y + pad.top,
@@ -110,11 +118,12 @@ protected:
     }
     // Get rect where the content should be displayed. Includes offsets
     Rectangle GetVisualRect() const {
-        auto base = GetDrawRect();
+        auto base = GetVisualWithoutOffset();
         return {base.x + positionOffset.x, base.y + positionOffset.y, base.width, base.height};
     }
 };
 
+// Used for popups and whatever custom behaviour needed
 class IOverlay{
 public:
     IOverlay() = default;
@@ -125,21 +134,25 @@ public:
     virtual void RemovePopupImmediate(UICompId id) = 0;
     virtual UIComponent* GetPopupById(UICompId id) = 0;
 };
-
+// Shared context for all UI elements
 struct UIContext
 {
     static UIContext& Get(){
         static UIContext m_ctx;
         return m_ctx;
     }
+    // pushed popup to IOverlay
     template<typename T>
     requires std::is_base_of_v<UIComponent, std::decay_t<T>>
     UICompId PushPopup(T&& comp){
         return PushPopup(std::make_unique<std::decay_t<T>>(std::forward<T>(comp)));
     }
+    // pushed popup to IOverlay
     UICompId PushPopup(std::unique_ptr<UIComponent> comp);
     UICompId PopPopup();
+    // removes popup after all is updated, does not invalidate iterators 
     void RemovePopup(UICompId id);
+    // removes popup from IOverlay. Invalidates layout tree iteration
     void RemovePopupImmediate(UICompId id);
     UIComponent* GetPopupById(UICompId id);
 
@@ -155,15 +168,19 @@ struct UIContext
     void ResetOverlay(){if (!m_overlayStack.empty()) m_overlayStack.pop_back(); }
     IOverlay* GetOverlay() const { return m_overlayStack.empty() ? nullptr : m_overlayStack.back(); }
 
+    // allows root to set capturing component
     void SetCapture(UIComponent* comp){m_captured = comp;}
     EventMask  GetCaptureTypes() const;
     UIComponent*  GetCapturered() const{return m_captured;}
-    UIComponent*  GetHovered() const{return m_hovered;}
+    // allows root to set hoverd component
     void  SetHovered(UIComponent* comp){m_hovered = comp;}
+    UIComponent*  GetHovered() const{return m_hovered;}
+    // clear captured/hovered state
     void ClearComponent(UIComponent* comp) {
         if (comp == m_captured) m_captured = nullptr;
         if (m_hovered == comp)  m_hovered = nullptr;
     }
+    // automatically called in component destructor. Clears the states
     void InvalidateComponent(UIComponent* comp) {
         if (comp == m_captured) ReleaseCapture();
         if (m_hovered == comp) {
@@ -174,8 +191,8 @@ struct UIContext
     void ReleaseCapture(){m_captured = nullptr;}
     UICompId nextId(){return ++maxId;}
 private:
-    std::vector<IOverlay*> m_overlayStack;
-    UICompId maxId{0}; 
+    std::vector<IOverlay*> m_overlayStack; //Overlay layer contains popups
+    UICompId maxId{0}; //unique id
     UIComponent* m_captured = nullptr;
     UIComponent* m_hovered = nullptr;
     UIComponent* m_root = nullptr;

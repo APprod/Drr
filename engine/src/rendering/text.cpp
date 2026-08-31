@@ -5,37 +5,37 @@
 
 namespace {
 // A line is blank when it has no words or only space tokens
-bool isBlankLine(const std::vector<Word>& words){
+bool isBlankLine(const std::vector<mytext::Word>& words){
     for (const auto& w : words)
         if (w.word.empty() || w.word[0] != ' ') return false;
     return true;
 }
 }
 
-Text::Text(std::string text, std::string role, int sizeDelta, Color color)
-    : m_text{std::move(text)}, m_role{std::move(role)}, m_sizeRole{0},
+Text::Text(std::string text, std::string sizeRole, std::string fontRole, int sizeDelta, Color color)
+    : m_text{std::move(text)}, m_sizeRole{std::move(sizeRole)}, m_sizeRoleId{0},
+      m_fontRole{std::move(fontRole)}, m_fontRoleId{0},
       m_sizeDelta{sizeDelta}, m_color{color}
 {
     auto& theme = GetServices().theme;
-    m_sizeRole = theme.getSizeRole(m_role);
+    m_sizeRoleId = theme.getSizeRole(m_sizeRole);
+    m_fontRoleId = theme.getFontRole(m_fontRole);
     m_dirtyText = true;
 }
 
 FontData Text::fontData() const {
     auto& theme = GetServices().theme;
-    return theme.getFont({m_sizeRole, 0}, m_sizeDelta);
+    return theme.getFont({m_sizeRoleId, m_fontRoleId}, m_sizeDelta);
 }
 
-std::vector<Line> splitLines(std::string& text)
+std::vector<mytext::Line> splitLines(std::string& text)
 {
-    std::vector<Line> lines;
-    Line line;
+    std::vector<mytext::Line> lines;
+    mytext::Line line;
 
     size_t i = 0;
-    while (i < text.size())
-    {
-        if (text[i] == '\n')
-        {
+    while (i < text.size()){
+        if (text[i] == '\n'){
             lines.push_back(std::move(line));
             line = {};
             ++i;
@@ -46,18 +46,15 @@ std::vector<Line> splitLines(std::string& text)
         char c = text[i];
         auto isSep = [](char ch) { return ch == '/' || ch == '\\'; };
 
-        if (c == ' ')
-        {
+        if (c == ' '){
             while (i < text.size() && text[i] == ' ')
                 ++i;
         }
-        else if (isSep(c))
-        {
+        else if (isSep(c)){
             while (i < text.size() && isSep(text[i]))
                 ++i;
         }
-        else
-        {
+        else{
             while (i < text.size() && text[i] != '\n' && text[i] != ' ' && !isSep(text[i]))
                 ++i;
         }
@@ -93,22 +90,22 @@ void Text::measureLines(){
     }
     m_lastFontSize = static_cast<int>(fd.size);
 }
-std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vector2 borders)
+std::vector<mytext::Line> Text::constructConstrained(const std::vector<mytext::Line>& lines, Vector2 borders)
 {
-    std::vector<Line> result;
+    std::vector<mytext::Line> result;
     auto fd = fontData();
     float blankHeight = fd.size;
 
     for (const auto& srcLine : lines){
         // blank or pure-space source line — emit single empty line with font height
         if (srcLine.words.empty() || isBlankLine(srcLine.words)) {
-            Line blank;
+            mytext::Line blank;
             blank.size = {0.0f, blankHeight};
             blank.lineView = "";
             result.push_back(std::move(blank));
             continue;
         }
-        Line current;
+        mytext::Line current;
         float currentWidth = 0.0f;
 
         for (const auto& token : srcLine.words){
@@ -166,9 +163,7 @@ std::vector<Line> Text::constructConstrained(const std::vector<Line>& lines, Vec
 }
 
 
-// After ReMeasure: if text was changed - all m_lines are recalculated
-// If text wasnt changed, only constrained are recalculated
-// Returns desired size;
+
 Vector2 Text::ReMeasure(Vector2 borders)
 {
     m_dirtyFull = false;

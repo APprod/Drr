@@ -1,16 +1,13 @@
 #pragma once
 
-#include <functional>
 #include <algorithm>
 #include <cmath>
+#include <functional>
+#include <numbers>
 
 #include "raylib.h"
 
 using EasingFn = float(*)(float t);
-
-#include <cmath>
-#include <numbers>
-
 namespace Easing {
 
 inline float linear(float t) { return t; }
@@ -106,10 +103,12 @@ template<> inline Vector4 lerp(const Vector4& a,  const Vector4& b, float t) {
     return {a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t,
             a.z + (b.z - a.z) * t, a.w + (b.w - a.w) * t};
 }
+
+// Animates value between start and target between duration
 template<typename T>
 struct Animated {
     T        current;
-    T        start;    // добавляем
+    T        start;
     T        target;
     float    duration;
     float    elapsed = 0.0f;
@@ -118,9 +117,13 @@ struct Animated {
     Animated(T initial, float dur = 0.15f, EasingFn ease = Easing::easeOutCubic)
         : current(initial), start(initial), target(initial), duration(dur), easing(ease) {}
 
+        
+    bool isDone() const { return elapsed >= duration; }
+    operator const T&() const { return current; }
+
     void setTarget(const T& value) {
         if (value == target) return;
-        start   = current; // стартуем от текущего, не от нуля
+        start   = current;
         elapsed = 0.0f;
         target  = value;
     }
@@ -129,7 +132,7 @@ struct Animated {
         current = start = target = value;
         elapsed = duration;
     }
-
+    // reset state completely
     void reset(const T& s, float dur, EasingFn ease) {
         current = start = target = s;
         duration = dur;
@@ -137,13 +140,11 @@ struct Animated {
         elapsed = 0.0f;
     }
 
+    //called from mainloop
     void update(float dt) {
         if (elapsed >= duration) return;
         elapsed = std::min(elapsed + dt, duration);
         float t = easing(elapsed / duration);
         current = lerp(start, target, t);
     }
-
-    bool isDone() const { return elapsed >= duration; }
-    operator const T&() const { return current; }
 };

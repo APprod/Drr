@@ -8,7 +8,9 @@
 
 enum class TextAlign { Left, Center, Right };
 
-
+// Base class for component displaring text
+// handles wrapping, scrolling
+// call Label::function if you override some function to preserve the behaviour
 class Label: public UIComponent{
 public:
     Label(

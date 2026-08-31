@@ -51,7 +51,7 @@ if errorlevel 1 (
 )
 
 set COPIED_ROOT_CMAKE=0
-for %%F in (CMakeLists.txt build.bat run.bat build.sh .gitignore) do (
+for %%F in (CMakeLists.txt build.bat build.ps1 run.bat run.ps1 build.sh .gitignore) do (
     if exist "%TEMPLATE_DIR%\%%F" (
         if exist "%%F" (
             echo [create] Root %%F already exists - keeping yours.
@@ -70,11 +70,6 @@ if "%COPIED_ROOT_CMAKE%"=="0" (
         powershell -NoProfile -Command "Add-Content 'CMakeLists.txt' ''; Add-Content 'CMakeLists.txt' 'add_subdirectory(apps/%APP_NAME%)'"
         echo [create] Appended add_subdirectory^(apps/%APP_NAME%^) to root CMakeLists.txt.
     )
-)
-
-rem Fresh root CMakeLists still points at the template folder - retarget it.
-if "%COPIED_ROOT_CMAKE%"=="1" (
-    powershell -NoProfile -Command "(Get-Content 'CMakeLists.txt') -replace 'apps/template', 'apps/%APP_NAME%' -replace 'project\(AppTest\)', 'project(%APP_NAME%)' | Set-Content 'CMakeLists.txt'"
 )
 
 :ci_only

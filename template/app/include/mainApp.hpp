@@ -1,7 +1,7 @@
 #pragma once
 #include "app.hpp"
 #include "userSettings.hpp"
-#include "scene/scene.hpp"
+#include "scene/baseScene.hpp"
 #include "ui/label.hpp"
 #include "ui/layout.hpp"
 #include "ui/overlay.hpp"
@@ -38,8 +38,10 @@ class App : public IApp {
         };
     };
     virtual void initPostOpenGl() override {
-        GetServices().sceneManager.QueTransit<HelloScene>();
     };
+    virtual std::unique_ptr<IScene> createScene(){
+        return std::make_unique<HelloScene>();
+    }
     virtual void close() override {};
 };
 

@@ -1,3 +1,4 @@
+/* helper functions, helper classes, templates*/
 #pragma once
 
 #include <chrono>
@@ -118,50 +119,4 @@ void myClamp(T &val, T min, T max)
 }
 
 
-class Tester
-{
-    std::chrono::steady_clock::time_point m_start;
-    std::string m_name;
-    float m_thresholdMs;
-    bool m_active;
-public:
-
-    Tester(std::string name, float thresholdMs, bool active);
-    ~Tester();
-};
-
 constexpr uint32_t BIT(int v){return 1u << v;}
-
-struct PerfStat{
-    std::vector<float> deltas;
-    float average() const {return deltas.size() ? (std::accumulate(deltas.begin(), deltas.end(), 0.0f) / deltas.size()) : 0 ;}
-    float peak() const {return deltas.size() ? (*std::max_element(deltas.begin(), deltas.end())) : 0;}
-};
-
-class PerfTester
-{
-    friend class PerformanceLog; //we cannot create PerfTest without existing PerformanceLog
-    std::function<void(std::string, float)> m_callback;
-    std::chrono::steady_clock::time_point m_start;
-    std::string m_name;
-    PerfTester(std::string m_name, std::function<void(std::string, float)> callback);
-public:
-    
-    ~PerfTester();
-};
-
-
-class PerformanceLog
-{
-public:
-    PerformanceLog(float logTimeSeconds): m_logTimeSeconds{logTimeSeconds}, m_lastLog{std::chrono::steady_clock::now()}{}
-    void setLogTime(float logTime) {if (logTime > 0) m_logTimeSeconds = logTime;}
-    PerfTester log(std::string name);
-    void update();
-    void getData(std::string name, float delta);
-    const std::unordered_map<std::string, PerfStat>& getLogData() const { return m_logData; }
-private:
-    float m_logTimeSeconds;
-    std::chrono::steady_clock::time_point m_lastLog;
-    std::unordered_map<std::string, PerfStat> m_logData;
-};

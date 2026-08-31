@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 cmake_policy(SET CMP0135 NEW)
 cmake_policy(SET CMP0091 NEW)
-project(AppTest)
+project(ApProjects)
 
 option(IS_STATIC "option static" OFF)
 
@@ -32,4 +32,4 @@ endif()
 
 # Engine ships its own dependency fetching (raylib/json anchored inside ApEngine/)
 add_subdirectory(ApEngine)
-add_subdirectory(apps/template)
+

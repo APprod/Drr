@@ -6,6 +6,7 @@
 
 #include "ui/label.hpp"
 
+// Displays value of variable with provided formatting
 template<typename T>
 requires std::is_arithmetic_v<T>
 class ValueLabel : public Label {

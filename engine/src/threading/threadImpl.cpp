@@ -31,5 +31,10 @@ void MyThreadPool::worker(){
             tasks.pop();
         }
         newTask();
+        {
+            std::unique_lock lock(mut);
+            --m_taskCount;
+            m_allDone.notify_all();
+        }
     }
 };

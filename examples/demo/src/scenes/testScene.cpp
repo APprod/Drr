@@ -52,7 +52,7 @@ void TestScene::OnEnter(){
     static int counter{0};
     auto column= std::make_unique<VerticalLayout>(UIComponentSpec{},LayoutSpec{Alignment::End});
     for(int i = 0; i < 1; i++){
-        auto buttonText = Text("Test", "button");
+        auto buttonText = Text("Log after 2 sec", "button");
         auto spec = UICSpec().SetFlex({.growth = 1, .shrink = 1})
                     .MinSize({100,50});
         auto row = std::make_unique<HorizontalScrollView>(
@@ -75,6 +75,15 @@ void TestScene::OnEnter(){
                     TextureSpec("button_default"),{200.f,100.f}, spec)
             );
         }
+        row->Add(
+            Button(Text("Wait for all threads (Blocking)", "button"),
+                [](){ 
+                    mylog::GetLogger().Info("Waiting");
+                    GetThreadPool().WaitAll();
+                    
+                },
+                TextureSpec("button_default"),{200.f,100.f}, spec)
+        );
         
         row->Add(
             Button(Text("Settings", "button"),

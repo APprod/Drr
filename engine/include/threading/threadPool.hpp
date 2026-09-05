@@ -55,7 +55,7 @@ public:
     void Async(F&& task){
         m_pool.async(std::forward<F>(task));
     }
-    void WaitAll(){;} //Not Implemented
+    void WaitAll(){m_pool.waitAll();}
     void Stop(){m_pool.stop(); m_pool.~MyThreadPool();}
     static ThreadPool& Get(){
         static ThreadPool sch;
@@ -85,3 +85,8 @@ private:
 #endif
 
 inline ThreadPool& GetThreadPool(){return ThreadPool::Get();}
+
+template<typename T>
+inline bool isFinished(std::future<T> fut){
+    return fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+}

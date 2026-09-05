@@ -8,7 +8,7 @@ class TestScene: public BaseScene{
 public:
     TestScene();
     void OnEnter() override;
-    void OnRestore() override;
+    void OnRestore() override;             
     void OnDrawContent() override;
     void OnUpdateState() override;
 

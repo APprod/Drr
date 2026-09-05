@@ -33,8 +33,8 @@ public:
                     (*task)();
                 }
             );
+            m_taskCount++;
         }
-
         m_cv.notify_one();
         return future;
     }
@@ -49,10 +49,16 @@ public:
                     std::apply(task, arg);
                 }
             );
+            m_taskCount++;
         }
         m_cv.notify_one();
     };
     void stop();
+    void waitAll(){
+        std::unique_lock lock(mut);
+        m_allDone.wait(lock, [this](){return !m_taskCount;});
+    }
+    
     
 private:
     void worker();
@@ -61,5 +67,9 @@ private:
     std::queue<std::function<void()>> tasks;
     std::mutex mut;
     std::condition_variable m_cv;
+
+    size_t m_taskCount{0};
+    std::condition_variable m_allDone;
+
     bool shutdown{false};
 };

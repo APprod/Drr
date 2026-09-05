@@ -5,6 +5,7 @@ set -e
 BUILD_TYPE=Debug
 STATIC_LINKING=ON
 PROFILE=OFF
+BS_THREAD=OFF
 BUILD_DEMO=OFF
 APP_TARGET=""
 BUILD_DIR_BASE="_build/"
@@ -22,6 +23,7 @@ while [[ $# -gt 0 ]]; do
         web|Web) WEB=True; BUILD_DIR=Web; shift ;;
         clang|Clang) CLANG=True; shift ;;
         profile) PROFILE=ON; shift ;;
+        bsthread) BS_THREAD=ON; shift ;;
         demo) BUILD_DEMO=ON; shift ;;
         --target)
             [[ -z "$2" ]] && { echo "Error: --target requires an argument"; exit 1; }
@@ -38,7 +40,7 @@ if [[ -n "$APP_TARGET" ]]; then TARGET_ARGS=(--target "$APP_TARGET"); fi
 if [[ "$WEB" == "True" ]]; then
     echo "Building for Web..."
 
-    CMAKE_ARGS_BASE=(-S . -B "${BUILD_DIR_BASE}${BUILD_DIR}" -G "Unix Makefiles" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" "-DPLATFORM=Web" "-DBUILD_DEMO=$BUILD_DEMO")
+    CMAKE_ARGS_BASE=(-S . -B "${BUILD_DIR_BASE}${BUILD_DIR}" -G "Unix Makefiles" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" "-DPLATFORM=Web" "-DBUILD_DEMO=$BUILD_DEMO" "-DBS_THREAD=$BS_THREAD")
 
     if [[ -n "$EMSDK" ]]; then
         CMAKE_ARGS_BASE+=("-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake")
@@ -51,7 +53,7 @@ if [[ "$WEB" == "True" ]]; then
 else
     echo "Building $BUILD_TYPE configuration..."
 
-    CMAKE_ARGS_BASE=(-S . -B "${BUILD_DIR_BASE}${BUILD_DIR}" -G "Unix Makefiles" "-DIS_STATIC=$STATIC_LINKING" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE")
+    CMAKE_ARGS_BASE=(-S . -B "${BUILD_DIR_BASE}${BUILD_DIR}" -G "Unix Makefiles" "-DIS_STATIC=$STATIC_LINKING" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" "-DBS_THREAD=$BS_THREAD" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE")
 
     if [[ "$CLANG" == "True" ]]; then
         CMAKE_ARGS_BASE+=("-DCMAKE_C_COMPILER=clang" "-DCMAKE_CXX_COMPILER=clang++")

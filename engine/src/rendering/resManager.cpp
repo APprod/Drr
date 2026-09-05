@@ -3,6 +3,7 @@
 #include "utils/util.hpp"
 #include "utils/log.hpp"
 #include "platform.hpp"
+#include "threading/threadPool.hpp"
 
 namespace {
 const std::vector<int>& fontCodepoints()
@@ -85,15 +86,53 @@ bool ResourceManager::loadTexture(std::string name, std::string filepath)
         mylog::GetLogger().Warn("Texture is already loaded, texture: ", name);
         return false;
     }
-    Texture2D newTexture = ::LoadTexture(filepath.c_str());
-    if (!::IsTextureValid(newTexture)) 
-    {
-        mylog::GetLogger().Error("Failed to load texture: " + name +  " path: " + filepath);
-        return false;
+    if (name == "default"){
+        Texture2D newTexture = ::LoadTexture(filepath.c_str());
+        if (!::IsTextureValid(newTexture)) 
+        {
+            mylog::GetLogger().Error("Failed to load texture: " + name +  " path: " + filepath);
+            return false;
+        }
+        m_textures[name] = newTexture;
+        return true;
     }
-    m_textures[name] = newTexture;
+    loadTextureThreaded(name, filepath);
+    m_textures[name] = getTexture("default");
     return true;
+    // Texture2D newTexture = loadTextureThreaded(filepath);
+    // if (!::IsTextureValid(newTexture)) 
+    // {
+    //     mylog::GetLogger().Error("Failed to load texture: " + name +  " path: " + filepath);
+    //     return false;
+    // }
+    // m_textures[name] = newTexture;
+    // return true;
 }   
+
+void ResourceManager::GPUUpload(std::string name, Image image, bool success){
+    Tester test("GPUUpload texture: "  + name,0,true);
+    Texture2D texture = LoadTextureFromImage(image);
+    success &= IsTextureValid(texture);
+    if (success){
+        m_textures[name] = texture;
+    }else{
+        m_failed_textures.insert(name); 
+    }
+    UnloadImage(image);
+}
+
+void ResourceManager::loadTextureThreaded(std::string name, std::string filepath){
+    GetThreadPool().Async(
+        [this, name, filepath](){
+            Tester test("CPU decode texture: " + name,0,true);
+            Image decoded = LoadImage(filepath.c_str());
+            bool ok = IsImageValid(decoded);
+            GetThreadPool().SubmitToMain([this, name, ok, decoded](){
+                this->GPUUpload(name, decoded, ok);
+            });
+        }
+    );
+}
 
 bool ResourceManager::unloadTexture(std::string name)
 {

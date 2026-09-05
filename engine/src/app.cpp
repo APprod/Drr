@@ -4,6 +4,7 @@
 #include "utils/util.hpp"
 #include "services.hpp"
 #include "platform.hpp"
+#include "threading/threadPool.hpp"
 
 #include <memory>
 
@@ -78,7 +79,7 @@ void Engine::init(){
     resManager.init();
     resManager.load();
     GetServices().theme.warmup(); //Loads all fontsizes
-    // SetExitKey(0);
+    SetExitKey(0);
     GetServices().sceneManager.QueTransit(m_app->createScene());
 }
 
@@ -92,6 +93,9 @@ void Engine::frame(){
         PerfTester tester = GetServices().perfLog.log("Scene Update");
         manager.Update();
     }
+    {
+        GetThreadPool().FlushMainQueue();
+    }   
     {
         PerfTester tester = GetServices().perfLog.log("Scene Render");
         manager.Draw();

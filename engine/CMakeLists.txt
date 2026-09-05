@@ -23,6 +23,7 @@ if(NOT DEFINED CMAKE_C_STANDARD_REQUIRED)
 endif()
 
 option(PROFILE "option profiling with Tracy" OFF)
+option(BS_THREAD "option using BS_THREAD" OFF)
 
 if (EMSCRIPTEN)
     set(GRAPHICS GRAPHICS_API_OPENGL_ES3 CACHE STRING "" FORCE)
@@ -69,7 +70,7 @@ endif()
 
 if (PROFILE)
     message("adding profiling")
-    add_compile_definitions(TRACY_PROFILE=TRACY_PROFILE)
+    target_compile_definitions(ApEngine PUBLIC TRACY_PROFILE)
     FetchContent_Declare(
         tracy
         GIT_REPOSITORY https://github.com/wolfpld/tracy.git
@@ -88,6 +89,21 @@ FILE(GLOB_RECURSE MyCPPSources ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CUR
 add_library(ApEngine STATIC ${MyCPPSources})
 
 target_include_directories(ApEngine PUBLIC include/)
+
+if (BS_THREAD)
+    message("loading BS thread")
+    target_compile_definitions(ApEngine PUBLIC BS_THREAD)
+    FetchContent_Declare(
+        BSThread
+        GIT_REPOSITORY https://github.com/bshoshany/thread-pool
+        GIT_TAG v5.1.0
+        BINARY_DIR "${CMAKE_BINARY_DIR}/_deps/bs-thread-build"
+        SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../third-party/bs-thread"
+    )
+    FetchContent_MakeAvailable(BSThread)
+    target_include_directories(ApEngine PUBLIC "${bsthread_SOURCE_DIR}/include")
+endif()
+
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND NOT EMSCRIPTEN)
     target_compile_options(ApEngine PUBLIC

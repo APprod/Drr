@@ -7,6 +7,7 @@ $MSVC = $false
 $CLANG = $false
 $BUILD_DEMO = "OFF"
 $PROFILE = "OFF"
+$BS_THREAD = "OFF"
 $APP_NAME = ""
 
 $START_TIME = Get-Date
@@ -28,6 +29,7 @@ while ($i -lt $args.Count){
         "msvc" { $MSVC = $true }
         "clang" { $CLANG = $true }
         "profile" { $PROFILE = "ON" }
+        "bsthread" { $BS_THREAD = "ON" }
         "demo" { $BUILD_DEMO = "ON" }
         default {
             $CMakeArgs.Add($arg)
@@ -51,11 +53,11 @@ if ($WEB) {
 
     if ($env:EMSDK) {
         & cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "MinGW Makefiles" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" `
-            "-DPLATFORM=Web" "-DBUILD_DEMO=$BUILD_DEMO" "-DCMAKE_TOOLCHAIN_FILE=$env:EMSDK\upstream\emscripten\cmake\Modules\Platform\Emscripten.cmake" `
+            "-DPLATFORM=Web" "-DBUILD_DEMO=$BUILD_DEMO" "-DBS_THREAD=$BS_THREAD" "-DCMAKE_TOOLCHAIN_FILE=$env:EMSDK\upstream\emscripten\cmake\Modules\Platform\Emscripten.cmake" `
             @CMakeArgs
     }
     else {
-        & emcmake cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "MinGW Makefiles" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" "-DPLATFORM=Web" "-DBUILD_DEMO=$BUILD_DEMO" @CMakeArgs
+        & emcmake cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "MinGW Makefiles" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" "-DPLATFORM=Web" "-DBUILD_DEMO=$BUILD_DEMO" "-DBS_THREAD=$BS_THREAD" @CMakeArgs
     }
 
     if ($LASTEXITCODE -ne 0) {
@@ -71,7 +73,7 @@ if ($WEB) {
 elseif ($MSVC) {
     Write-Host "Building $BUILD_TYPE configuration... MSVC"
 
-    & cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "Visual Studio 17 2022" -A x64 "-DIS_STATIC=$STATIC_LINKING" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" @CMakeArgs
+    & cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "Visual Studio 17 2022" -A x64 "-DIS_STATIC=$STATIC_LINKING" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" "-DBS_THREAD=$BS_THREAD" @CMakeArgs
 
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
@@ -87,10 +89,10 @@ else {
     Write-Host "Building $BUILD_TYPE configuration..."
 
     if ($CLANG) {
-        & cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "MinGW Makefiles" "-DCMAKE_C_COMPILER=clang" "-DCMAKE_CXX_COMPILER=clang++" "-DIS_STATIC=$STATIC_LINKING" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" @CMakeArgs
+        & cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "MinGW Makefiles" "-DCMAKE_C_COMPILER=clang" "-DCMAKE_CXX_COMPILER=clang++" "-DIS_STATIC=$STATIC_LINKING" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" "-DBS_THREAD=$BS_THREAD" @CMakeArgs
     }
     else {
-        & cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "MinGW Makefiles" "-DIS_STATIC=$STATIC_LINKING" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" @CMakeArgs
+        & cmake -S . -B "$BUILD_DIR_BASE$BUILD_DIR" -G "MinGW Makefiles" "-DIS_STATIC=$STATIC_LINKING" "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" "-DPROFILE=$PROFILE" "-DBUILD_DEMO=$BUILD_DEMO" "-DBS_THREAD=$BS_THREAD" @CMakeArgs
     }
 
     if ($LASTEXITCODE -ne 0) {
@@ -110,9 +112,10 @@ $elapsed = $END_TIME - $START_TIME
 Write-Host ""
 Write-Host ("Total time: {0:hh\:mm\:ss\.fff} s" -f $elapsed)
 
-return @{
+$global:ApEngineBuildConfig = @{
     APP_NAME       = $APP_NAME
     BUILD_DIR      = $BUILD_DIR
     BUILD_DIR_BASE = $BUILD_DIR_BASE
     WEB            = $WEB
 }
+return $global:ApEngineBuildConfig

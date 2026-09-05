@@ -9,6 +9,7 @@
 #include "ui/modifier.hpp"
 #include "ui/dropdown.hpp"
 #include "platform.hpp"
+#include "threading/threadPool.hpp"
 
 TestScene::TestScene()
 {
@@ -61,10 +62,20 @@ void TestScene::OnEnter(){
         for(int j = 0; j < 4; j++){
             row->Add(
                 Button(buttonText,
-                    [j](){ mylog::GetLogger().Info(std::to_string(++counter), " Button"+ std::to_string(j) +" clicked!"); },
+                    [j](){ 
+                        GetThreadPool().Submit(
+                            [j](){
+                                std::this_thread::sleep_for(std::chrono::seconds(2));
+                                mylog::GetLogger().Info(std::to_string(++counter), " Button"+ std::to_string(j) +" clicked!");
+                            }
+                        );
+                        
+                        
+                    },
                     TextureSpec("button_default"),{200.f,100.f}, spec)
             );
         }
+        
         row->Add(
             Button(Text("Settings", "button"),
                 [](){ 

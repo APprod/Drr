@@ -8,6 +8,7 @@
 #include "rendering/shader.hpp"
 #include "rendering/textureSpec.hpp"
 
+
 // Baked atlas sizes for one font family: px size -> Font. Owned by ResourceManager.
 using FontMap = std::unordered_map<int, Font>;
 struct FontEntry{
@@ -29,6 +30,7 @@ public:
     bool loadTexture(std::string name);
     // Load texture from specified path
     bool loadTexture(std::string name, std::string filepath);
+    
     bool unloadTexture(std::string name); 
 
     // loads font and stores under <name> key for each font every size from fontSizes is loaded
@@ -52,6 +54,10 @@ public:
 private:
     bool lazyLoad(std::string name);
     void loadTextures();
+    // Load using multithreading
+    void loadTextureThreaded(std::string name, std::string filepath);
+    // Uploads to GPU and sets to the name
+    void GPUUpload(std::string name, Image image, bool failed);
     // Bakes one atlas of ASCII + Cyrillic glyphs at the given px size (LoadFontEx) and sets its filter.
     Font loadFontAtSize(const std::string& filepath, int size, TextureFilter filter);
     std::unordered_map<std::string, Texture2D> m_textures;
